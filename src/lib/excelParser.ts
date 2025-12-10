@@ -10,7 +10,7 @@ export interface ExcelClaimRow {
 }
 
 // Map office codes to full names
-const officeMap: Record<string, string> = {
+const officeCodeMap: Record<string, string> = {
   'h': 'Houston',
   'H': 'Houston',
   'd': 'Dallas',
@@ -19,7 +19,7 @@ const officeMap: Record<string, string> = {
   'Dallas': 'Dallas',
 };
 
-export async function parseExcelFromUrl(url: string): Promise<ExcelClaimRow[]> {
+export async function parseExcelFromUrl(url: string): Promise<{ claims: ExcelClaimRow[], rawHeaders: string[], rawRows: any[][], officeColumn: { index: number, header: string, values: string[] } | null }> {
   const response = await fetch(url);
   const arrayBuffer = await response.arrayBuffer();
   const data = new Uint8Array(arrayBuffer);
@@ -36,77 +36,49 @@ export async function parseExcelFromUrl(url: string): Promise<ExcelClaimRow[]> {
   const worksheet = workbook.Sheets[sheetName];
   const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
   
-  // Log ALL headers and first 3 data rows for debugging
-  console.log('=== EXCEL STRUCTURE ===');
-  console.log('Row 0 (headers):', jsonData[0]);
-  console.log('Row 1:', jsonData[1]);
-  console.log('Row 2:', jsonData[2]);
-  console.log('Row 3:', jsonData[3]);
-  console.log('Total rows:', jsonData.length);
-  console.log('Total columns:', jsonData[0]?.length);
-  
-  // Get headers
-  const headers = jsonData[0]?.map((h: any) => String(h || '').trim()) || [];
+  // Get all headers
+  const headers = jsonData[0]?.map((h: any, idx: number) => String(h || `Column${idx}`).trim()) || [];
   const headersLower = headers.map(h => h.toLowerCase());
   
+  console.log('All headers:', headers);
+  
   // Find column indices
-  let nameIdx = -1;
-  let adjusterIdx = -1;
+  let nameIdx = headersLower.findIndex(h => h.includes('name') || h.includes('insured'));
+  let adjusterIdx = headersLower.findIndex(h => h.includes('adjuster'));
+  let dateIdx = headersLower.findIndex(h => h.includes('date') && h.includes('signed'));
+  let estimateIdx = headersLower.findIndex(h => 
+    h.includes('estimate') && h.includes('loss') && !h.includes('revised')
+  );
+  let revisedIdx = headersLower.findIndex(h => h.includes('revised'));
+  
+  // Find office column by scanning ALL columns for H/D values
   let officeIdx = -1;
-  let dateIdx = -1;
-  let estimateIdx = -1;
-  let revisedIdx = -1;
+  let officeColumnInfo: { index: number, header: string, values: string[] } | null = null;
   
-  // Search headers for matches
-  for (let i = 0; i < headersLower.length; i++) {
-    const h = headersLower[i];
-    console.log(`Column ${i}: "${headers[i]}"`);
+  // Log all columns and their first few values
+  console.log('=== SCANNING ALL COLUMNS FOR H/D VALUES ===');
+  for (let col = 0; col < headers.length; col++) {
+    const values: string[] = [];
+    for (let row = 1; row < Math.min(10, jsonData.length); row++) {
+      const val = String(jsonData[row]?.[col] || '').trim();
+      values.push(val);
+    }
+    const hdValues = values.filter(v => v.toUpperCase() === 'H' || v.toUpperCase() === 'D');
+    console.log(`Column ${col} "${headers[col]}": ${values.join(', ')} | H/D count: ${hdValues.length}`);
     
-    if (nameIdx === -1 && (h.includes('name') || h.includes('insured') || h.includes('claimant'))) {
-      nameIdx = i;
-    }
-    if (adjusterIdx === -1 && (h.includes('adjuster') || h.includes('adj'))) {
-      adjusterIdx = i;
-    }
-    if (officeIdx === -1 && (h.includes('office') || h.includes('location') || h.includes('loc') || h.includes('city'))) {
-      officeIdx = i;
-    }
-    if (dateIdx === -1 && (h.includes('date') || h.includes('signed'))) {
-      dateIdx = i;
-    }
-    if (estimateIdx === -1 && h.includes('estimate') && !h.includes('revised') && !h.includes('rev')) {
-      estimateIdx = i;
-    }
-    if (revisedIdx === -1 && (h.includes('revised') || (h.includes('rev') && h.includes('est')))) {
-      revisedIdx = i;
+    if (hdValues.length >= 3 && officeIdx === -1) {
+      officeIdx = col;
+      officeColumnInfo = { index: col, header: headers[col], values };
+      console.log(`>>> Found office column at ${col}: ${headers[col]}`);
     }
   }
   
-  // Scan ALL columns for H/D values if office not found
-  if (officeIdx === -1) {
-    console.log('Scanning for office column with H/D values...');
-    for (let col = 0; col < (headers.length || 10); col++) {
-      let hCount = 0;
-      let dCount = 0;
-      for (let row = 1; row < Math.min(20, jsonData.length); row++) {
-        const val = String(jsonData[row]?.[col] || '').trim().toUpperCase();
-        if (val === 'H') hCount++;
-        if (val === 'D') dCount++;
-      }
-      console.log(`Column ${col}: H=${hCount}, D=${dCount}`);
-      if (hCount >= 1 || dCount >= 1) {
-        officeIdx = col;
-        console.log('Found office column at index:', col);
-        break;
-      }
-    }
-  }
-  
-  // Default positions if not found
+  // Defaults if not found
   if (nameIdx === -1) nameIdx = 0;
   if (adjusterIdx === -1) adjusterIdx = 1;
-  if (estimateIdx === -1) estimateIdx = 3;
-  if (revisedIdx === -1) revisedIdx = 4;
+  if (dateIdx === -1) dateIdx = headersLower.findIndex(h => h.includes('date'));
+  if (estimateIdx === -1) estimateIdx = headersLower.findIndex(h => h.includes('estimate'));
+  if (revisedIdx === -1) revisedIdx = headersLower.findIndex(h => h.includes('revised'));
   
   console.log('Final column mapping:', { nameIdx, adjusterIdx, officeIdx, dateIdx, estimateIdx, revisedIdx });
   
@@ -122,12 +94,9 @@ export async function parseExcelFromUrl(url: string): Promise<ExcelClaimRow[]> {
     
     const adjuster = String(row[adjusterIdx] || '').trim();
     
-    // Get office value
-    let rawOffice = '';
-    if (officeIdx >= 0 && officeIdx < row.length) {
-      rawOffice = String(row[officeIdx] || '').trim();
-    }
-    const office = officeMap[rawOffice] || officeMap[rawOffice.toUpperCase()] || (rawOffice || 'Unknown');
+    // Get office from detected column
+    let rawOffice = officeIdx >= 0 ? String(row[officeIdx] || '').trim() : '';
+    const office = officeCodeMap[rawOffice] || officeCodeMap[rawOffice.toUpperCase()] || 'Unknown';
     
     // Parse date
     let dateSigned: string | null = null;
@@ -138,15 +107,10 @@ export async function parseExcelFromUrl(url: string): Promise<ExcelClaimRow[]> {
         if (date) {
           dateSigned = `${date.y}-${String(date.m).padStart(2, '0')}-${String(date.d).padStart(2, '0')}`;
         }
-      } else if (typeof dateVal === 'string') {
-        const parsed = new Date(dateVal);
-        if (!isNaN(parsed.getTime())) {
-          dateSigned = parsed.toISOString().split('T')[0];
-        }
       }
     }
     
-    // Parse monetary values
+    // Parse amounts
     const parseAmount = (val: any): number => {
       if (typeof val === 'number') return val;
       const str = String(val || '0').replace(/[$,\s]/g, '');
@@ -158,17 +122,15 @@ export async function parseExcelFromUrl(url: string): Promise<ExcelClaimRow[]> {
     
     if (estimateOfLoss === 0 && revisedEstimateOfLoss === 0) continue;
     
-    claims.push({
-      name,
-      adjuster,
-      office,
-      dateSigned,
-      estimateOfLoss,
-      revisedEstimateOfLoss,
-    });
+    claims.push({ name, adjuster, office, dateSigned, estimateOfLoss, revisedEstimateOfLoss });
   }
   
-  console.log(`Parsed ${claims.length} claims`);
-  console.log('Sample claims:', claims.slice(0, 3));
-  return claims;
+  return { claims, rawHeaders: headers, rawRows: jsonData.slice(0, 10), officeColumn: officeColumnInfo };
+}
+
+export function applyOfficeMapping(claims: ExcelClaimRow[], mapping: Record<string, string>): ExcelClaimRow[] {
+  return claims.map(claim => ({
+    ...claim,
+    office: mapping[claim.adjuster] || claim.office
+  }));
 }
