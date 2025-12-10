@@ -53,11 +53,14 @@ export default function ImportDataPage() {
       setRawRows(result.rawRows);
       setOfficeColInfo(result.officeColumn);
       
-      // Check if any claims have Unknown office
-      const hasUnknownOffice = result.claims.some(c => c.office === 'Unknown');
-      if (hasUnknownOffice) {
-        setShowMapping(true);
-      }
+      // Get unique adjusters and randomly assign offices
+      const uniqueAdjusters = [...new Set(result.claims.map(c => c.adjuster))].filter(Boolean);
+      const randomMapping: Record<string, string> = {};
+      uniqueAdjusters.forEach(adjuster => {
+        randomMapping[adjuster] = Math.random() > 0.5 ? 'Houston' : 'Dallas';
+      });
+      setOfficeMapping(randomMapping);
+      setShowMapping(true);
     } catch (err) {
       console.error('Error parsing Excel:', err);
       setError(err instanceof Error ? err.message : 'Failed to parse Excel file');
