@@ -56,11 +56,11 @@ const Index = () => {
   return (
     <DashboardLayout>
       {/* Header */}
-      <div className="mb-8 animate-fade-in">
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          Claims Dashboard
+      <div className="mb-6 lg:mb-8 animate-fade-in">
+        <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-1 lg:mb-2">
+          Commission Dashboard
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm lg:text-base text-muted-foreground">
           2025 Adjuster Performance Overview
         </p>
       </div>
@@ -127,9 +127,10 @@ const Index = () => {
               </button>
             </div>
             <ClaimsTable
-              claims={(claims || []).slice(0, 5)}
+              claims={(claims || []).slice(0, 7)}
               onAdjusterClick={(adjuster) => navigate(`/adjusters?selected=${adjuster}`)}
               onOfficeClick={(office) => navigate(`/offices?selected=${office}`)}
+              hideSearch
             />
           </div>
         </div>

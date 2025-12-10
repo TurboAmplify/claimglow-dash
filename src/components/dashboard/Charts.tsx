@@ -190,45 +190,47 @@ export function OfficeComparisonChart({ data }: OfficeComparisonChartProps) {
   }, [data]);
 
   return (
-    <div className="chart-container animate-fade-in">
-      <h3 className="text-lg font-semibold text-foreground mb-4">
+    <div className="chart-container animate-fade-in h-full flex flex-col">
+      <h3 className="text-lg font-semibold text-foreground mb-2">
         Claims by Office
       </h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-          <Pie
-            data={pieData}
-            cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={100}
-            paddingAngle={4}
-            dataKey="value"
-          >
-            {pieData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "hsl(222, 47%, 10%)",
-              border: "1px solid hsl(222, 47%, 20%)",
-              borderRadius: "12px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-            }}
-            labelStyle={{ color: "hsl(210, 40%, 98%)" }}
-            formatter={(value: number, name: string) => [`${value} claims`, name]}
-          />
-        </PieChart>
-      </ResponsiveContainer>
-      <div className="flex flex-wrap justify-center gap-4 mt-4">
+      <div className="flex-1 min-h-0">
+        <ResponsiveContainer width="100%" height={200}>
+          <PieChart>
+            <Pie
+              data={pieData}
+              cx="50%"
+              cy="50%"
+              innerRadius={40}
+              outerRadius={70}
+              paddingAngle={4}
+              dataKey="value"
+            >
+              {pieData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "hsl(222, 47%, 10%)",
+                border: "1px solid hsl(222, 47%, 20%)",
+                borderRadius: "12px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+              }}
+              labelStyle={{ color: "hsl(210, 40%, 98%)" }}
+              formatter={(value: number, name: string) => [`${value} claims`, name]}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="flex flex-wrap justify-center gap-3 mt-2">
         {pieData.map((entry) => (
-          <div key={entry.name} className="flex items-center gap-2">
+          <div key={entry.name} className="flex items-center gap-1.5">
             <div
-              className="w-3 h-3 rounded-full"
+              className="w-2.5 h-2.5 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-sm text-muted-foreground">{entry.name}</span>
+            <span className="text-xs text-muted-foreground">{entry.name}</span>
           </div>
         ))}
       </div>
