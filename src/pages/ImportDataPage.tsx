@@ -26,6 +26,7 @@ export default function ImportDataPage() {
   const [officeMapping, setOfficeMapping] = useState<Record<string, string>>({});
   const [showMapping, setShowMapping] = useState(false);
   const [officeColInfo, setOfficeColInfo] = useState<{ index: number, header: string, values: string[] } | null>(null);
+  const [autoImportTriggered, setAutoImportTriggered] = useState(false);
 
   // Get unique adjusters from claims
   const adjusters = useMemo(() => {
@@ -41,6 +42,21 @@ export default function ImportDataPage() {
   useEffect(() => {
     loadExcelData();
   }, []);
+
+  // Auto-import when data is ready
+  useEffect(() => {
+    if (
+      !autoImportTriggered && 
+      !loading && 
+      !importing && 
+      !imported && 
+      mappedClaims.length > 0 && 
+      Object.keys(officeMapping).length > 0
+    ) {
+      setAutoImportTriggered(true);
+      importToDatabase();
+    }
+  }, [loading, importing, imported, mappedClaims, officeMapping, autoImportTriggered]);
 
   const loadExcelData = async () => {
     try {
