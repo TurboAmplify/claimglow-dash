@@ -14,7 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      claims_2025: {
+        Row: {
+          adjuster: string
+          change_indicator: string | null
+          created_at: string
+          date_signed: string | null
+          dollar_difference: number | null
+          estimate_of_loss: number | null
+          id: string
+          name: string
+          office: string | null
+          percent_change: number | null
+          revised_estimate_of_loss: number | null
+          updated_at: string
+        }
+        Insert: {
+          adjuster: string
+          change_indicator?: string | null
+          created_at?: string
+          date_signed?: string | null
+          dollar_difference?: number | null
+          estimate_of_loss?: number | null
+          id?: string
+          name: string
+          office?: string | null
+          percent_change?: number | null
+          revised_estimate_of_loss?: number | null
+          updated_at?: string
+        }
+        Update: {
+          adjuster?: string
+          change_indicator?: string | null
+          created_at?: string
+          date_signed?: string | null
+          dollar_difference?: number | null
+          estimate_of_loss?: number | null
+          id?: string
+          name?: string
+          office?: string | null
+          percent_change?: number | null
+          revised_estimate_of_loss?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
