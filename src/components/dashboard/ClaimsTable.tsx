@@ -9,6 +9,7 @@ interface ClaimsTableProps {
   onAdjusterClick?: (adjuster: string) => void;
   onOfficeClick?: (office: string) => void;
   compact?: boolean;
+  hideSearch?: boolean;
 }
 
 export function ClaimsTable({
@@ -16,6 +17,7 @@ export function ClaimsTable({
   onAdjusterClick,
   onOfficeClick,
   compact = false,
+  hideSearch = false,
 }: ClaimsTableProps) {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<keyof Claim>("date_signed");
@@ -65,19 +67,21 @@ export function ClaimsTable({
 
   return (
     <div className="glass-table overflow-hidden animate-fade-in">
-      {/* Search */}
-      <div className="p-4 border-b border-glass-border/20">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search claims, adjusters, offices..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-glass-border/30 rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-          />
+      {/* Search - hide on compact/dashboard view */}
+      {!hideSearch && (
+        <div className="p-4 border-b border-glass-border/20">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search claims, adjusters, offices..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-glass-border/30 rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Table */}
       <div className="overflow-x-auto">
@@ -85,14 +89,20 @@ export function ClaimsTable({
           <thead>
             <tr className="text-left">
               <th
-                className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
+                className={cn(
+                  "px-3 py-2 font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors",
+                  hideSearch ? "text-[10px]" : "text-xs px-4 py-3"
+                )}
                 onClick={() => handleSort("name")}
               >
-                Claim Name
+                Claim
               </th>
               {!compact && (
                 <th
-                  className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
+                  className={cn(
+                    "px-3 py-2 font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors",
+                    hideSearch ? "text-[10px]" : "text-xs px-4 py-3"
+                  )}
                   onClick={() => handleSort("adjuster")}
                 >
                   Adjuster
@@ -100,35 +110,41 @@ export function ClaimsTable({
               )}
               {!compact && (
                 <th
-                  className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
+                  className={cn(
+                    "px-3 py-2 font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors hidden sm:table-cell",
+                    hideSearch ? "text-[10px]" : "text-xs px-4 py-3"
+                  )}
                   onClick={() => handleSort("office")}
                 >
                   Office
                 </th>
               )}
               <th
-                className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors"
+                className={cn(
+                  "px-3 py-2 font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors hidden md:table-cell",
+                  hideSearch ? "text-[10px]" : "text-xs px-4 py-3"
+                )}
                 onClick={() => handleSort("date_signed")}
               >
                 Date
               </th>
               <th
-                className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors text-right"
-                onClick={() => handleSort("estimate_of_loss")}
-              >
-                Original Est.
-              </th>
-              <th
-                className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors text-right"
+                className={cn(
+                  "px-3 py-2 font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors text-right",
+                  hideSearch ? "text-[10px]" : "text-xs px-4 py-3"
+                )}
                 onClick={() => handleSort("revised_estimate_of_loss")}
               >
-                Revised Est.
+                Est.
               </th>
               <th
-                className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors text-right"
+                className={cn(
+                  "px-3 py-2 font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors text-right",
+                  hideSearch ? "text-[10px]" : "text-xs px-4 py-3"
+                )}
                 onClick={() => handleSort("percent_change")}
               >
-                Change
+                %
               </th>
             </tr>
           </thead>
@@ -139,21 +155,21 @@ export function ClaimsTable({
                 className="animate-fade-in"
                 style={{ animationDelay: `${index * 30}ms` }}
               >
-                <td className="px-4 py-3">
-                  <span className="font-medium text-foreground">{claim.name}</span>
+                <td className={cn("px-3 py-2", hideSearch ? "text-xs" : "px-4 py-3")}>
+                  <span className="font-medium text-foreground truncate block max-w-[120px]">{claim.name}</span>
                 </td>
                 {!compact && (
-                  <td className="px-4 py-3">
+                  <td className={cn("px-3 py-2", hideSearch ? "text-xs" : "px-4 py-3")}>
                     <button
                       onClick={() => onAdjusterClick?.(claim.adjuster)}
-                      className="text-primary hover:text-primary/80 hover:underline transition-colors"
+                      className="text-primary hover:text-primary/80 hover:underline transition-colors truncate block max-w-[80px]"
                     >
                       {claim.adjuster}
                     </button>
                   </td>
                 )}
                 {!compact && (
-                  <td className="px-4 py-3">
+                  <td className={cn("px-3 py-2 hidden sm:table-cell", hideSearch ? "text-xs" : "px-4 py-3")}>
                     <button
                       onClick={() => claim.office && onOfficeClick?.(claim.office)}
                       className="text-muted-foreground hover:text-foreground transition-colors"
@@ -162,40 +178,27 @@ export function ClaimsTable({
                     </button>
                   </td>
                 )}
-                <td className="px-4 py-3 text-muted-foreground">
+                <td className={cn("px-3 py-2 text-muted-foreground hidden md:table-cell", hideSearch ? "text-xs" : "px-4 py-3")}>
                   {claim.date_signed
-                    ? format(new Date(claim.date_signed), "MMM d, yyyy")
+                    ? format(new Date(claim.date_signed), "M/d")
                     : "—"}
                 </td>
-                <td className="px-4 py-3 text-right font-mono text-foreground">
-                  {formatCurrency(claim.estimate_of_loss)}
-                </td>
-                <td className="px-4 py-3 text-right font-mono text-foreground">
+                <td className={cn("px-3 py-2 text-right font-mono text-foreground", hideSearch ? "text-xs" : "px-4 py-3")}>
                   {formatCurrency(claim.revised_estimate_of_loss)}
                 </td>
-                <td className="px-4 py-3 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <span
-                      className={cn(
-                        "badge-neutral",
-                        claim.change_indicator === "increase" && "badge-increase",
-                        claim.change_indicator === "decrease" && "badge-decrease"
-                      )}
-                    >
-                      <span className="flex items-center gap-1">
-                        {claim.change_indicator === "increase" && (
-                          <ArrowUpRight className="w-3 h-3" />
-                        )}
-                        {claim.change_indicator === "decrease" && (
-                          <ArrowDownRight className="w-3 h-3" />
-                        )}
-                        {claim.change_indicator === "no_change" && (
-                          <Minus className="w-3 h-3" />
-                        )}
-                        {formatPercent(claim.percent_change)}
-                      </span>
-                    </span>
-                  </div>
+                <td className={cn("px-3 py-2 text-right", hideSearch ? "text-xs" : "px-4 py-3")}>
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded",
+                      claim.change_indicator === "increase" && "text-success bg-success/10",
+                      claim.change_indicator === "decrease" && "text-destructive bg-destructive/10",
+                      claim.change_indicator === "no_change" && "text-muted-foreground bg-muted/50"
+                    )}
+                  >
+                    {claim.change_indicator === "increase" && <ArrowUpRight className="w-3 h-3" />}
+                    {claim.change_indicator === "decrease" && <ArrowDownRight className="w-3 h-3" />}
+                    {formatPercent(claim.percent_change)}
+                  </span>
                 </td>
               </tr>
             ))}

@@ -18,7 +18,11 @@ const navItems = [
   { title: "All Claims", url: "/claims", icon: FileText },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  onNavigate?: () => void;
+}
+
+export function Sidebar({ onNavigate }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -36,8 +40,8 @@ export function Sidebar() {
           </div>
           {!collapsed && (
             <div className="animate-fade-in">
-              <h1 className="text-lg font-bold text-foreground">ClaimsPro</h1>
-              <p className="text-xs text-muted-foreground">Dashboard</p>
+              <h1 className="text-lg font-bold text-foreground">Commission</h1>
+              <p className="text-xs text-muted-foreground">Tracker</p>
             </div>
           )}
         </div>
@@ -50,6 +54,7 @@ export function Sidebar() {
             key={item.url}
             to={item.url}
             end={item.url === "/"}
+            onClick={onNavigate}
             className={cn(
               "flex items-center gap-3 px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200",
               collapsed && "justify-center px-3"
@@ -65,8 +70,8 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Collapse Toggle */}
-      <div className="p-4 border-t border-sidebar-border/30">
+      {/* Collapse Toggle - hidden on mobile */}
+      <div className="p-4 border-t border-sidebar-border/30 hidden lg:block">
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200"
