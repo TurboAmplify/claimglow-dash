@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      adjusters: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          is_active: boolean
+          name: string
+          office: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          office: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          office?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       claims_2025: {
         Row: {
           adjuster: string
