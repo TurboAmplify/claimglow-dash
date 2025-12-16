@@ -31,8 +31,7 @@ interface AdjusterBarChartProps {
 export function AdjusterBarChart({ data }: AdjusterBarChartProps) {
   const chartData = useMemo(() => {
     return data.map((d) => ({
-      name: d.adjuster.split(" ")[0],
-      fullName: d.adjuster,
+      name: d.adjuster,
       avgChange: Number(d.avgPercentChange.toFixed(1)),
       claims: d.totalClaims,
     }));
@@ -43,13 +42,17 @@ export function AdjusterBarChart({ data }: AdjusterBarChartProps) {
       <h3 className="text-lg font-semibold text-foreground mb-4">
         Average % Change by Adjuster
       </h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+      <ResponsiveContainer width="100%" height={320}>
+        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={COLORS.muted} opacity={0.3} />
           <XAxis
             dataKey="name"
-            tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 12 }}
+            tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
             axisLine={{ stroke: COLORS.muted }}
+            angle={-45}
+            textAnchor="end"
+            height={60}
+            interval={0}
           />
           <YAxis
             tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 12 }}
@@ -64,10 +67,7 @@ export function AdjusterBarChart({ data }: AdjusterBarChartProps) {
               boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
             }}
             labelStyle={{ color: "hsl(210, 40%, 98%)" }}
-            formatter={(value: number, name: string, props: any) => [
-              `${value}%`,
-              `${props.payload.fullName}`,
-            ]}
+            formatter={(value: number) => [`${value}%`, "Avg Change"]}
           />
           <Bar
             dataKey="avgChange"
