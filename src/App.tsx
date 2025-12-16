@@ -8,6 +8,9 @@ import AdjustersPage from "./pages/AdjustersPage";
 import OfficesPage from "./pages/OfficesPage";
 import ClaimsPage from "./pages/ClaimsPage";
 import ImportDataPage from "./pages/ImportDataPage";
+import ImportCommissionsPage from "./pages/ImportCommissionsPage";
+import SalesDashboardPage from "./pages/SalesDashboardPage";
+import GoalPlannerPage from "./pages/GoalPlannerPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,8 +25,11 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/adjusters" element={<AdjustersPage />} />
           <Route path="/import" element={<ImportDataPage />} />
+          <Route path="/import-commissions" element={<ImportCommissionsPage />} />
           <Route path="/offices" element={<OfficesPage />} />
           <Route path="/claims" element={<ClaimsPage />} />
+          <Route path="/sales" element={<SalesDashboardPage />} />
+          <Route path="/goals" element={<GoalPlannerPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

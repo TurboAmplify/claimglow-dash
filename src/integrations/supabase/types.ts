@@ -89,6 +89,110 @@ export type Database = {
         }
         Relationships: []
       }
+      sales_commissions: {
+        Row: {
+          adjuster: string | null
+          client_name: string
+          commission_percentage: number | null
+          commissions_paid: number | null
+          created_at: string
+          date_signed: string | null
+          fee_percentage: number | null
+          id: string
+          initial_estimate: number | null
+          insurance_checks_ytd: number | null
+          new_remainder: number | null
+          office: string | null
+          old_remainder: number | null
+          percent_change: number | null
+          revised_estimate: number | null
+          salesperson_id: string | null
+          split_percentage: number | null
+          status: string | null
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          adjuster?: string | null
+          client_name: string
+          commission_percentage?: number | null
+          commissions_paid?: number | null
+          created_at?: string
+          date_signed?: string | null
+          fee_percentage?: number | null
+          id?: string
+          initial_estimate?: number | null
+          insurance_checks_ytd?: number | null
+          new_remainder?: number | null
+          office?: string | null
+          old_remainder?: number | null
+          percent_change?: number | null
+          revised_estimate?: number | null
+          salesperson_id?: string | null
+          split_percentage?: number | null
+          status?: string | null
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          adjuster?: string | null
+          client_name?: string
+          commission_percentage?: number | null
+          commissions_paid?: number | null
+          created_at?: string
+          date_signed?: string | null
+          fee_percentage?: number | null
+          id?: string
+          initial_estimate?: number | null
+          insurance_checks_ytd?: number | null
+          new_remainder?: number | null
+          office?: string | null
+          old_remainder?: number | null
+          percent_change?: number | null
+          revised_estimate?: number | null
+          salesperson_id?: string | null
+          split_percentage?: number | null
+          status?: string | null
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_commissions_salesperson_id_fkey"
+            columns: ["salesperson_id"]
+            isOneToOne: false
+            referencedRelation: "salespeople"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salespeople: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
