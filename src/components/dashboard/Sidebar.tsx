@@ -8,7 +8,8 @@ import {
   ChevronRight,
   BarChart3,
   DollarSign,
-  Target
+  Target,
+  Upload
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ const claimsNavItems = [
 const salesNavItems = [
   { title: "Sales Dashboard", url: "/sales", icon: DollarSign },
   { title: "Goal Planner", url: "/goals", icon: Target },
+  { title: "Import Data", url: "/import-commissions", icon: Upload },
 ];
 
 interface SidebarProps {
