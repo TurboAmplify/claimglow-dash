@@ -1,8 +1,10 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useSalesCommissions, useSalespeople, useAvailableYears, useYearSummaries } from "@/hooks/useSalesCommissions";
 import { useState, useMemo } from "react";
-import { Loader2, TrendingUp, TrendingDown, DollarSign, FileText, Percent, Target } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Loader2, TrendingUp, TrendingDown, DollarSign, FileText, Percent, Target, Upload } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart, Line, PieChart, Pie, Cell, Legend } from "recharts";
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', '#22c55e', '#f59e0b', '#ef4444'];
@@ -143,6 +145,12 @@ export default function SalesDashboardPage() {
           <p className="text-sm text-muted-foreground mt-2">
             Import your commission data to see analytics.
           </p>
+          <Link to="/import-commissions">
+            <Button className="mt-6">
+              <Upload className="w-4 h-4 mr-2" />
+              Import Commission Data
+            </Button>
+          </Link>
         </div>
       ) : (
         <>
