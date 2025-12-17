@@ -13,10 +13,16 @@ export interface QuarterlyPlan {
   q4: DealMix;
 }
 
+export type RiskLevel = "low" | "moderate" | "high";
+
 export interface DealMixScenario {
   id: string;
   name: string;
+  subtitle: string;
   description: string;
+  priorities: string[];
+  assumptions: string[];
+  riskLevel: RiskLevel;
   quarters: QuarterlyPlan;
   totalVolume: number;
   totalDeals: number;
@@ -39,57 +45,133 @@ export const DEAL_SIZES = {
 
 export const SCENARIO_TEMPLATES: Omit<DealMixScenario, 'totalVolume' | 'totalDeals' | 'isActive'>[] = [
   {
-    id: "steady-flow",
-    name: "Steady Flow",
-    description: "1 large + 2 medium per quarter - consistent, predictable growth",
+    id: "base-reference",
+    name: "Base Reference",
+    subtitle: "Control Scenario",
+    description: "Balanced execution based on historical performance, realistic opportunity flow, and disciplined activity across all verticals. Residential provides steady pipeline momentum, while mid-size commercial and large commercial/industrial opportunities form the backbone of annual production.",
+    priorities: [
+      "Consistent monthly activity",
+      "Balanced verticals execution",
+      "Historical pattern alignment"
+    ],
+    assumptions: [
+      "No extraordinary market disruption",
+      "Normal variability in claim timing and size",
+      "Consistent monthly activity levels"
+    ],
+    riskLevel: "moderate",
     isTemplate: true,
     quarters: {
-      q1: { large: 1, medium: 2, small: 2 },
-      q2: { large: 1, medium: 2, small: 2 },
-      q3: { large: 1, medium: 2, small: 2 },
-      q4: { large: 1, medium: 2, small: 2 },
+      q1: { large: 1, medium: 3, small: 8 },
+      q2: { large: 1, medium: 3, small: 8 },
+      q3: { large: 2, medium: 3, small: 8 },
+      q4: { large: 1, medium: 3, small: 8 },
     },
   },
   {
-    id: "quarterly-impact",
-    name: "Quarterly Impact",
-    description: "1-2 large deals per quarter only - fewer deals, higher value",
+    id: "conservative",
+    name: "Conservative",
+    subtitle: "Defensive Execution",
+    description: "Assumes a softer commercial and industrial environment with fewer large-loss opportunities. Focus shifts toward residential volume and smaller institutional opportunities to maintain overall production while protecting downside.",
+    priorities: [
+      "Stability over upside",
+      "Consistent activity during slower periods",
+      "Protecting downside while staying positioned"
+    ],
+    assumptions: [
+      "Softer commercial/industrial market",
+      "Fewer large-loss opportunities materialize",
+      "Residential volume offsets reduced large-loss flow"
+    ],
+    riskLevel: "low",
     isTemplate: true,
     quarters: {
-      q1: { large: 2, medium: 0, small: 0 },
-      q2: { large: 2, medium: 0, small: 0 },
-      q3: { large: 2, medium: 0, small: 0 },
-      q4: { large: 2, medium: 0, small: 0 },
+      q1: { large: 0, medium: 2, small: 10 },
+      q2: { large: 1, medium: 2, small: 10 },
+      q3: { large: 1, medium: 3, small: 10 },
+      q4: { large: 0, medium: 2, small: 10 },
     },
   },
   {
-    id: "heavy-h1",
-    name: "Heavy H1",
-    description: "Front-load the year with large deals in Q1 & Q2",
+    id: "balanced",
+    name: "Balanced",
+    subtitle: "Base-Plus Performance",
+    description: "Strong but realistic execution of the 2026 strategy. Opportunity flow improves modestly across all categories. Residential volume remains healthy, commercial converts solidly, and religious organizations contribute meaningfully through disciplined outreach.",
+    priorities: [
+      "High consistency in outreach and follow-through",
+      "Effective relationship leverage",
+      "Strong CRM discipline and pipeline management"
+    ],
+    assumptions: [
+      "Modest improvement in opportunity flow",
+      "Strong conversion rates",
+      "Disciplined outreach execution"
+    ],
+    riskLevel: "moderate",
     isTemplate: true,
     quarters: {
-      q1: { large: 2, medium: 2, small: 1 },
-      q2: { large: 2, medium: 2, small: 1 },
-      q3: { large: 1, medium: 1, small: 2 },
-      q4: { large: 1, medium: 1, small: 2 },
+      q1: { large: 1, medium: 3, small: 8 },
+      q2: { large: 2, medium: 3, small: 8 },
+      q3: { large: 2, medium: 4, small: 8 },
+      q4: { large: 2, medium: 3, small: 8 },
     },
   },
   {
-    id: "back-loaded",
-    name: "Back-Loaded",
-    description: "Light H1 for relationship building, heavy H2 for closing",
+    id: "commercial-heavy",
+    name: "Commercial Heavy",
+    subtitle: "High-Value Focus",
+    description: "Successful capture of multiple high-value commercial and industrial losses, resulting in significantly higher average deal sizes. Residential volume decreases as time shifts toward fewer, larger opportunities with campus-style or multi-building claims.",
+    priorities: [
+      "Deep relationship leverage",
+      "Patience and timing",
+      "Strategic focus on fewer, higher-impact opportunities"
+    ],
+    assumptions: [
+      "Multiple high-value opportunities close",
+      "Strong industrial/commercial market",
+      "Successful capture of large claims"
+    ],
+    riskLevel: "high",
     isTemplate: true,
     quarters: {
-      q1: { large: 0, medium: 2, small: 3 },
-      q2: { large: 1, medium: 2, small: 2 },
-      q3: { large: 2, medium: 2, small: 1 },
-      q4: { large: 2, medium: 2, small: 1 },
+      q1: { large: 2, medium: 2, small: 4 },
+      q2: { large: 3, medium: 2, small: 4 },
+      q3: { large: 3, medium: 3, small: 4 },
+      q4: { large: 2, medium: 2, small: 4 },
+    },
+  },
+  {
+    id: "volume-institutional",
+    name: "Volume + Institutional",
+    subtitle: "Diversified Model",
+    description: "Prioritizes breadth, consistency, and resilience. Residential volume increases and institutional opportunities—particularly churches and schools—become a major driver. Total production achieved through a diversified mix rather than large individual deals.",
+    priorities: [
+      "Strong systems and organization",
+      "High-touch relationship management",
+      "Consistent weekly and monthly activity"
+    ],
+    assumptions: [
+      "Institutional pipeline converts well",
+      "Diversified mix reduces volatility",
+      "Volume compensates for fewer large deals"
+    ],
+    riskLevel: "low",
+    isTemplate: true,
+    quarters: {
+      q1: { large: 1, medium: 4, small: 10 },
+      q2: { large: 1, medium: 4, small: 10 },
+      q3: { large: 1, medium: 5, small: 10 },
+      q4: { large: 1, medium: 4, small: 10 },
     },
   },
   {
     id: "custom",
     name: "Custom",
-    description: "Build your own deal mix for each quarter",
+    subtitle: "User-Defined",
+    description: "Build your own deal mix for each quarter based on your unique market insight and strategic priorities.",
+    priorities: ["User-defined priorities"],
+    assumptions: ["User-defined assumptions"],
+    riskLevel: "moderate",
     isTemplate: true,
     quarters: {
       q1: { large: 0, medium: 0, small: 0 },
@@ -131,7 +213,7 @@ export function calculateQuarterDeals(mix: DealMix) {
 }
 
 export function useGoalScenarios(targetRevenue: number = 55000000) {
-  const [activeScenarioId, setActiveScenarioId] = useState<string>("steady-flow");
+  const [activeScenarioId, setActiveScenarioId] = useState<string>("base-reference");
   const [customQuarters, setCustomQuarters] = useState<QuarterlyPlan>({
     q1: { large: 1, medium: 2, small: 2 },
     q2: { large: 1, medium: 2, small: 2 },

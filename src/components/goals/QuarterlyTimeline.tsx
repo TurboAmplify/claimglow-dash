@@ -1,11 +1,19 @@
-import { Calendar, TrendingUp, CheckCircle2, Circle } from "lucide-react";
+import { Calendar, TrendingUp, CheckCircle2, Circle, AlertTriangle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { 
   DealMixScenario, 
   DEAL_SIZES,
+  RiskLevel,
   calculateQuarterVolume,
   calculateQuarterDeals 
 } from "@/hooks/useGoalScenarios";
+
+const riskConfig: Record<RiskLevel, { label: string; color: string; bgColor: string }> = {
+  low: { label: "Low Risk", color: "text-emerald-500", bgColor: "bg-emerald-500/20" },
+  moderate: { label: "Moderate Risk", color: "text-amber-500", bgColor: "bg-amber-500/20" },
+  high: { label: "High Risk", color: "text-red-500", bgColor: "bg-red-500/20" },
+};
 
 interface QuarterlyTimelineProps {
   activeScenario: DealMixScenario;
@@ -47,14 +55,20 @@ export function QuarterlyTimeline({
 
   return (
     <div className="glass-card p-6 animate-fade-in">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 rounded-lg bg-cyan-500/20">
-          <Calendar className="w-5 h-5 text-cyan-500" />
+      <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-cyan-500/20">
+            <Calendar className="w-5 h-5 text-cyan-500" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Quarterly Timeline</h2>
+            <p className="text-sm text-muted-foreground">{activeScenario.name} — {activeScenario.subtitle}</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Quarterly Timeline</h2>
-          <p className="text-sm text-muted-foreground">Visual roadmap for {activeScenario.name} scenario</p>
-        </div>
+        <Badge className={`${riskConfig[activeScenario.riskLevel].bgColor} ${riskConfig[activeScenario.riskLevel].color} border-0`}>
+          <AlertTriangle className="w-3 h-3 mr-1" />
+          {riskConfig[activeScenario.riskLevel].label}
+        </Badge>
       </div>
 
       {/* YTD Progress Summary */}
