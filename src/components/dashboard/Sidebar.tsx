@@ -27,9 +27,12 @@ const salesNavItems = [
   { title: "By Sales Person", url: "/sales/by-person", icon: Users },
   { title: "By Office", url: "/sales/by-office", icon: Building2 },
   { title: "All Sales", url: "/sales/all", icon: FileText },
+  { title: "Import Data", url: "/import-commissions", icon: Upload },
+];
+
+const planningNavItems = [
   { title: "Goal Planner", url: "/goals", icon: Target },
   { title: "Sales Roadmap", url: "/roadmap", icon: Map },
-  { title: "Import Data", url: "/import-commissions", icon: Upload },
 ];
 
 interface SidebarProps {
@@ -104,6 +107,30 @@ export function Sidebar({ onNavigate }: SidebarProps) {
             )}
             activeClassName="bg-primary/10 text-primary border border-primary/20 glow-primary"
             style={{ animationDelay: `${(claimsNavItems.length + index) * 50}ms` }}
+          >
+            <item.icon className="w-5 h-5 flex-shrink-0" />
+            {!collapsed && (
+              <span className="font-medium animate-fade-in">{item.title}</span>
+            )}
+          </NavLink>
+        ))}
+
+        {/* Planning Section */}
+        {!collapsed && (
+          <p className="px-4 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Planning</p>
+        )}
+        {collapsed && <div className="h-4" />}
+        {planningNavItems.map((item, index) => (
+          <NavLink
+            key={item.url}
+            to={item.url}
+            onClick={onNavigate}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200",
+              collapsed && "justify-center px-3"
+            )}
+            activeClassName="bg-primary/10 text-primary border border-primary/20 glow-primary"
+            style={{ animationDelay: `${(claimsNavItems.length + salesNavItems.length + index) * 50}ms` }}
           >
             <item.icon className="w-5 h-5 flex-shrink-0" />
             {!collapsed && (
