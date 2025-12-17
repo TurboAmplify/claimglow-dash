@@ -11,6 +11,7 @@ import ImportDataPage from "./pages/ImportDataPage";
 import ImportCommissionsPage from "./pages/ImportCommissionsPage";
 import SalesDashboardPage from "./pages/SalesDashboardPage";
 import GoalPlannerPage from "./pages/GoalPlannerPage";
+import SalesRoadmapPage from "./pages/SalesRoadmapPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/claims" element={<ClaimsPage />} />
           <Route path="/sales" element={<SalesDashboardPage />} />
           <Route path="/goals" element={<GoalPlannerPage />} />
+          <Route path="/roadmap" element={<SalesRoadmapPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
