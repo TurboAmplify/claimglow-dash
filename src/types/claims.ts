@@ -21,6 +21,10 @@ export interface AdjusterSummary {
   totalRevised: number;
   avgPercentChange: number;
   totalDollarDifference: number;
+  positiveClaims: number;
+  negativeClaims: number;
+  positiveDifference: number;
+  negativeDifference: number;
   claims: Claim[];
 }
 

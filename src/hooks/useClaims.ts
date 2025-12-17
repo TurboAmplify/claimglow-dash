@@ -38,6 +38,11 @@ export function useAdjusterSummaries(claims: Claim[] | undefined): AdjusterSumma
     const totalRevised = adjusterClaims.reduce((sum, c) => sum + c.revised_estimate_of_loss, 0);
     const avgPercentChange = adjusterClaims.reduce((sum, c) => sum + c.percent_change, 0) / adjusterClaims.length;
     const totalDollarDifference = adjusterClaims.reduce((sum, c) => sum + c.dollar_difference, 0);
+    
+    const positiveClaims = adjusterClaims.filter(c => c.dollar_difference > 0);
+    const negativeClaims = adjusterClaims.filter(c => c.dollar_difference < 0);
+    const positiveDifference = positiveClaims.reduce((sum, c) => sum + c.dollar_difference, 0);
+    const negativeDifference = negativeClaims.reduce((sum, c) => sum + c.dollar_difference, 0);
 
     return {
       adjuster,
@@ -47,6 +52,10 @@ export function useAdjusterSummaries(claims: Claim[] | undefined): AdjusterSumma
       totalRevised,
       avgPercentChange,
       totalDollarDifference,
+      positiveClaims: positiveClaims.length,
+      negativeClaims: negativeClaims.length,
+      positiveDifference,
+      negativeDifference,
       claims: adjusterClaims,
     };
   });
