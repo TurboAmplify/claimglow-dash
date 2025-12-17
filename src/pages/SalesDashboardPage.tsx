@@ -94,12 +94,14 @@ export default function SalesDashboardPage() {
 
   const yearComparisonData = useMemo(() => {
     if (!yearSummaries) return [];
-    return yearSummaries.map(s => ({
-      year: s.year.toString(),
-      volume: s.totalRevisedEstimate,
-      deals: s.totalDeals,
-      commission: s.totalCommissionsPaid,
-    }));
+    return yearSummaries
+      .map(s => ({
+        year: s.year.toString(),
+        volume: s.totalRevisedEstimate,
+        deals: s.totalDeals,
+        commission: s.totalCommissionsPaid,
+      }))
+      .sort((a, b) => parseInt(a.year) - parseInt(b.year)); // ascending order (oldest first)
   }, [yearSummaries]);
 
   if (isLoading) {
