@@ -26,6 +26,36 @@ export interface Salesperson {
   name: string;
   email: string | null;
   is_active: boolean;
+  role: 'sales_director' | 'sales_rep' | string;
+  manager_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SalesGoal {
+  id: string;
+  salesperson_id: string;
+  year: number;
+  target_revenue: number;
+  target_deals: number;
+  goal_type: 'individual' | 'team_contribution' | 'team_aggregate';
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GoalScenario {
+  id: string;
+  salesperson_id: string;
+  year: number;
+  scenario_name: string;
+  quarters: {
+    q1: { large: number; medium: number; small: number };
+    q2: { large: number; medium: number; small: number };
+    q3: { large: number; medium: number; small: number };
+    q4: { large: number; medium: number; small: number };
+  };
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
