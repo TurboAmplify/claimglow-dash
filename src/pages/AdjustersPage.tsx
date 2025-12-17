@@ -1,16 +1,18 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { AdjusterCard } from "@/components/dashboard/AdjusterCard";
 import { ClaimsTable } from "@/components/dashboard/ClaimsTable";
-import { FilterDropdown } from "@/components/dashboard/FilterDropdown";
+import { MultiSelectFilter } from "@/components/dashboard/MultiSelectFilter";
+import { EditAdjusterDialog } from "@/components/dashboard/EditAdjusterDialog";
 import { useClaims, useAdjusterSummaries } from "@/hooks/useClaims";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, Edit2 } from "lucide-react";
 import { useState, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export default function AdjustersPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const selectedAdjuster = searchParams.get("selected") || "all";
-  const [officeFilter, setOfficeFilter] = useState("all");
+  const [selectedAdjusters, setSelectedAdjusters] = useState<string[]>([]);
+  const [selectedOffices, setSelectedOffices] = useState<string[]>([]);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingAdjuster, setEditingAdjuster] = useState<{ name: string; office: string } | null>(null);
   
   const { data: claims, isLoading, error } = useClaims();
   const adjusterSummaries = useAdjusterSummaries(claims);
@@ -26,28 +28,20 @@ export default function AdjustersPage() {
   const filteredSummaries = useMemo(() => {
     let filtered = adjusterSummaries;
     
-    if (officeFilter !== "all") {
-      filtered = filtered.filter((a) => a.office === officeFilter);
+    if (selectedOffices.length > 0) {
+      filtered = filtered.filter((a) => a.office && selectedOffices.includes(a.office));
     }
     
-    if (selectedAdjuster !== "all") {
-      filtered = filtered.filter((a) => a.adjuster === selectedAdjuster);
+    if (selectedAdjusters.length > 0) {
+      filtered = filtered.filter((a) => selectedAdjusters.includes(a.adjuster));
     }
     
     return filtered;
-  }, [adjusterSummaries, officeFilter, selectedAdjuster]);
+  }, [adjusterSummaries, selectedOffices, selectedAdjusters]);
 
-  const selectedSummary = selectedAdjuster !== "all" 
-    ? adjusterSummaries.find((a) => a.adjuster === selectedAdjuster)
-    : null;
-
-  const handleAdjusterSelect = (adjuster: string) => {
-    if (adjuster === "all") {
-      searchParams.delete("selected");
-    } else {
-      searchParams.set("selected", adjuster);
-    }
-    setSearchParams(searchParams);
+  const handleEditAdjuster = (adjuster: string, office: string) => {
+    setEditingAdjuster({ name: adjuster, office });
+    setEditDialogOpen(true);
   };
 
   if (isLoading) {
@@ -90,64 +84,55 @@ export default function AdjustersPage() {
       {/* Filters */}
       <div className="glass-card p-6 mb-8 animate-fade-in">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FilterDropdown
+          <MultiSelectFilter
             label="Filter by Adjuster"
-            value={selectedAdjuster}
             options={adjusters}
-            onChange={handleAdjusterSelect}
-            placeholder="Select adjuster..."
+            selected={selectedAdjusters}
+            onChange={setSelectedAdjusters}
+            placeholder="Select adjusters..."
           />
-          <FilterDropdown
+          <MultiSelectFilter
             label="Filter by Office"
-            value={officeFilter}
             options={offices}
-            onChange={setOfficeFilter}
-            placeholder="Select office..."
+            selected={selectedOffices}
+            onChange={setSelectedOffices}
+            placeholder="Select offices..."
           />
         </div>
       </div>
 
-      {/* Selected Adjuster Detail View */}
-      {selectedSummary && (
-        <div className="mb-8 animate-fade-in">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-foreground">
-              {selectedSummary.adjuster}'s Claims
-            </h2>
-            <button
-              onClick={() => handleAdjusterSelect("all")}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-            >
-              <X className="w-4 h-4" />
-              Clear Selection
-            </button>
-          </div>
-          <ClaimsTable
-            claims={selectedSummary.claims}
-            compact
-          />
-        </div>
-      )}
-
       {/* Adjuster Cards Grid */}
-      {!selectedSummary && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredSummaries.map((summary, index) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {filteredSummaries.map((summary, index) => (
+          <div key={summary.adjuster} className="relative group">
             <AdjusterCard
-              key={summary.adjuster}
               summary={summary}
-              onClick={() => handleAdjusterSelect(summary.adjuster)}
               delay={index * 50}
             />
-          ))}
-        </div>
-      )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleEditAdjuster(summary.adjuster, summary.office || "")}
+              className="absolute top-4 right-4 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-secondary/80 hover:bg-secondary"
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+      </div>
 
-      {filteredSummaries.length === 0 && !selectedSummary && (
+      {filteredSummaries.length === 0 && (
         <div className="glass-card p-12 text-center animate-fade-in">
           <p className="text-muted-foreground">No adjusters found matching filters.</p>
         </div>
       )}
+
+      <EditAdjusterDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        adjuster={editingAdjuster}
+        offices={offices}
+      />
     </DashboardLayout>
   );
 }
