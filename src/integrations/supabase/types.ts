@@ -89,6 +89,47 @@ export type Database = {
         }
         Relationships: []
       }
+      goal_scenarios: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          quarters: Json
+          salesperson_id: string
+          scenario_name: string
+          updated_at: string | null
+          year: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          quarters: Json
+          salesperson_id: string
+          scenario_name: string
+          updated_at?: string | null
+          year: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          quarters?: Json
+          salesperson_id?: string
+          scenario_name?: string
+          updated_at?: string | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_scenarios_salesperson_id_fkey"
+            columns: ["salesperson_id"]
+            isOneToOne: false
+            referencedRelation: "salespeople"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sales_commissions: {
         Row: {
           adjuster: string | null
@@ -166,13 +207,59 @@ export type Database = {
           },
         ]
       }
+      sales_goals: {
+        Row: {
+          created_at: string | null
+          goal_type: string
+          id: string
+          notes: string | null
+          salesperson_id: string
+          target_deals: number | null
+          target_revenue: number | null
+          updated_at: string | null
+          year: number
+        }
+        Insert: {
+          created_at?: string | null
+          goal_type?: string
+          id?: string
+          notes?: string | null
+          salesperson_id: string
+          target_deals?: number | null
+          target_revenue?: number | null
+          updated_at?: string | null
+          year: number
+        }
+        Update: {
+          created_at?: string | null
+          goal_type?: string
+          id?: string
+          notes?: string | null
+          salesperson_id?: string
+          target_deals?: number | null
+          target_revenue?: number | null
+          updated_at?: string | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_goals_salesperson_id_fkey"
+            columns: ["salesperson_id"]
+            isOneToOne: false
+            referencedRelation: "salespeople"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       salespeople: {
         Row: {
           created_at: string
           email: string | null
           id: string
           is_active: boolean
+          manager_id: string | null
           name: string
+          role: string | null
           updated_at: string
         }
         Insert: {
@@ -180,7 +267,9 @@ export type Database = {
           email?: string | null
           id?: string
           is_active?: boolean
+          manager_id?: string | null
           name: string
+          role?: string | null
           updated_at?: string
         }
         Update: {
@@ -188,10 +277,20 @@ export type Database = {
           email?: string | null
           id?: string
           is_active?: boolean
+          manager_id?: string | null
           name?: string
+          role?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "salespeople_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "salespeople"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
