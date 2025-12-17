@@ -8,26 +8,178 @@ interface GoalsSummaryProps {
   formatCurrency: (value: number) => string;
 }
 
-const DEFAULT_GOALS = `2026 Annual Objectives
+const DEFAULT_GOALS = `Matt Aldrich — 2026 Sales & Growth Plan
 
-Revenue Target: $55,000,000 in pursued opportunities
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. PURPOSE & STRATEGIC INTENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Key Milestones:
-• Q1: Establish pipeline foundation - $10M+ in qualified opportunities
-• Q2: Accelerate large commercial pursuits - cumulative $25M
-• Q3: Peak activity period - cumulative $40M
-• Q4: Conversion focus & 2027 positioning - reach $55M
+Primary Goals for 2026:
+• Execute a consistent, disciplined, and measurable sales and outreach system
+• Create sustained opportunity flow in residential, commercial, industrial, and religious verticals
+• Expand influence across chambers, industry groups, schools, and professional organizations
+• Build a regionally dominant pre-loss and relationship-driven referral pipeline
+• Finish 2026 strong and enter 2027 with a fully primed opportunity engine
 
-Strategic Priorities:
-• Focus on large commercial/industrial opportunities ($5M+)
-• Maintain steady flow of residential losses for base volume
-• Build pre-loss relationships for future opportunities
-• Target 2-3 large deals per quarter minimum
+Strategic Philosophy:
+1. Clarity over activity — Everything must support high-value opportunities
+2. Quality over quantity — Fewer, stronger relationships outperform mass outreach
+3. Consistency wins — Weekly actions produce compounding results
+4. Seasonal alignment — Adjust intensity based on known seasonal loss patterns
 
-Success Metrics:
-• Average deal size: $1.5M+ (vs historical $1.1M)
-• Deal count: 35-45 total deals
-• Close rate: Maintain 40%+ conversion on qualified opportunities`;
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. CORE OPPORTUNITY TARGETS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Residential ($350k–$500k):
+• Quarterly: 6–9 | Annual: 24–36
+• Focus: High-value total-loss or heavy-smoke homes; summer storms; high-income ZIP codes
+
+Mid-Size Commercial ($1M–$1.5M):
+• Quarterly: 3 | Annual: 12
+• Focus: Schools, mid-size offices, restaurants, retail centers, multi-tenant properties
+
+Large Commercial/Industrial ($750k–$10M):
+• Quarterly: 2–3 | Annual: 8–12
+• Focus: Manufacturing, warehouses, automotive, distribution centers, regional chains
+
+Religious >$1M:
+• Quarterly: 2–5 | Annual: 8–20
+• Focus: Large churches, temples, mosques, synagogues, ministries, retreat centers
+
+Total Annual Goal: $45M–$60M combined opportunities
+
+Pipeline Expectations:
+• Active Pipeline: $8M–$12M minimum at any time
+• Quarterly New Pipeline: $10M–$15M
+• Quarterly Closed: $4M–$7M
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. QUARTERLY BREAKDOWN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Q1 — Foundation & Pipeline Activation:
+• Build starting pipeline through early-year outreach
+• Identify all in-state religious targets with $1M+ potential
+• Begin school district outreach (1 large + 1 small per month)
+• Attend all qualifying early-year church fires
+• Refresh CRM categories and follow-up cadence
+
+Q2 — Commercial Focus & Relationship Deepening:
+• Target 1–2 mid-size or large commercial opportunities/month
+• Strengthen relationships through Life Styles & Allen Chamber
+• Join Independent Insurance Adjusters of Dallas
+• Start outreach to neighboring states for regional influence
+• Secure 2–4 major school meetings
+
+Q3 — Seasonal Peak & Expansion:
+• Target 2–3 high-value residential losses/month
+• Increase follow-up cadence on all commercial/industrial pipeline
+• Attend all summer church fires; prioritize high-value ministry properties
+• Mid-year pipeline audit and tactical reset
+• Complete regional religious organization database
+
+Q4 — Close Strong & Position 2027:
+• Push to close opportunities aggressively
+• Re-engage school districts with winter-break timing
+• Solidify contractor/adjuster partnerships before year-end
+• Attend all late-year networking and industry events
+• Pre-book Q1 2027 meetings and identify top 10 targets
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. MONTHLY EXPECTATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Opportunity Generation:
+• Residential: 2–3 new qualified leads
+• Commercial: 1–2 solid opportunities
+• Industrial: 1 potential large-loss contact
+• Religious: 2–4 researched targets + 1–2 meetings/calls
+
+Networking & Relationships:
+• Life Styles Organization: 2 meaningful connections
+• Allen Chamber: 2–3 high-value meetings
+• IIAD or target org: 1 event/activity
+• Schools: 2 district touches (meeting, email, call)
+• Contractor/adjuster partners: 4–6 touches
+
+Fire Response:
+• Chase 100% of target-aligned church fires
+• Chase select high-value commercial fires
+• Chase residential fires with higher value (case-by-case)
+• Add minimum 10 new contacts monthly
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. WEEKLY CADENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Prospecting & Outreach:
+• 15–20 outreach actions (calls, emails, texts, messages)
+• 3–5 meetings (in-person or virtual)
+• 3 follow-up sequences
+• 1–2 pre-loss walkthroughs or site visits
+
+Relationship Maintenance:
+• 2 contractor touches
+• 1 agent touch
+• 1 school district follow-up
+• 1 religious organization outreach sequence
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. NETWORKING STRATEGY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Life Styles Organization:
+• Attend starting March
+• Goal: Build 12–18 high-value contacts annually
+• Monthly: 2–3 meaningful follow-ups
+
+Allen Chamber:
+• Attend monthly breakfasts/luncheons
+• Form 1 deeper relationship per month
+• Map out top 25 commercial members by Q2
+
+Schools:
+• Monthly: 1 large + 1 small district meeting attempt
+• Track: Superintendent, facilities manager, maintenance director, risk manager
+• Offer: Pre-loss planning, emergency binder, contractor neutrality
+
+IIAD (Independent Insurance Agents of Dallas):
+• Attend events as available
+• Build top 10 agency list
+• Aim for 3–5 agency referrals by Q4
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. RELIGIOUS ORGANIZATION STRATEGY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Target Types:
+• Large Baptist, Methodist, Catholic, Pentecostal, nondenominational churches
+• Temples, Synagogues, Mosques
+• Retreat centers & ministries with multi-building campuses
+• Faith-based schools
+
+Priority Scoring:
+• High: Multi-site, historic, large campuses, ministries with schools
+• Medium: Single-site, mid-size facilities, newer builds
+• Low: Small congregations unlikely to reach $1M+ valuation
+
+Outreach Process:
+1. Add to CRM with full research fields
+2. Establish soft intro (email or call)
+3. Schedule meeting with pastor, board, or facilities manager
+4. Provide pre-loss planning
+5. Offer emergency response guidance
+6. Maintain quarterly follow-up
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. KEY PRINCIPLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• Consistency: Every week, every month, every quarter — same disciplined actions
+• Quality Over Quantity: Be selective about meetings, organizations, and opportunities
+• Metrics Drive Everything: No guessing. All decisions from pipeline, priority, and performance data
+• Professional Compassion: Don't become hardened from responses and numb to their loss`;
 
 export function GoalsSummary({ targetRevenue, formatCurrency }: GoalsSummaryProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,7 +193,7 @@ export function GoalsSummary({ targetRevenue, formatCurrency }: GoalsSummaryProp
             <Target className="w-5 h-5 text-primary" />
           </div>
           <div className="text-left">
-            <h2 className="text-lg font-semibold text-foreground">2026 Goals & Objectives</h2>
+            <h2 className="text-lg font-semibold text-foreground">2026 Sales & Growth Plan</h2>
             <p className="text-sm text-muted-foreground">
               Annual target: {formatCurrency(targetRevenue)}
             </p>
