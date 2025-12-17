@@ -9,7 +9,8 @@ import {
   BarChart3,
   DollarSign,
   Target,
-  Upload
+  Upload,
+  Map
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,7 @@ const claimsNavItems = [
 const salesNavItems = [
   { title: "Sales Dashboard", url: "/sales", icon: DollarSign },
   { title: "Goal Planner", url: "/goals", icon: Target },
+  { title: "Sales Roadmap", url: "/roadmap", icon: Map },
   { title: "Import Data", url: "/import-commissions", icon: Upload },
 ];
 
