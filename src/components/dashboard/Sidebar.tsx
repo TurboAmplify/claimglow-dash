@@ -96,6 +96,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           <NavLink
             key={item.url}
             to={item.url}
+            end={item.url === "/sales"}
             onClick={onNavigate}
             className={cn(
               "flex items-center gap-3 px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200",
