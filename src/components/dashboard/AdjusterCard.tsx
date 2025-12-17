@@ -10,6 +10,8 @@ interface AdjusterCardProps {
 
 export function AdjusterCard({ summary, onClick, delay = 0 }: AdjusterCardProps) {
   const isPositive = summary.avgPercentChange >= 0;
+  const isHouston = summary.office?.toLowerCase() === "houston";
+  const isDallas = summary.office?.toLowerCase() === "dallas";
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -20,11 +22,38 @@ export function AdjusterCard({ summary, onClick, delay = 0 }: AdjusterCardProps)
     }).format(value);
   };
 
+  // Office-based styling
+  const getOfficeStyles = () => {
+    if (isHouston) {
+      return {
+        cardBg: "bg-blue-950/40",
+        borderColor: "border-l-blue-500",
+        officeBadge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+      };
+    }
+    if (isDallas) {
+      return {
+        cardBg: "bg-cyan-950/30",
+        borderColor: "border-l-cyan-400",
+        officeBadge: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+      };
+    }
+    return {
+      cardBg: "bg-secondary/30",
+      borderColor: "border-l-muted-foreground",
+      officeBadge: "bg-muted/20 text-muted-foreground border-muted/30",
+    };
+  };
+
+  const officeStyles = getOfficeStyles();
+
   return (
     <div
       onClick={onClick}
       className={cn(
-        "glass-card p-5 cursor-pointer transition-all duration-300 hover:scale-[1.02] animate-fade-in",
+        "glass-card p-5 cursor-pointer transition-all duration-300 hover:scale-[1.02] animate-fade-in border-l-4",
+        officeStyles.cardBg,
+        officeStyles.borderColor,
         isPositive ? "hover:glow-success" : "hover:glow-destructive"
       )}
       style={{ animationDelay: `${delay}ms` }}
@@ -47,7 +76,10 @@ export function AdjusterCard({ summary, onClick, delay = 0 }: AdjusterCardProps)
           </div>
           <div>
             <h3 className="font-semibold text-foreground">{summary.adjuster}</h3>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <div className={cn(
+              "flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border mt-1",
+              officeStyles.officeBadge
+            )}>
               <Building2 className="w-3 h-3" />
               <span>{summary.office || "Unassigned"}</span>
             </div>
@@ -71,28 +103,69 @@ export function AdjusterCard({ summary, onClick, delay = 0 }: AdjusterCardProps)
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="p-3 rounded-xl bg-secondary/30">
-          <div className="flex items-center gap-2 text-muted-foreground mb-1">
-            <FileText className="w-3.5 h-3.5" />
-            <span className="text-xs uppercase tracking-wide">Claims</span>
+      {/* Stats Grid - 3 Rows */}
+      <div className="space-y-2">
+        {/* Row 1: Total Claims & Total Difference */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 rounded-xl bg-secondary/30">
+            <div className="flex items-center gap-2 text-muted-foreground mb-1">
+              <FileText className="w-3.5 h-3.5" />
+              <span className="text-xs uppercase tracking-wide">Total Claims</span>
+            </div>
+            <p className="text-xl font-bold text-foreground">{summary.totalClaims}</p>
           </div>
-          <p className="text-xl font-bold text-foreground">{summary.totalClaims}</p>
+          <div className="p-3 rounded-xl bg-secondary/30">
+            <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+              Total Difference
+            </div>
+            <p
+              className={cn(
+                "text-lg font-bold",
+                summary.totalDollarDifference >= 0 ? "text-success" : "text-destructive"
+              )}
+            >
+              {summary.totalDollarDifference >= 0 ? "+" : ""}
+              {formatCurrency(summary.totalDollarDifference)}
+            </p>
+          </div>
         </div>
-        <div className="p-3 rounded-xl bg-secondary/30">
-          <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-            Difference
+
+        {/* Row 2: Positive Claims & Positive Difference */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 rounded-xl bg-success/10 border border-success/20">
+            <div className="flex items-center gap-2 text-success mb-1">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span className="text-xs uppercase tracking-wide">Positive</span>
+            </div>
+            <p className="text-xl font-bold text-success">{summary.positiveClaims}</p>
           </div>
-          <p
-            className={cn(
-              "text-lg font-bold",
-              summary.totalDollarDifference >= 0 ? "text-success" : "text-destructive"
-            )}
-          >
-            {summary.totalDollarDifference >= 0 ? "+" : ""}
-            {formatCurrency(summary.totalDollarDifference)}
-          </p>
+          <div className="p-3 rounded-xl bg-success/10 border border-success/20">
+            <div className="text-xs text-success uppercase tracking-wide mb-1">
+              Positive Diff
+            </div>
+            <p className="text-lg font-bold text-success">
+              +{formatCurrency(summary.positiveDifference)}
+            </p>
+          </div>
+        </div>
+
+        {/* Row 3: Negative Claims & Negative Difference */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20">
+            <div className="flex items-center gap-2 text-destructive mb-1">
+              <TrendingDown className="w-3.5 h-3.5" />
+              <span className="text-xs uppercase tracking-wide">Negative</span>
+            </div>
+            <p className="text-xl font-bold text-destructive">{summary.negativeClaims}</p>
+          </div>
+          <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20">
+            <div className="text-xs text-destructive uppercase tracking-wide mb-1">
+              Negative Diff
+            </div>
+            <p className="text-lg font-bold text-destructive">
+              {formatCurrency(summary.negativeDifference)}
+            </p>
+          </div>
         </div>
       </div>
 
