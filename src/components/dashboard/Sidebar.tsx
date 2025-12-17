@@ -16,7 +16,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 const claimsNavItems = [
-  { title: "Overview", url: "/", icon: LayoutDashboard },
+  { title: "Adjusters Dashboard", url: "/", icon: LayoutDashboard },
   { title: "By Adjuster", url: "/adjusters", icon: Users },
   { title: "By Office", url: "/offices", icon: Building2 },
   { title: "All Claims", url: "/claims", icon: FileText },
@@ -24,6 +24,9 @@ const claimsNavItems = [
 
 const salesNavItems = [
   { title: "Sales Dashboard", url: "/sales", icon: DollarSign },
+  { title: "By Sales Person", url: "/sales/by-person", icon: Users },
+  { title: "By Office", url: "/sales/by-office", icon: Building2 },
+  { title: "All Sales", url: "/sales/all", icon: FileText },
   { title: "Goal Planner", url: "/goals", icon: Target },
   { title: "Sales Roadmap", url: "/roadmap", icon: Map },
   { title: "Import Data", url: "/import-commissions", icon: Upload },
