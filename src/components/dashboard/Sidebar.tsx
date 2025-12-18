@@ -11,10 +11,14 @@ import {
   Target,
   Upload,
   Map,
-  Home
+  Home,
+  LogOut
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const mainNavItems = [
   { title: "Home", url: "/", icon: Home },
@@ -46,6 +50,26 @@ interface SidebarProps {
 
 export function Sidebar({ onNavigate }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const { signOut, user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast({
+        title: "Error signing out",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
+      navigate('/login');
+    }
+  };
 
   return (
     <aside
@@ -167,21 +191,38 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         ))}
       </nav>
 
-      {/* Collapse Toggle - hidden on mobile */}
-      <div className="p-4 border-t border-sidebar-border/30 hidden lg:block">
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200"
-        >
-          {collapsed ? (
-            <ChevronRight className="w-5 h-5" />
-          ) : (
-            <>
-              <ChevronLeft className="w-5 h-5" />
-              <span className="font-medium">Collapse</span>
-            </>
-          )}
-        </button>
+      {/* User section and Collapse Toggle */}
+      <div className="p-4 border-t border-sidebar-border/30 space-y-2">
+        {/* Sign Out Button */}
+        {user && (
+          <button
+            onClick={handleSignOut}
+            className={cn(
+              "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 transition-all duration-200",
+              collapsed && "justify-center px-3"
+            )}
+          >
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            {!collapsed && <span className="font-medium">Sign Out</span>}
+          </button>
+        )}
+        
+        {/* Collapse Toggle - hidden on mobile */}
+        <div className="hidden lg:block">
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200"
+          >
+            {collapsed ? (
+              <ChevronRight className="w-5 h-5" />
+            ) : (
+              <>
+                <ChevronLeft className="w-5 h-5" />
+                <span className="font-medium">Collapse</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </aside>
   );
