@@ -5,6 +5,7 @@ import { SalespersonCard, SalespersonStats } from "@/components/dashboard/Salesp
 import { useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions";
 import { Loader2, Edit2 } from "lucide-react";
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SalesCommission } from "@/types/sales";
 
@@ -12,6 +13,7 @@ export default function SalesByPersonPage() {
   const [selectedPeople, setSelectedPeople] = useState<string[]>([]);
   const [editRecord, setEditRecord] = useState<SalesCommission | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   const { data: salespeople, isLoading: loadingSalespeople } = useSalespeople();
   const { data: commissions, isLoading: loadingCommissions } = useSalesCommissions();
@@ -83,18 +85,22 @@ export default function SalesByPersonPage() {
       stats[name].totalSplitPercentage += c.split_percentage || 100;
     });
     
-    return Object.entries(stats).map(([name, data]): SalespersonStats => ({
-      name,
-      office: data.office,
-      deals: data.deals,
-      volume: data.volume,
-      revisedVolume: data.revisedVolume,
-      commissions: data.commissions,
-      avgFeePercentage: data.deals > 0 ? data.totalFeePercentage / data.deals : 0,
-      avgCommissionPercentage: data.deals > 0 ? data.totalCommissionPercentage / data.deals : 0,
-      avgSplitPercentage: data.deals > 0 ? data.totalSplitPercentage / data.deals : 100,
-    })).sort((a, b) => b.commissions - a.commissions);
-  }, [filteredCommissions, salespeopleMap]);
+    return Object.entries(stats).map(([name, data]): SalespersonStats & { id: string } => {
+      const sp = salespeople?.find((s) => s.name === name);
+      return {
+        id: sp?.id || "",
+        name,
+        office: data.office,
+        deals: data.deals,
+        volume: data.volume,
+        revisedVolume: data.revisedVolume,
+        commissions: data.commissions,
+        avgFeePercentage: data.deals > 0 ? data.totalFeePercentage / data.deals : 0,
+        avgCommissionPercentage: data.deals > 0 ? data.totalCommissionPercentage / data.deals : 0,
+        avgSplitPercentage: data.deals > 0 ? data.totalSplitPercentage / data.deals : 100,
+      };
+    }).sort((a, b) => b.commissions - a.commissions);
+  }, [filteredCommissions, salespeopleMap, salespeople]);
 
   const handleEdit = (record: SalesCommission) => {
     setEditRecord(record);
@@ -142,7 +148,12 @@ export default function SalesByPersonPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
         {salespersonStats.map((stat, index) => (
-          <SalespersonCard key={stat.name} stats={stat} delay={index * 50} />
+          <SalespersonCard 
+            key={stat.name} 
+            stats={stat} 
+            delay={index * 50}
+            onClick={() => stat.id && navigate(`/sales/person/${stat.id}`)}
+          />
         ))}
       </div>
 
