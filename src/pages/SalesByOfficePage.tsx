@@ -3,8 +3,7 @@ import { MultiSelectFilter } from "@/components/dashboard/MultiSelectFilter";
 import { EditSalesRecordDialog } from "@/components/dashboard/EditSalesRecordDialog";
 import { SalespersonCard, SalespersonStats } from "@/components/dashboard/SalespersonCard";
 import { useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions";
-import { Loader2, Edit2, Building2, DollarSign, Users, FileText, Percent, AlertTriangle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, Edit2, Building2, DollarSign, Users, FileText, Percent } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { SalesCommission } from "@/types/sales";
@@ -45,19 +44,6 @@ export default function SalesByOfficePage() {
       return selectedOffices.includes(normalizedOffice);
     });
   }, [commissions, selectedOffices]);
-
-  // Calculate unknown deals stats for alert
-  const unknownDealsStats = useMemo(() => {
-    let count = 0;
-    let volume = 0;
-    commissions?.forEach((c) => {
-      if (normalizeOffice(c.office) === "Unknown") {
-        count += 1;
-        volume += c.initial_estimate || 0;
-      }
-    });
-    return { count, volume };
-  }, [commissions]);
 
   const officeStats = useMemo(() => {
     const stats: Record<string, { 
@@ -183,17 +169,6 @@ export default function SalesByOfficePage() {
           Office performance and regional commission breakdown
         </p>
       </div>
-
-      {/* Unknown Deals Alert */}
-      {unknownDealsStats.count > 0 && (
-        <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
-          <AlertTriangle className="h-4 w-4 text-amber-500" />
-          <AlertDescription className="text-foreground">
-            <span className="font-medium">{unknownDealsStats.count} deals</span> with unknown office assignment 
-            (${(unknownDealsStats.volume / 1000000).toFixed(2)}M volume) — mostly historical data from 2020-2021.
-          </AlertDescription>
-        </Alert>
-      )}
 
       {/* Filters */}
       <div className="glass-card p-6 mb-8 animate-fade-in">
