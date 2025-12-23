@@ -1,8 +1,9 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { MultiSelectFilter } from "@/components/dashboard/MultiSelectFilter";
 import { EditSalesRecordDialog } from "@/components/dashboard/EditSalesRecordDialog";
+import { SalespersonCard, SalespersonStats } from "@/components/dashboard/SalespersonCard";
 import { useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions";
-import { Loader2, Edit2, DollarSign, FileText, TrendingUp } from "lucide-react";
+import { Loader2, Edit2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { SalesCommission } from "@/types/sales";
@@ -27,6 +28,15 @@ export default function SalesByPersonPage() {
     return map;
   }, [salespeople]);
 
+  // Normalize office values to full names
+  const normalizeOffice = (office: string | null | undefined): string => {
+    if (!office) return "Unknown";
+    const lower = office.toLowerCase().trim();
+    if (lower === "h" || lower === "houston") return "Houston";
+    if (lower === "d" || lower === "dallas") return "Dallas";
+    return "Unknown";
+  };
+
   const filteredCommissions = useMemo(() => {
     if (!commissions) return [];
     if (selectedPeople.length === 0) return commissions;
@@ -39,19 +49,51 @@ export default function SalesByPersonPage() {
   }, [commissions, selectedPeople, salespeople]);
 
   const salespersonStats = useMemo(() => {
-    const stats: Record<string, { deals: number; volume: number; commissions: number }> = {};
+    const stats: Record<string, {
+      deals: number;
+      volume: number;
+      revisedVolume: number;
+      commissions: number;
+      totalFeePercentage: number;
+      totalCommissionPercentage: number;
+      totalSplitPercentage: number;
+      office: string;
+    }> = {};
     
     filteredCommissions.forEach((c) => {
       const name = c.salesperson_id ? salespeopleMap[c.salesperson_id] : "Unknown";
       if (!stats[name]) {
-        stats[name] = { deals: 0, volume: 0, commissions: 0 };
+        stats[name] = { 
+          deals: 0, 
+          volume: 0, 
+          revisedVolume: 0,
+          commissions: 0,
+          totalFeePercentage: 0,
+          totalCommissionPercentage: 0,
+          totalSplitPercentage: 0,
+          office: normalizeOffice(c.office),
+        };
       }
       stats[name].deals += 1;
       stats[name].volume += c.initial_estimate || 0;
+      stats[name].revisedVolume += c.revised_estimate || 0;
       stats[name].commissions += c.commissions_paid || 0;
+      stats[name].totalFeePercentage += c.fee_percentage || 0;
+      stats[name].totalCommissionPercentage += c.commission_percentage || 0;
+      stats[name].totalSplitPercentage += c.split_percentage || 100;
     });
     
-    return Object.entries(stats).map(([name, data]) => ({ name, ...data }));
+    return Object.entries(stats).map(([name, data]): SalespersonStats => ({
+      name,
+      office: data.office,
+      deals: data.deals,
+      volume: data.volume,
+      revisedVolume: data.revisedVolume,
+      commissions: data.commissions,
+      avgFeePercentage: data.deals > 0 ? data.totalFeePercentage / data.deals : 0,
+      avgCommissionPercentage: data.deals > 0 ? data.totalCommissionPercentage / data.deals : 0,
+      avgSplitPercentage: data.deals > 0 ? data.totalSplitPercentage / data.deals : 100,
+    })).sort((a, b) => b.commissions - a.commissions);
   }, [filteredCommissions, salespeopleMap]);
 
   const handleEdit = (record: SalesCommission) => {
@@ -100,42 +142,7 @@ export default function SalesByPersonPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
         {salespersonStats.map((stat, index) => (
-          <div
-            key={stat.name}
-            className="glass-card p-6 animate-fade-in"
-            style={{ animationDelay: `${index * 50}ms` }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-foreground">{stat.name}</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <FileText className="w-4 h-4" />
-                  <span className="text-sm">Deals</span>
-                </div>
-                <span className="text-foreground font-medium">{stat.deals}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="text-sm">Volume</span>
-                </div>
-                <span className="text-foreground font-medium">
-                  ${(stat.volume / 1000000).toFixed(2)}M
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <DollarSign className="w-4 h-4" />
-                  <span className="text-sm">Commissions</span>
-                </div>
-                <span className="text-primary font-medium">
-                  ${stat.commissions.toLocaleString()}
-                </span>
-              </div>
-            </div>
-          </div>
+          <SalespersonCard key={stat.name} stats={stat} delay={index * 50} />
         ))}
       </div>
 
@@ -151,6 +158,7 @@ export default function SalesByPersonPage() {
                 <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Office</th>
                 <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Initial Est.</th>
                 <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Revised Est.</th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Fee %</th>
                 <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Commission</th>
                 <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">Actions</th>
               </tr>
@@ -162,14 +170,15 @@ export default function SalesByPersonPage() {
                   <td className="py-3 px-4 text-foreground">
                     {record.salesperson_id ? salespeopleMap[record.salesperson_id] : "-"}
                   </td>
-                  <td className="py-3 px-4 text-foreground">
-                    {record.office === "H" ? "Houston" : record.office === "D" ? "Dallas" : record.office || "-"}
-                  </td>
+                  <td className="py-3 px-4 text-foreground">{normalizeOffice(record.office)}</td>
                   <td className="py-3 px-4 text-right text-foreground">
                     ${(record.initial_estimate || 0).toLocaleString()}
                   </td>
                   <td className="py-3 px-4 text-right text-foreground">
                     ${(record.revised_estimate || 0).toLocaleString()}
+                  </td>
+                  <td className="py-3 px-4 text-right text-foreground">
+                    {(record.fee_percentage || 0).toFixed(1)}%
                   </td>
                   <td className="py-3 px-4 text-right text-primary font-medium">
                     ${(record.commissions_paid || 0).toLocaleString()}
