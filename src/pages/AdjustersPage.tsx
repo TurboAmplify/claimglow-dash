@@ -1,11 +1,19 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { MultiSelectFilter } from "@/components/dashboard/MultiSelectFilter";
 import { EditAdjusterDialog } from "@/components/dashboard/EditAdjusterDialog";
+import { AdjusterCard } from "@/components/dashboard/AdjusterCard";
 import { useAdjusters, Adjuster } from "@/hooks/useAdjusters";
+import { useClaims, useAdjusterSummaries } from "@/hooks/useClaims";
+import { AdjusterSummary } from "@/types/claims";
 import { Loader2, Edit2, User, Building2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+interface MergedAdjuster {
+  adjuster: Adjuster;
+  summary: AdjusterSummary | null;
+}
 
 export default function AdjustersPage() {
   const [selectedAdjusters, setSelectedAdjusters] = useState<string[]>([]);
@@ -13,7 +21,25 @@ export default function AdjustersPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingAdjuster, setEditingAdjuster] = useState<Adjuster | null>(null);
 
-  const { data: adjusters, isLoading, error } = useAdjusters();
+  const { data: adjusters, isLoading: adjustersLoading, error: adjustersError } = useAdjusters();
+  const { data: claims, isLoading: claimsLoading } = useClaims();
+  const adjusterSummaries = useAdjusterSummaries(claims);
+
+  const isLoading = adjustersLoading || claimsLoading;
+
+  // Merge adjusters table with claims summaries
+  const mergedAdjusters = useMemo((): MergedAdjuster[] => {
+    if (!adjusters) return [];
+
+    return adjusters.map((adjuster) => {
+      // Find matching summary by name (case-insensitive, trim whitespace)
+      const summary = adjusterSummaries.find(
+        (s) => s.adjuster.toLowerCase().trim() === adjuster.name.toLowerCase().trim()
+      ) || null;
+
+      return { adjuster, summary };
+    });
+  }, [adjusters, adjusterSummaries]);
 
   const offices = useMemo(() => {
     if (!adjusters) return [];
@@ -26,19 +52,23 @@ export default function AdjustersPage() {
   }, [adjusters]);
 
   const filteredAdjusters = useMemo(() => {
-    if (!adjusters) return [];
-    let filtered = adjusters;
+    let filtered = mergedAdjusters;
 
     if (selectedOffices.length > 0) {
-      filtered = filtered.filter((a) => selectedOffices.includes(a.office));
+      filtered = filtered.filter((m) => selectedOffices.includes(m.adjuster.office));
     }
 
     if (selectedAdjusters.length > 0) {
-      filtered = filtered.filter((a) => selectedAdjusters.includes(a.name));
+      filtered = filtered.filter((m) => selectedAdjusters.includes(m.adjuster.name));
     }
 
-    return filtered;
-  }, [adjusters, selectedOffices, selectedAdjusters]);
+    // Sort by total claims descending, those without claims go to end
+    return filtered.sort((a, b) => {
+      const aTotal = a.summary?.totalClaims ?? -1;
+      const bTotal = b.summary?.totalClaims ?? -1;
+      return bTotal - aTotal;
+    });
+  }, [mergedAdjusters, selectedOffices, selectedAdjusters]);
 
   const handleEditAdjuster = (adjuster: Adjuster) => {
     setEditingAdjuster(adjuster);
@@ -58,7 +88,7 @@ export default function AdjustersPage() {
     );
   }
 
-  if (error) {
+  if (adjustersError) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -78,7 +108,7 @@ export default function AdjustersPage() {
           View by Adjuster
         </h1>
         <p className="text-muted-foreground">
-          All adjusters and their office assignments
+          All adjusters and their performance metrics
         </p>
       </div>
 
@@ -104,13 +134,23 @@ export default function AdjustersPage() {
 
       {/* Adjuster Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredAdjusters.map((adjuster, index) => (
-          <AdjusterSimpleCard
-            key={adjuster.id}
-            adjuster={adjuster}
-            delay={index * 50}
-            onEdit={() => handleEditAdjuster(adjuster)}
-          />
+        {filteredAdjusters.map((merged, index) => (
+          merged.summary ? (
+            <AdjusterCardWithEdit
+              key={merged.adjuster.id}
+              summary={merged.summary}
+              adjuster={merged.adjuster}
+              delay={index * 50}
+              onEdit={() => handleEditAdjuster(merged.adjuster)}
+            />
+          ) : (
+            <AdjusterSimpleCard
+              key={merged.adjuster.id}
+              adjuster={merged.adjuster}
+              delay={index * 50}
+              onEdit={() => handleEditAdjuster(merged.adjuster)}
+            />
+          )
         ))}
       </div>
 
@@ -130,6 +170,31 @@ export default function AdjustersPage() {
   );
 }
 
+// Wrapper for AdjusterCard with edit button overlay
+interface AdjusterCardWithEditProps {
+  summary: AdjusterSummary;
+  adjuster: Adjuster;
+  delay?: number;
+  onEdit: () => void;
+}
+
+function AdjusterCardWithEdit({ summary, adjuster, delay = 0, onEdit }: AdjusterCardWithEditProps) {
+  return (
+    <div className="relative group">
+      <AdjusterCard summary={summary} delay={delay} />
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onEdit}
+        className="absolute top-4 right-4 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-secondary/80 hover:bg-secondary z-10"
+      >
+        <Edit2 className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+}
+
+// Simple card for adjusters without claims data
 interface AdjusterSimpleCardProps {
   adjuster: Adjuster;
   delay?: number;
@@ -201,6 +266,7 @@ function AdjusterSimpleCard({ adjuster, delay = 0, onEdit }: AdjusterSimpleCardP
             <Building2 className="w-3 h-3" />
             <span>{adjuster.office}</span>
           </div>
+          <p className="text-xs text-muted-foreground mt-1">No claims data</p>
         </div>
       </div>
     </div>
