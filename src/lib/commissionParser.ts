@@ -57,23 +57,29 @@ export async function parseCommissionExcel(url: string): Promise<SheetData[]> {
     
     const headers = jsonData[0]?.map((h: any) => String(h || '').trim().toLowerCase()) || [];
     
-    // Find column indices based on headers - improved matching
+    // Find column indices based on headers - improved matching with null safety
     const colMap = {
-      clientName: headers.findIndex(h => h === 'name' || h.includes('client')),
-      adjuster: headers.findIndex(h => h === 'adjuster' || (h.includes('adjuster') && !h.includes('%'))),
-      office: headers.findIndex(h => h === 'city' || h.includes('city') || h.includes('office')),
-      percentDiff: headers.findIndex(h => (h.includes('plus') && h.includes('minus')) || (h.includes('%') && h.includes('diff'))),
-      dateSigned: headers.findIndex(h => h.includes('date') && h.includes('signed')),
-      initialEstimate: headers.findIndex(h => h === 'estimate of loss' || h === 'initial est. of loss' || (h.includes('estimate') && !h.includes('revised'))),
-      revisedEstimate: headers.findIndex(h => h.includes('revised')),
-      insuranceChecks: headers.findIndex(h => h.includes('ins.') && h.includes('check') || h.includes('insurance')),
-      oldRemainder: headers.findIndex(h => h.includes('old') && h.includes('remainder')),
-      newRemainder: headers.findIndex(h => h.includes('new') && h.includes('remainder')),
+      clientName: headers.findIndex(h => h === 'name' || (h && h.includes('client'))),
+      adjuster: headers.findIndex(h => h === 'adjuster' || (h && h.includes('adjuster') && !h.includes('%'))),
+      office: headers.findIndex(h => h === 'city' || (h && (h.includes('city') || h.includes('office')))),
+      percentDiff: headers.findIndex(h => h && ((h.includes('plus') && h.includes('minus')) || (h.includes('%') && h.includes('diff')))),
+      dateSigned: headers.findIndex(h => h && h.includes('date') && h.includes('signed')),
+      initialEstimate: headers.findIndex(h => h === 'estimate of loss' || h === 'initial est. of loss' || (h && h.includes('estimate') && !h.includes('revised'))),
+      revisedEstimate: headers.findIndex(h => h && h.includes('revised')),
+      insuranceChecks: headers.findIndex(h => h && ((h.includes('ins.') && h.includes('check')) || h.includes('insurance'))),
+      oldRemainder: headers.findIndex(h => h && h.includes('old') && h.includes('remainder')),
+      newRemainder: headers.findIndex(h => h && h.includes('new') && h.includes('remainder')),
       splitPercentage: headers.findIndex(h => h === 'split'),
-      feePercentage: headers.findIndex(h => h === 'fee' || (h.includes('fee') && !h.includes('check'))),
-      commissionPercentage: headers.findIndex(h => h === 'percent' || (h.includes('percent') && !h.includes('commission'))),
-      commissionsPaid: headers.findIndex(h => h === 'payed' || h === 'paid' || (h.includes('paid') && !h.includes('remaining'))),
+      feePercentage: headers.findIndex(h => h === 'fee' || (h && h.includes('fee') && !h.includes('check'))),
+      commissionPercentage: headers.findIndex(h => h === 'percent' || (h && h.includes('percent') && !h.includes('commission'))),
+      commissionsPaid: headers.findIndex(h => h === 'payed' || h === 'paid' || (h && h.includes('paid') && !h.includes('remaining'))),
     };
+    
+    // Skip sheets that don't have required columns
+    if (colMap.clientName === -1) {
+      console.log(`Skipping sheet ${sheetName}: no client name column found`);
+      continue;
+    }
     
     console.log(`Column mapping for ${sheetName}:`, colMap, 'Headers:', headers);
     
