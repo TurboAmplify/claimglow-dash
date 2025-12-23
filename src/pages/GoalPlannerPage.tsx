@@ -10,6 +10,7 @@ import { TeamMemberGoalCard } from "@/components/goals/TeamMemberGoalCard";
 import { TeamAggregateView } from "@/components/goals/TeamAggregateView";
 import { DirectorDashboard } from "@/components/goals/DirectorDashboard";
 import { AddTeamMemberDialog } from "@/components/goals/AddTeamMemberDialog";
+import { ValuesSection } from "@/components/goals/ValuesSection";
 import { useGoalScenarios } from "@/hooks/useGoalScenarios";
 import { useSalesDirector, useTeamMembers } from "@/hooks/useTeamMembers";
 import { useSalesGoals, useTeamGoals } from "@/hooks/useSalesGoals";
@@ -125,6 +126,11 @@ export default function GoalPlannerPage() {
 
   return (
     <DashboardLayout>
+      {/* Values Section at the top */}
+      <div className="mb-6">
+        <ValuesSection />
+      </div>
+
       <div className="mb-6 animate-fade-in">
         <h1 className="text-3xl font-bold text-foreground mb-2">Goal Planner</h1>
         <p className="text-muted-foreground">
