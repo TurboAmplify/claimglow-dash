@@ -171,19 +171,19 @@ export default function AllSalesPage() {
 
       {/* Records Table */}
       <div className="glass-card p-6 animate-fade-in">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
           <table className="w-full">
-            <thead>
+            <thead className="sticky top-0 z-10 bg-card">
               <tr className="border-b border-glass-border/30">
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Year</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Client</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Salesperson</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Office</th>
-                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Adjuster</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Initial Est.</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Revised Est.</th>
-                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Commission</th>
-                <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">Actions</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground bg-card">Year</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground bg-card">Client</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground bg-card">Salesperson</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground bg-card">Office</th>
+                <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground bg-card">Adjuster</th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground bg-card">Initial Est.</th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground bg-card">Revised Est.</th>
+                <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground bg-card">Commission</th>
+                <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground bg-card">Actions</th>
               </tr>
             </thead>
             <tbody>
