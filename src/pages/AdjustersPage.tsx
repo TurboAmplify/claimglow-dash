@@ -1,46 +1,47 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
-import { AdjusterCard } from "@/components/dashboard/AdjusterCard";
-import { ClaimsTable } from "@/components/dashboard/ClaimsTable";
 import { MultiSelectFilter } from "@/components/dashboard/MultiSelectFilter";
 import { EditAdjusterDialog } from "@/components/dashboard/EditAdjusterDialog";
-import { useClaims, useAdjusterSummaries } from "@/hooks/useClaims";
-import { Loader2, X, Edit2 } from "lucide-react";
+import { useAdjusters, Adjuster } from "@/hooks/useAdjusters";
+import { Loader2, Edit2, User, Building2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function AdjustersPage() {
   const [selectedAdjusters, setSelectedAdjusters] = useState<string[]>([]);
   const [selectedOffices, setSelectedOffices] = useState<string[]>([]);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingAdjuster, setEditingAdjuster] = useState<{ name: string; office: string } | null>(null);
-  
-  const { data: claims, isLoading, error } = useClaims();
-  const adjusterSummaries = useAdjusterSummaries(claims);
+  const [editingAdjuster, setEditingAdjuster] = useState<Adjuster | null>(null);
+
+  const { data: adjusters, isLoading, error } = useAdjusters();
 
   const offices = useMemo(() => {
-    return [...new Set(adjusterSummaries.map((a) => a.office).filter(Boolean))] as string[];
-  }, [adjusterSummaries]);
+    if (!adjusters) return [];
+    return [...new Set(adjusters.map((a) => a.office).filter(Boolean))];
+  }, [adjusters]);
 
-  const adjusters = useMemo(() => {
-    return adjusterSummaries.map((a) => a.adjuster);
-  }, [adjusterSummaries]);
+  const adjusterNames = useMemo(() => {
+    if (!adjusters) return [];
+    return adjusters.map((a) => a.name);
+  }, [adjusters]);
 
-  const filteredSummaries = useMemo(() => {
-    let filtered = adjusterSummaries;
-    
+  const filteredAdjusters = useMemo(() => {
+    if (!adjusters) return [];
+    let filtered = adjusters;
+
     if (selectedOffices.length > 0) {
-      filtered = filtered.filter((a) => a.office && selectedOffices.includes(a.office));
+      filtered = filtered.filter((a) => selectedOffices.includes(a.office));
     }
-    
-    if (selectedAdjusters.length > 0) {
-      filtered = filtered.filter((a) => selectedAdjusters.includes(a.adjuster));
-    }
-    
-    return filtered;
-  }, [adjusterSummaries, selectedOffices, selectedAdjusters]);
 
-  const handleEditAdjuster = (adjuster: string, office: string) => {
-    setEditingAdjuster({ name: adjuster, office });
+    if (selectedAdjusters.length > 0) {
+      filtered = filtered.filter((a) => selectedAdjusters.includes(a.name));
+    }
+
+    return filtered;
+  }, [adjusters, selectedOffices, selectedAdjusters]);
+
+  const handleEditAdjuster = (adjuster: Adjuster) => {
+    setEditingAdjuster(adjuster);
     setEditDialogOpen(true);
   };
 
@@ -77,7 +78,7 @@ export default function AdjustersPage() {
           View by Adjuster
         </h1>
         <p className="text-muted-foreground">
-          Individual adjuster performance and claims
+          All adjusters and their office assignments
         </p>
       </div>
 
@@ -86,7 +87,7 @@ export default function AdjustersPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <MultiSelectFilter
             label="Filter by Adjuster"
-            options={adjusters}
+            options={adjusterNames}
             selected={selectedAdjusters}
             onChange={setSelectedAdjusters}
             placeholder="Select adjusters..."
@@ -103,25 +104,17 @@ export default function AdjustersPage() {
 
       {/* Adjuster Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredSummaries.map((summary, index) => (
-          <div key={summary.adjuster} className="relative group">
-            <AdjusterCard
-              summary={summary}
-              delay={index * 50}
-            />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleEditAdjuster(summary.adjuster, summary.office || "")}
-              className="absolute top-4 right-4 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-secondary/80 hover:bg-secondary"
-            >
-              <Edit2 className="h-4 w-4" />
-            </Button>
-          </div>
+        {filteredAdjusters.map((adjuster, index) => (
+          <AdjusterSimpleCard
+            key={adjuster.id}
+            adjuster={adjuster}
+            delay={index * 50}
+            onEdit={() => handleEditAdjuster(adjuster)}
+          />
         ))}
       </div>
 
-      {filteredSummaries.length === 0 && (
+      {filteredAdjusters.length === 0 && (
         <div className="glass-card p-12 text-center animate-fade-in">
           <p className="text-muted-foreground">No adjusters found matching filters.</p>
         </div>
@@ -134,5 +127,82 @@ export default function AdjustersPage() {
         offices={offices}
       />
     </DashboardLayout>
+  );
+}
+
+interface AdjusterSimpleCardProps {
+  adjuster: Adjuster;
+  delay?: number;
+  onEdit: () => void;
+}
+
+function AdjusterSimpleCard({ adjuster, delay = 0, onEdit }: AdjusterSimpleCardProps) {
+  const isHouston = adjuster.office?.toLowerCase() === "houston";
+  const isDallas = adjuster.office?.toLowerCase() === "dallas";
+
+  const getOfficeStyles = () => {
+    if (isHouston) {
+      return {
+        cardBg: "bg-blue-950/40",
+        borderColor: "border-l-blue-500",
+        officeBadge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+        iconBg: "bg-blue-500/20",
+        iconColor: "text-blue-400",
+      };
+    }
+    if (isDallas) {
+      return {
+        cardBg: "bg-cyan-950/30",
+        borderColor: "border-l-cyan-400",
+        officeBadge: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+        iconBg: "bg-cyan-500/20",
+        iconColor: "text-cyan-400",
+      };
+    }
+    return {
+      cardBg: "bg-secondary/30",
+      borderColor: "border-l-muted-foreground",
+      officeBadge: "bg-muted/20 text-muted-foreground border-muted/30",
+      iconBg: "bg-muted/20",
+      iconColor: "text-muted-foreground",
+    };
+  };
+
+  const styles = getOfficeStyles();
+
+  return (
+    <div
+      className={cn(
+        "glass-card p-5 transition-all duration-300 animate-fade-in border-l-4 relative group",
+        styles.cardBg,
+        styles.borderColor
+      )}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onEdit}
+        className="absolute top-4 right-4 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-secondary/80 hover:bg-secondary"
+      >
+        <Edit2 className="h-4 w-4" />
+      </Button>
+
+      <div className="flex items-center gap-3">
+        <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", styles.iconBg)}>
+          <User className={cn("w-6 h-6", styles.iconColor)} />
+        </div>
+        <div>
+          <h3 className="font-semibold text-foreground">{adjuster.name}</h3>
+          <div className={cn(
+            "flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border mt-1",
+            styles.officeBadge
+          )}>
+            <Building2 className="w-3 h-3" />
+            <span>{adjuster.office}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
