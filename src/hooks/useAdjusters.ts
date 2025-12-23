@@ -45,3 +45,22 @@ export function useUpdateAdjuster() {
     },
   });
 }
+
+export function useDeleteAdjuster() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("adjusters")
+        .update({ is_active: false })
+        .eq("id", id);
+
+      if (error) throw error;
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adjusters"] });
+    },
+  });
+}
