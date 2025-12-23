@@ -26,7 +26,7 @@ export default function ImportCommissionsPage() {
     try {
       setLoading(true);
       setError(null);
-      const data = await parseCommissionExcel('/data/Commission_3.xlsx');
+      const data = await parseCommissionExcel('/data/Commission_3_1.xlsx');
       
       const summary = data.map(d => ({ year: d.year, count: d.rows.length }));
       setYearData(summary);
@@ -58,7 +58,7 @@ export default function ImportCommissionsPage() {
       if (!mattAldrich) throw new Error('Matt Aldrich not found in salespeople');
 
       // Parse the data again for import
-      const data = await parseCommissionExcel('/data/Commission_3.xlsx');
+      const data = await parseCommissionExcel('/data/Commission_3_1.xlsx');
       
       // Delete existing commissions for this salesperson
       const { error: deleteError } = await supabase
@@ -129,7 +129,7 @@ export default function ImportCommissionsPage() {
           Import Commission Data
         </h1>
         <p className="text-muted-foreground">
-          Import sales commission data from Commission_3.xlsx (2020-2025)
+          Import sales commission data from Commission_3_1.xlsx (2020-2025)
         </p>
       </div>
 
@@ -202,7 +202,7 @@ export default function ImportCommissionsPage() {
             <h3 className="text-lg font-semibold text-foreground mb-4">Import Details</h3>
             <div className="space-y-2 text-muted-foreground">
               <p><strong>Salesperson:</strong> Matt Aldrich</p>
-              <p><strong>Data Source:</strong> Commission_3.xlsx</p>
+              <p><strong>Data Source:</strong> Commission_3_1.xlsx</p>
               <p><strong>Total Records:</strong> {totalRows}</p>
               <p><strong>Years Covered:</strong> {yearData.length} years (2020-2025)</p>
             </div>
