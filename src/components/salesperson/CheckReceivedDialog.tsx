@@ -56,11 +56,22 @@ export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceive
       const revisedEstimate = record.revised_estimate || 0;
       const newRemainder = Math.max(0, revisedEstimate - newTotal);
 
+      // Calculate commission earned from this check
+      const feePercent = (record.fee_percentage || 0) / 100;
+      const commissionPercent = (record.commission_percentage || 0) / 100;
+      const splitPercent = (record.split_percentage || 100) / 100;
+      const commissionFromCheck = amount * feePercent * commissionPercent * splitPercent;
+      
+      // Update commissions paid
+      const currentCommissionsPaid = record.commissions_paid || 0;
+      const newCommissionsPaid = currentCommissionsPaid + commissionFromCheck;
+
       const { error } = await supabase
         .from("sales_commissions")
         .update({
           insurance_checks_ytd: newTotal,
           new_remainder: newRemainder,
+          commissions_paid: newCommissionsPaid,
           updated_at: new Date().toISOString(),
         })
         .eq("id", record.id);
@@ -69,7 +80,7 @@ export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceive
 
       toast({
         title: "Check recorded",
-        description: `Added ${formatCurrency(amount)} to ${record.client_name}. New total: ${formatCurrency(newTotal)}`,
+        description: `Added ${formatCurrency(amount)} to ${record.client_name}. Commission earned: ${formatCurrency(commissionFromCheck)}`,
       });
 
       queryClient.invalidateQueries({ queryKey: ["sales_commissions"] });
@@ -160,25 +171,46 @@ export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceive
           </div>
 
           {/* Preview */}
-          {checkAmount && (
-            <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-              <p className="text-sm text-muted-foreground">After recording:</p>
-              <div className="flex justify-between mt-1">
-                <span className="text-foreground">New Total Checks:</span>
-                <span className="font-bold text-primary">
-                  {formatCurrency((record.insurance_checks_ytd || 0) + parseFloat(checkAmount || "0"))}
-                </span>
+          {checkAmount && (() => {
+            const amount = parseFloat(checkAmount) || 0;
+            const newTotalChecks = (record.insurance_checks_ytd || 0) + amount;
+            const newRemainder = Math.max(0, (record.revised_estimate || 0) - newTotalChecks);
+            const feePercent = (record.fee_percentage || 0) / 100;
+            const commissionPercent = (record.commission_percentage || 0) / 100;
+            const splitPercent = (record.split_percentage || 100) / 100;
+            const commissionFromCheck = amount * feePercent * commissionPercent * splitPercent;
+            const newTotalCommission = (record.commissions_paid || 0) + commissionFromCheck;
+            
+            return (
+              <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 space-y-1">
+                <p className="text-sm text-muted-foreground">After recording:</p>
+                <div className="flex justify-between">
+                  <span className="text-foreground">New Total Checks:</span>
+                  <span className="font-bold text-primary">
+                    {formatCurrency(newTotalChecks)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-foreground">New Remainder:</span>
+                  <span className="font-medium">
+                    {formatCurrency(newRemainder)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-foreground">Commission from Check:</span>
+                  <span className="font-medium text-green-600">
+                    +{formatCurrency(commissionFromCheck)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-foreground">New Total Commission:</span>
+                  <span className="font-bold text-primary">
+                    {formatCurrency(newTotalCommission)}
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between mt-1">
-                <span className="text-foreground">New Remainder:</span>
-                <span className="font-medium">
-                  {formatCurrency(
-                    Math.max(0, (record.revised_estimate || 0) - ((record.insurance_checks_ytd || 0) + parseFloat(checkAmount || "0")))
-                  )}
-                </span>
-              </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Notes */}
           <div className="space-y-2">
