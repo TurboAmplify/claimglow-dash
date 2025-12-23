@@ -5,14 +5,14 @@ import { AdjusterCard } from "@/components/dashboard/AdjusterCard";
 import { useAdjusters, Adjuster } from "@/hooks/useAdjusters";
 import { useClaims, useAdjusterSummaries } from "@/hooks/useClaims";
 import { AdjusterSummary } from "@/types/claims";
-import { Loader2, Edit2, User, Building2 } from "lucide-react";
+import { Loader2, Edit2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+
 
 interface MergedAdjuster {
   adjuster: Adjuster;
-  summary: AdjusterSummary | null;
+  summary: AdjusterSummary;
 }
 
 export default function AdjustersPage() {
@@ -33,9 +33,25 @@ export default function AdjustersPage() {
 
     return adjusters.map((adjuster) => {
       // Find matching summary by name (case-insensitive, trim whitespace)
-      const summary = adjusterSummaries.find(
+      const existingSummary = adjusterSummaries.find(
         (s) => s.adjuster.toLowerCase().trim() === adjuster.name.toLowerCase().trim()
-      ) || null;
+      );
+
+      // Create a default summary with zeros if no claims data exists
+      const summary: AdjusterSummary = existingSummary || {
+        adjuster: adjuster.name,
+        office: adjuster.office,
+        totalClaims: 0,
+        positiveClaims: 0,
+        negativeClaims: 0,
+        totalDollarDifference: 0,
+        positiveDifference: 0,
+        negativeDifference: 0,
+        avgPercentChange: 0,
+        totalEstimate: 0,
+        totalRevised: 0,
+        claims: [],
+      };
 
       return { adjuster, summary };
     });
@@ -135,22 +151,13 @@ export default function AdjustersPage() {
       {/* Adjuster Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredAdjusters.map((merged, index) => (
-          merged.summary ? (
-            <AdjusterCardWithEdit
-              key={merged.adjuster.id}
-              summary={merged.summary}
-              adjuster={merged.adjuster}
-              delay={index * 50}
-              onEdit={() => handleEditAdjuster(merged.adjuster)}
-            />
-          ) : (
-            <AdjusterSimpleCard
-              key={merged.adjuster.id}
-              adjuster={merged.adjuster}
-              delay={index * 50}
-              onEdit={() => handleEditAdjuster(merged.adjuster)}
-            />
-          )
+          <AdjusterCardWithEdit
+            key={merged.adjuster.id}
+            summary={merged.summary}
+            adjuster={merged.adjuster}
+            delay={index * 50}
+            onEdit={() => handleEditAdjuster(merged.adjuster)}
+          />
         ))}
       </div>
 
@@ -194,81 +201,3 @@ function AdjusterCardWithEdit({ summary, adjuster, delay = 0, onEdit }: Adjuster
   );
 }
 
-// Simple card for adjusters without claims data
-interface AdjusterSimpleCardProps {
-  adjuster: Adjuster;
-  delay?: number;
-  onEdit: () => void;
-}
-
-function AdjusterSimpleCard({ adjuster, delay = 0, onEdit }: AdjusterSimpleCardProps) {
-  const isHouston = adjuster.office?.toLowerCase() === "houston";
-  const isDallas = adjuster.office?.toLowerCase() === "dallas";
-
-  const getOfficeStyles = () => {
-    if (isHouston) {
-      return {
-        cardBg: "bg-blue-950/40",
-        borderColor: "border-l-blue-500",
-        officeBadge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-        iconBg: "bg-blue-500/20",
-        iconColor: "text-blue-400",
-      };
-    }
-    if (isDallas) {
-      return {
-        cardBg: "bg-cyan-950/30",
-        borderColor: "border-l-cyan-400",
-        officeBadge: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
-        iconBg: "bg-cyan-500/20",
-        iconColor: "text-cyan-400",
-      };
-    }
-    return {
-      cardBg: "bg-secondary/30",
-      borderColor: "border-l-muted-foreground",
-      officeBadge: "bg-muted/20 text-muted-foreground border-muted/30",
-      iconBg: "bg-muted/20",
-      iconColor: "text-muted-foreground",
-    };
-  };
-
-  const styles = getOfficeStyles();
-
-  return (
-    <div
-      className={cn(
-        "glass-card p-5 transition-all duration-300 animate-fade-in border-l-4 relative group",
-        styles.cardBg,
-        styles.borderColor
-      )}
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onEdit}
-        className="absolute top-4 right-4 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-secondary/80 hover:bg-secondary"
-      >
-        <Edit2 className="h-4 w-4" />
-      </Button>
-
-      <div className="flex items-center gap-3">
-        <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", styles.iconBg)}>
-          <User className={cn("w-6 h-6", styles.iconColor)} />
-        </div>
-        <div>
-          <h3 className="font-semibold text-foreground">{adjuster.name}</h3>
-          <div className={cn(
-            "flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border mt-1",
-            styles.officeBadge
-          )}>
-            <Building2 className="w-3 h-3" />
-            <span>{adjuster.office}</span>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">No claims data</p>
-        </div>
-      </div>
-    </div>
-  );
-}
