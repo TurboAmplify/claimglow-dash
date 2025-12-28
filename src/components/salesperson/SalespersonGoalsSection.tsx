@@ -29,7 +29,7 @@ export function SalespersonGoalsSection({
   salespersonName,
   currentStats 
 }: SalespersonGoalsSectionProps) {
-  const currentYear = new Date().getFullYear();
+  const currentYear = 2026; // Planning year for 2026 goals
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [isEditing, setIsEditing] = useState(false);
   const [targetRevenue, setTargetRevenue] = useState("");

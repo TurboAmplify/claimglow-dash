@@ -19,7 +19,7 @@ import { useMemo, useEffect } from "react";
 export default function SalespersonDashboardPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const currentYear = new Date().getFullYear();
+  const currentYear = 2026; // Planning year for 2026 goals
 
   const { data: salespeople, isLoading: loadingSalespeople } = useSalespeople();
   const { data: commissions, isLoading: loadingCommissions } = useSalesCommissions(id);
