@@ -1,7 +1,8 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useYearSummaries, useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions";
 import { useMemo, useState, useEffect } from "react";
-import { Loader2, Target, TrendingUp, BarChart3, Calendar, Map as MapIcon, Layers, Compass, Save, Activity, Users, ShieldAlert } from "lucide-react";
+import { Loader2, Target, TrendingUp, BarChart3, Calendar, Map as MapIcon, Layers, Compass, Save, Activity, Users, ShieldAlert, Send } from "lucide-react";
+import { usePlanApproval } from "@/hooks/usePlanApproval";
 import { ValuesSection } from "@/components/goals/ValuesSection";
 import { PlanCreator } from "@/components/planning/PlanCreator";
 import { ScenarioCard } from "@/components/planning/ScenarioCard";
@@ -106,6 +107,9 @@ export default function SalesPlanningPage() {
 
   const { plan, savePlan, isSaving, isLoading: loadingPlan } = useSalesPlan(salespersonId, currentYear);
 
+  // Get director ID for notifications - defined early so it can be used in handleSubmitForReview
+  const directorId = salespeople?.find(sp => sp.role === "sales_director")?.id;
+
   // Load saved plan on mount, or initialize from goals if no plan exists
   useEffect(() => {
     if (plan) {
@@ -162,6 +166,8 @@ export default function SalesPlanningPage() {
     return { totalVolume, totalDeals, totalCommission, monthlyBreakdown };
   }, [commissions, currentYear]);
 
+  const { submitForApproval, isSubmitting } = usePlanApproval();
+
   const handleSavePlan = () => {
     if (!salespersonId) return;
     
@@ -175,6 +181,22 @@ export default function SalesPlanningPage() {
       selected_scenario: selectedScenarioId,
     });
   };
+
+  const handleSubmitForReview = () => {
+    if (!plan || !salespersonId || !directorId) return;
+    submitForApproval({
+      planId: plan.id,
+      senderId: salespersonId,
+      directorId,
+    });
+  };
+
+  const canSubmitForReview = plan && 
+    plan.approval_status !== 'pending' && 
+    plan.approval_status !== 'pending_approval' && 
+    plan.approval_status !== 'approved' &&
+    directorId &&
+    !isDirector; // Directors shouldn't submit to themselves
 
   const formatCurrency = (value: number) => {
     if (value >= 1000000) {
@@ -238,9 +260,6 @@ export default function SalesPlanningPage() {
   }, [yearSummaries]);
 
   const isLoading = loadingSalespeople || loadingCommissions || loadingSummaries || loadingPlan || loadingCurrentUser || (isTeamView && loadingTeamMetrics) || loadingIndividualGoals;
-
-  // Get director ID for notifications
-  const directorId = salespeople?.find(sp => sp.role === "sales_director")?.id;
 
   if (isLoading) {
     return (
@@ -402,14 +421,27 @@ export default function SalesPlanningPage() {
             </TabsTrigger>
           </TabsList>
 
-          <Button 
-            onClick={handleSavePlan} 
-            disabled={isSaving || isTeamView || !salespersonId}
-            className="gap-2"
-          >
-            <Save className="w-4 h-4" />
-            {isSaving ? "Saving..." : plan ? "Update Plan" : "Save Plan"}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleSavePlan} 
+              disabled={isSaving || isTeamView || !salespersonId}
+              className="gap-2"
+            >
+              <Save className="w-4 h-4" />
+              {isSaving ? "Saving..." : plan ? "Update Plan" : "Save Plan"}
+            </Button>
+            {canSubmitForReview && (
+              <Button 
+                onClick={handleSubmitForReview} 
+                disabled={isSubmitting}
+                variant="outline"
+                className="gap-2 border-primary text-primary hover:bg-primary/10"
+              >
+                <Send className="w-4 h-4" />
+                {isSubmitting ? "Submitting..." : "Submit for Review"}
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Plan Tab */}
