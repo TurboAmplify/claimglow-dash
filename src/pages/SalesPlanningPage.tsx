@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useYearSummaries, useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions";
 import { useMemo, useState, useEffect } from "react";
-import { Loader2, Target, TrendingUp, BarChart3, Calendar, Map as MapIcon, Layers, Compass, Save, Activity } from "lucide-react";
+import { Loader2, Target, TrendingUp, BarChart3, Calendar, Map as MapIcon, Layers, Compass, Save, Activity, Users } from "lucide-react";
 import { ValuesSection } from "@/components/goals/ValuesSection";
 import { PlanCreator } from "@/components/planning/PlanCreator";
 import { ScenarioCard } from "@/components/planning/ScenarioCard";
@@ -12,10 +12,11 @@ import { ProgressTracker } from "@/components/planning/ProgressTracker";
 import { WeeklyDealsTracker } from "@/components/planning/WeeklyDealsTracker";
 import { DealPipeline } from "@/components/planning/DealPipeline";
 import { PendingApprovalsPanel } from "@/components/planning/PendingApprovalsPanel";
-import { SalespersonSelector } from "@/components/planning/SalespersonSelector";
+import { TeamMemberFilter, TeamMemberSelection } from "@/components/planning/TeamMemberFilter";
 import { usePlanScenarios } from "@/hooks/usePlanScenarios";
 import { useRoadmapAnalysis } from "@/hooks/useRoadmapAnalysis";
 import { useSalesPlan } from "@/hooks/useSalesPlan";
+import { useTeamMetrics } from "@/hooks/useTeamMetrics";
 import { useProgressAlerts } from "@/hooks/useProgressAlerts";
 import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -37,19 +38,37 @@ export default function SalesPlanningPage() {
   const { salesperson: currentUser, isDirector, isLoading: loadingCurrentUser } = useCurrentSalesperson();
   const { data: salespeople, isLoading: loadingSalespeople } = useSalespeople();
   
-  // For directors, allow selecting any salesperson; for reps, use their own ID
-  const [selectedSalespersonId, setSelectedSalespersonId] = useState<string | undefined>(undefined);
+  // Team member selection state for directors
+  const [teamSelection, setTeamSelection] = useState<TeamMemberSelection>({
+    mode: "individual",
+    selectedIds: [],
+  });
   
   // Set initial selection once data loads
   useEffect(() => {
-    if (currentUser && !selectedSalespersonId) {
-      setSelectedSalespersonId(currentUser.id);
+    if (currentUser && teamSelection.selectedIds.length === 0) {
+      setTeamSelection({
+        mode: "individual",
+        selectedIds: [currentUser.id],
+      });
     }
-  }, [currentUser, selectedSalespersonId]);
+  }, [currentUser, teamSelection.selectedIds.length]);
 
-  const salespersonId = selectedSalespersonId;
+  // Determine view mode and get display name
+  const isTeamView = teamSelection.mode === "team" || teamSelection.selectedIds.length > 1;
+  const salespersonId = teamSelection.selectedIds.length === 1 ? teamSelection.selectedIds[0] : undefined;
   const selectedSalesperson = salespeople?.find(sp => sp.id === salespersonId);
-  const salespersonName = selectedSalesperson?.name || 'Salesperson';
+  
+  const salespersonName = useMemo(() => {
+    if (teamSelection.mode === "team") return "Entire Team";
+    if (teamSelection.selectedIds.length > 1) {
+      return `${teamSelection.selectedIds.length} Team Members`;
+    }
+    return selectedSalesperson?.name || "Salesperson";
+  }, [teamSelection, selectedSalesperson]);
+
+  // Fetch team metrics when viewing team or multiple members
+  const { metrics: teamMetrics, isLoading: loadingTeamMetrics } = useTeamMetrics(teamSelection, currentYear);
   
   const { data: commissions, isLoading: loadingCommissions } = useSalesCommissions(salespersonId);
   const { data: yearSummaries, isLoading: loadingSummaries } = useYearSummaries(salespersonId);
@@ -195,7 +214,7 @@ export default function SalesPlanningPage() {
     };
   }, [yearSummaries]);
 
-  const isLoading = loadingSalespeople || loadingCommissions || loadingSummaries || loadingPlan || loadingCurrentUser;
+  const isLoading = loadingSalespeople || loadingCommissions || loadingSummaries || loadingPlan || loadingCurrentUser || (isTeamView && loadingTeamMetrics);
 
   // Get director ID for notifications
   const directorId = salespeople?.find(sp => sp.role === "sales_director")?.id;
@@ -227,29 +246,18 @@ export default function SalesPlanningPage() {
         <ValuesSection />
       </div>
 
-      {/* Header with Salesperson Selector */}
+      {/* Header */}
       <div className="mb-6 animate-fade-in">
-        <div className="flex items-center justify-between gap-4 mb-2">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/20">
-              <MapIcon className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Sales Planning {currentYear}</h1>
-              <p className="text-muted-foreground">
-                {salespersonName} — Create your annual plan and choose your path to success
-              </p>
-            </div>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 rounded-lg bg-primary/20">
+            <MapIcon className="w-6 h-6 text-primary" />
           </div>
-          
-          {/* Salesperson Selector for Directors */}
-          {isDirector && (
-            <SalespersonSelector
-              selectedId={selectedSalespersonId}
-              onSelect={setSelectedSalespersonId}
-              showTeamOption
-            />
-          )}
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Sales Planning {currentYear}</h1>
+            <p className="text-muted-foreground">
+              {salespersonName} — Create your annual plan and choose your path to success
+            </p>
+          </div>
         </div>
         
         {/* Target Reference */}
@@ -300,7 +308,7 @@ export default function SalesPlanningPage() {
 
           <Button 
             onClick={handleSavePlan} 
-            disabled={isSaving || !salespersonId}
+            disabled={isSaving || isTeamView || !salespersonId}
             className="gap-2"
           >
             <Save className="w-4 h-4" />
@@ -308,13 +316,74 @@ export default function SalesPlanningPage() {
           </Button>
         </div>
 
-        {/* Your Plan Tab */}
+        {/* Plan Tab */}
         <TabsContent value="plan" className="space-y-6">
-          <PlanCreator 
-            planInputs={planInputs}
-            updatePlanInput={updatePlanInput}
-            formatCurrency={formatCurrency}
-          />
+          {/* Team Member Selection - Always visible in Plan tab */}
+          <div className="glass-card p-6 animate-fade-in">
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="flex-shrink-0 md:w-72">
+                <TeamMemberFilter
+                  selection={teamSelection}
+                  onSelectionChange={setTeamSelection}
+                />
+              </div>
+              
+              {/* Team Metrics Summary when viewing team/multiple members */}
+              {isTeamView && (
+                <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
+                    <p className="text-xs text-muted-foreground">Team Members</p>
+                    <p className="text-2xl font-bold text-foreground flex items-center gap-2">
+                      <Users className="w-5 h-5 text-primary" />
+                      {teamMetrics.memberCount}
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-secondary/30">
+                    <p className="text-xs text-muted-foreground">Combined Target</p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {formatCurrency(teamMetrics.totalTargetRevenue)}
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-secondary/30">
+                    <p className="text-xs text-muted-foreground">Team Deals YTD</p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {teamMetrics.actualCommissions.totalDeals}
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                    <p className="text-xs text-muted-foreground">Team Volume YTD</p>
+                    <p className="text-2xl font-bold text-emerald-500">
+                      {formatCurrency(teamMetrics.actualCommissions.totalVolume)}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Show plan creator only for individual view */}
+          {!isTeamView && (
+            <PlanCreator 
+              planInputs={planInputs}
+              updatePlanInput={updatePlanInput}
+              formatCurrency={formatCurrency}
+            />
+          )}
+          
+          {/* Team View Notice */}
+          {isTeamView && (
+            <div className="glass-card p-6 animate-fade-in border-l-4 border-primary">
+              <div className="flex items-start gap-3">
+                <Users className="w-5 h-5 text-primary mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-foreground mb-1">Viewing Team Aggregated Data</h3>
+                  <p className="text-sm text-muted-foreground">
+                    To edit plan details, select an individual team member. Team view shows combined metrics across {teamMetrics.memberCount} team member{teamMetrics.memberCount !== 1 ? 's' : ''}.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Quick Scenario Preview */}
           <div className="glass-card p-6 animate-fade-in">
