@@ -59,7 +59,8 @@ export default function SalesByPersonPage() {
       totalFeePercentage: number;
       totalCommissionPercentage: number;
       totalSplitPercentage: number;
-      office: string;
+      dallasCount: number;
+      houstonCount: number;
     }> = {};
     
     filteredCommissions.forEach((c) => {
@@ -73,7 +74,8 @@ export default function SalesByPersonPage() {
           totalFeePercentage: 0,
           totalCommissionPercentage: 0,
           totalSplitPercentage: 0,
-          office: normalizeOffice(c.office),
+          dallasCount: 0,
+          houstonCount: 0,
         };
       }
       stats[name].deals += 1;
@@ -83,14 +85,21 @@ export default function SalesByPersonPage() {
       stats[name].totalFeePercentage += c.fee_percentage || 0;
       stats[name].totalCommissionPercentage += c.commission_percentage || 0;
       stats[name].totalSplitPercentage += c.split_percentage || 100;
+      
+      // Count offices for each salesperson
+      const normalizedOffice = normalizeOffice(c.office);
+      if (normalizedOffice === "Dallas") stats[name].dallasCount += 1;
+      if (normalizedOffice === "Houston") stats[name].houstonCount += 1;
     });
     
     return Object.entries(stats).map(([name, data]): SalespersonStats & { id: string } => {
       const sp = salespeople?.find((s) => s.name === name);
+      // Use the most frequent office for this salesperson
+      const office = data.dallasCount >= data.houstonCount ? "Dallas" : "Houston";
       return {
         id: sp?.id || "",
         name,
-        office: data.office,
+        office,
         deals: data.deals,
         volume: data.volume,
         revisedVolume: data.revisedVolume,

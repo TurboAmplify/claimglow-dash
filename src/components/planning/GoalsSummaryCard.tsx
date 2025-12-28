@@ -129,7 +129,7 @@ export function GoalsSummaryCard({
       {hasSavedPlan && planData ? (
         <div className="space-y-4">
           {/* Comparison Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Goals Column */}
             <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
               <h4 className="text-sm font-semibold text-primary mb-3 uppercase tracking-wide">Director Goals</h4>
@@ -165,7 +165,7 @@ export function GoalsSummaryCard({
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">% of Goal</span>
-                  <span className={`font-semibold ${isOnTrack ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  <span className={`font-semibold whitespace-nowrap ${isOnTrack ? 'text-emerald-600' : 'text-amber-600'}`}>
                     {planVsGoalPercent.toFixed(0)}%
                   </span>
                 </div>
