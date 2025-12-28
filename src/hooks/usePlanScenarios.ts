@@ -28,8 +28,8 @@ export interface ScenarioPath {
 }
 
 const DEFAULT_PLAN: PlanInputs = {
-  targetRevenue: 55000000,
-  targetCommission: 825000,
+  targetRevenue: 10000000, // Reasonable default, will be overridden by salesperson's goal
+  targetCommission: 150000,
   avgFeePercent: 7.5,
   commissionPercent: 20,
 };
