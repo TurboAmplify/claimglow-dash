@@ -60,7 +60,7 @@ export default function IndividualPlanningPage() {
 
   const { plan, savePlan, isSaving, isLoading: loadingPlan } = useSalesPlan(id, currentYear);
 
-  // Load saved plan on mount
+  // Load saved plan on mount, or initialize from goals if no plan exists
   useEffect(() => {
     if (plan) {
       setPlanInputs({
@@ -70,8 +70,11 @@ export default function IndividualPlanningPage() {
         commissionPercent: Number(plan.commission_percent),
       });
       setSelectedScenarioId(plan.selected_scenario);
+    } else if (currentGoal?.target_revenue) {
+      // Initialize from salesperson's goal if no saved plan exists
+      updatePlanInput('targetRevenue', Number(currentGoal.target_revenue));
     }
-  }, [plan, setPlanInputs, setSelectedScenarioId]);
+  }, [plan, currentGoal, setPlanInputs, setSelectedScenarioId, updatePlanInput]);
 
   const { historicalPatterns } = useRoadmapAnalysis(commissions, planInputs.targetRevenue);
 
