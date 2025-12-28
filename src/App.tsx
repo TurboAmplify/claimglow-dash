@@ -16,6 +16,7 @@ import SalesByPersonPage from "./pages/SalesByPersonPage";
 import SalesByOfficePage from "./pages/SalesByOfficePage";
 import AllSalesPage from "./pages/AllSalesPage";
 import SalesPlanningPage from "./pages/SalesPlanningPage";
+import IndividualPlanningPage from "./pages/IndividualPlanningPage";
 import SalespersonDashboardPage from "./pages/SalespersonDashboardPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/sales/by-office" element={<ProtectedRoute><SalesByOfficePage /></ProtectedRoute>} />
           <Route path="/sales/all" element={<ProtectedRoute><AllSalesPage /></ProtectedRoute>} />
           <Route path="/planning" element={<ProtectedRoute><SalesPlanningPage /></ProtectedRoute>} />
+          <Route path="/planning/:id" element={<ProtectedRoute><IndividualPlanningPage /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
