@@ -295,6 +295,7 @@ export default function SalesPlanningPage() {
             currentPlanRevenue={planInputs.targetRevenue}
             formatCurrency={formatCurrency}
             hasSavedPlan={!!plan}
+            isLoading={loadingIndividualGoals}
           />
         </div>
       )}
