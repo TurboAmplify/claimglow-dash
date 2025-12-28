@@ -106,7 +106,7 @@ export default function SalesPlanningPage() {
 
   const { plan, savePlan, isSaving, isLoading: loadingPlan } = useSalesPlan(salespersonId, currentYear);
 
-  // Load saved plan on mount
+  // Load saved plan on mount, or initialize from goals if no plan exists
   useEffect(() => {
     if (plan) {
       setPlanInputs({
@@ -116,8 +116,11 @@ export default function SalesPlanningPage() {
         commissionPercent: Number(plan.commission_percent),
       });
       setSelectedScenarioId(plan.selected_scenario);
+    } else if (currentGoal?.target_revenue) {
+      // Initialize from salesperson's goal if no saved plan exists
+      updatePlanInput('targetRevenue', Number(currentGoal.target_revenue));
     }
-  }, [plan, setPlanInputs, setSelectedScenarioId]);
+  }, [plan, currentGoal, setPlanInputs, setSelectedScenarioId, updatePlanInput]);
 
   const { historicalPatterns } = useRoadmapAnalysis(commissions, planInputs.targetRevenue);
 
@@ -266,6 +269,23 @@ export default function SalesPlanningPage() {
         <ValuesSection />
       </div>
 
+      {/* Team Member Selector - Always visible at the top for directors */}
+      {isDirector && (
+        <div className="mb-6 glass-card p-4 animate-fade-in">
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              <span className="font-medium text-foreground">Viewing:</span>
+            </div>
+            <TeamMemberFilter
+              selection={teamSelection}
+              onSelectionChange={setTeamSelection}
+              className="flex-1"
+            />
+          </div>
+        </div>
+      )}
+
       {/* 2026 Goals Card - Show for individual view */}
       {!isTeamView && (
         <div className="mb-6">
@@ -274,6 +294,7 @@ export default function SalesPlanningPage() {
             salespersonName={salespersonName}
             currentPlanRevenue={planInputs.targetRevenue}
             formatCurrency={formatCurrency}
+            hasSavedPlan={!!plan}
           />
         </div>
       )}
