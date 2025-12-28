@@ -446,49 +446,6 @@ export default function SalesPlanningPage() {
 
         {/* Plan Tab */}
         <TabsContent value="plan" className="space-y-6">
-          {/* Team Member Selection - Always visible in Plan tab */}
-          <div className="glass-card p-6 animate-fade-in">
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="flex-shrink-0 md:w-72">
-                <TeamMemberFilter
-                  selection={teamSelection}
-                  onSelectionChange={setTeamSelection}
-                />
-              </div>
-              
-              {/* Team Metrics Summary when viewing team/multiple members */}
-              {isTeamView && (
-                <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                    <p className="text-xs text-muted-foreground">Team Members</p>
-                    <p className="text-2xl font-bold text-foreground flex items-center gap-2">
-                      <Users className="w-5 h-5 text-primary" />
-                      {teamMetrics.memberCount}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-secondary/30">
-                    <p className="text-xs text-muted-foreground">Combined Target</p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {formatCurrency(teamMetrics.totalTargetRevenue)}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-secondary/30">
-                    <p className="text-xs text-muted-foreground">Team Deals YTD</p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {teamMetrics.actualCommissions.totalDeals}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                    <p className="text-xs text-muted-foreground">Team Volume YTD</p>
-                    <p className="text-2xl font-bold text-emerald-500">
-                      {formatCurrency(teamMetrics.actualCommissions.totalVolume)}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
           {/* Show plan creator only for individual view */}
           {!isTeamView && (
             <PlanCreator 
