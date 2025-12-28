@@ -312,7 +312,7 @@ export default function IndividualPlanningPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
-          <TabsList className="glass-card p-1 flex-wrap">
+          <TabsList className="glass-card p-1 flex-wrap gap-1">
             <TabsTrigger value="strategy" className="data-[state=active]:bg-primary/20">
               <Compass className="w-4 h-4 mr-2" />
               Strategy

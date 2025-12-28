@@ -146,10 +146,10 @@ export function ProgressTracker({
               </span>
             </div>
             <Progress value={progress.volumeProgress} className="h-2" />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Target: {formatCurrency(scenario.totalVolume)}</span>
-              <span className={getStatusColor(progress.volumeVsExpected)}>
-                {progress.volumeVsExpected >= 0 ? "+" : ""}{progress.volumeVsExpected.toFixed(1)}% vs expected
+            <div className="flex justify-between text-xs text-muted-foreground gap-2">
+              <span className="truncate">Target: {formatCurrency(scenario.totalVolume)}</span>
+              <span className={`whitespace-nowrap ${getStatusColor(progress.volumeVsExpected)}`}>
+                {progress.volumeVsExpected >= 0 ? "+" : ""}{progress.volumeVsExpected.toFixed(1)}%
               </span>
             </div>
           </div>
@@ -169,10 +169,10 @@ export function ProgressTracker({
               </span>
             </div>
             <Progress value={progress.dealsProgress} className="h-2" />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Target: {scenario.dealCount} deals</span>
-              <span className={getStatusColor(progress.dealsVsExpected)}>
-                {progress.dealsVsExpected >= 0 ? "+" : ""}{progress.dealsVsExpected.toFixed(1)}% vs expected
+            <div className="flex justify-between text-xs text-muted-foreground gap-2">
+              <span className="whitespace-nowrap">Target: {scenario.dealCount} deals</span>
+              <span className={`whitespace-nowrap ${getStatusColor(progress.dealsVsExpected)}`}>
+                {progress.dealsVsExpected >= 0 ? "+" : ""}{progress.dealsVsExpected.toFixed(1)}%
               </span>
             </div>
           </div>

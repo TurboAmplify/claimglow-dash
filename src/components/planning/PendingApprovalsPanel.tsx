@@ -76,14 +76,14 @@ export function PendingApprovalsPanel({ directorId, formatCurrency }: PendingApp
             >
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                     <User className="w-5 h-5 text-primary" />
                   </div>
-                  <div>
-                    <p className="font-semibold text-foreground">{plan.salesperson?.name}</p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="w-3 h-3" />
-                      Submitted {plan.submitted_at ? format(new Date(plan.submitted_at), "MMM d 'at' h:mm a") : "recently"}
+                  <div className="min-w-0">
+                    <p className="font-semibold text-foreground truncate">{plan.salesperson?.name}</p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground whitespace-nowrap">
+                      <Clock className="w-3 h-3 flex-shrink-0" />
+                      <span className="truncate">Submitted {plan.submitted_at ? format(new Date(plan.submitted_at), "MMM d 'at' h:mm a") : "recently"}</span>
                     </div>
                   </div>
                 </div>
@@ -92,7 +92,7 @@ export function PendingApprovalsPanel({ directorId, formatCurrency }: PendingApp
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                 <div className="p-3 rounded-lg bg-background/50">
                   <div className="flex items-center gap-1 text-muted-foreground text-xs mb-1">
                     <Target className="w-3 h-3" />

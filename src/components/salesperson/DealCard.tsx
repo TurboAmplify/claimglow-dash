@@ -90,8 +90,8 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold text-lg text-foreground">{commission.client_name}</h3>
+            <div className="flex items-center gap-2 mb-1 min-w-0">
+              <h3 className="font-semibold text-lg text-foreground truncate">{commission.client_name}</h3>
               <Badge variant={commission.status === "closed" ? "secondary" : "default"}>
                 {commission.status || "open"}
               </Badge>
@@ -99,15 +99,15 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
                 <Badge variant="outline">{commission.year}</Badge>
               )}
             </div>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-              {commission.adjuster && <span>{commission.adjuster}</span>}
+            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              {commission.adjuster && <span className="truncate max-w-[150px]">{commission.adjuster}</span>}
               {commission.adjuster && commission.office && <span>•</span>}
-              {commission.office && <span>{commission.office}</span>}
+              {commission.office && <span className="whitespace-nowrap">{commission.office}</span>}
               {commission.date_signed && (
                 <>
                   <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
+                  <span className="flex items-center gap-1 whitespace-nowrap">
+                    <Calendar className="w-3 h-3 flex-shrink-0" />
                     {formatDate(commission.date_signed)}
                   </span>
                 </>

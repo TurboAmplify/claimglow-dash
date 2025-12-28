@@ -57,13 +57,13 @@ export function ScenarioCard({ scenario, isSelected, onSelect, formatCurrency }:
 
       {/* Key Metrics */}
       <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="p-3 rounded-lg bg-secondary/30">
-          <p className="text-xs text-muted-foreground">Deals Needed</p>
+        <div className="p-3 rounded-lg bg-secondary/30 min-h-[72px]">
+          <p className="text-xs text-muted-foreground whitespace-nowrap">Deals Needed</p>
           <p className="text-xl font-bold text-foreground">{scenario.dealCount}</p>
         </div>
-        <div className="p-3 rounded-lg bg-secondary/30">
-          <p className="text-xs text-muted-foreground">Avg Deal Size</p>
-          <p className="text-xl font-bold text-foreground">{formatCurrency(scenario.avgDealSize)}</p>
+        <div className="p-3 rounded-lg bg-secondary/30 min-h-[72px]">
+          <p className="text-xs text-muted-foreground whitespace-nowrap">Avg Deal Size</p>
+          <p className="text-xl font-bold text-foreground whitespace-nowrap">{formatCurrency(scenario.avgDealSize)}</p>
         </div>
       </div>
 

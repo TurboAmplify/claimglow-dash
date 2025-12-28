@@ -100,9 +100,9 @@ export function SalespersonCard({ stats, onClick, delay = 0 }: SalespersonCardPr
           </div>
         </div>
         {/* Commission Yield Badge */}
-        <div className="px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1 bg-primary/15 text-primary border border-primary/30">
-          <Percent className="w-4 h-4" />
-          {commissionYield.toFixed(1)}% yield
+        <div className="px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1 bg-primary/15 text-primary border border-primary/30 whitespace-nowrap">
+          <Percent className="w-4 h-4 flex-shrink-0" />
+          <span>{commissionYield.toFixed(1)}% yield</span>
         </div>
       </div>
 
@@ -113,21 +113,21 @@ export function SalespersonCard({ stats, onClick, delay = 0 }: SalespersonCardPr
             <FileText className="w-3.5 h-3.5" />
             <span className="text-xs uppercase tracking-wide">Deals</span>
           </div>
-          <p className="text-xl font-bold text-foreground">{stats.deals}</p>
+          <p className="text-xl font-bold text-foreground tabular-nums">{stats.deals}</p>
         </div>
         <div className="p-3 rounded-xl bg-secondary/30">
           <div className="flex items-center gap-2 text-muted-foreground mb-1">
             <TrendingUp className="w-3.5 h-3.5" />
             <span className="text-xs uppercase tracking-wide">Volume</span>
           </div>
-          <p className="text-xl font-bold text-foreground">{formatCurrency(stats.volume)}</p>
+          <p className="text-xl font-bold text-foreground whitespace-nowrap">{formatCurrency(stats.volume)}</p>
         </div>
         <div className="p-3 rounded-xl bg-primary/10">
           <div className="flex items-center gap-2 text-muted-foreground mb-1">
             <DollarSign className="w-3.5 h-3.5" />
             <span className="text-xs uppercase tracking-wide">Earned</span>
           </div>
-          <p className="text-xl font-bold text-primary">{formatCurrency(stats.commissions)}</p>
+          <p className="text-xl font-bold text-primary whitespace-nowrap">{formatCurrency(stats.commissions)}</p>
         </div>
       </div>
 
@@ -137,13 +137,13 @@ export function SalespersonCard({ stats, onClick, delay = 0 }: SalespersonCardPr
           <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
             Avg Fee %
           </div>
-          <p className="text-lg font-bold text-foreground">{stats.avgFeePercentage.toFixed(1)}%</p>
+          <p className="text-lg font-bold text-foreground whitespace-nowrap tabular-nums">{stats.avgFeePercentage.toFixed(1)}%</p>
         </div>
         <div className="p-3 rounded-xl bg-secondary/30">
           <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
             Avg Deal Size
           </div>
-          <p className="text-lg font-bold text-foreground">{formatCurrency(avgDealSize)}</p>
+          <p className="text-lg font-bold text-foreground whitespace-nowrap">{formatCurrency(avgDealSize)}</p>
         </div>
       </div>
 

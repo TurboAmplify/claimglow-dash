@@ -1,8 +1,7 @@
 import { useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Target, TrendingUp, Flame } from "lucide-react";
-import { startOfWeek, endOfWeek, startOfMonth, format, isWithinInterval, parseISO, differenceInDays } from "date-fns";
+import { startOfWeek, endOfWeek, startOfMonth, format, isWithinInterval, parseISO } from "date-fns";
 
 interface SalesCommission {
   id: string;
@@ -122,17 +121,17 @@ export function WeeklyDealsTracker({
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <CalendarDays className="h-5 w-5" />
+    <div className="glass-card p-6 animate-fade-in">
+      <div className="pb-4">
+        <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+          <CalendarDays className="h-5 w-5 text-primary" />
           Weekly Deals Tracker
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
+        </h3>
+        <p className="text-sm text-muted-foreground mt-1">
           Week of {format(stats.weekStart, "MMM d")} - {format(stats.weekEnd, "MMM d")}
         </p>
-      </CardHeader>
-      <CardContent>
+      </div>
+      <div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* This Week */}
           <div className="p-4 rounded-lg bg-muted/50 space-y-2">
@@ -210,7 +209,7 @@ export function WeeklyDealsTracker({
             )}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
