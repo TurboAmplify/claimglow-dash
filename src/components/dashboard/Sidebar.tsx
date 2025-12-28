@@ -40,8 +40,7 @@ const salesNavItems = [
 ];
 
 const planningNavItems = [
-  { title: "Goal Planner", url: "/goals", icon: Target },
-  { title: "Sales Roadmap", url: "/roadmap", icon: Map },
+  { title: "Sales Planning", url: "/planning", icon: Target },
 ];
 
 interface SidebarProps {
