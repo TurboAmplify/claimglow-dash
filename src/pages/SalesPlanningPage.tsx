@@ -1,12 +1,13 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useYearSummaries, useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions";
 import { useMemo, useState } from "react";
-import { Loader2, Target, TrendingUp, BarChart3, Calendar, Map as MapIcon, Layers } from "lucide-react";
+import { Loader2, Target, TrendingUp, BarChart3, Calendar, Map as MapIcon, Layers, Compass } from "lucide-react";
 import { ValuesSection } from "@/components/goals/ValuesSection";
 import { PlanCreator } from "@/components/planning/PlanCreator";
 import { ScenarioCard } from "@/components/planning/ScenarioCard";
 import { ScenarioComparisonChart } from "@/components/planning/ScenarioComparisonChart";
 import { QuarterlyBreakdown } from "@/components/planning/QuarterlyBreakdown";
+import { StrategicFocusSection } from "@/components/planning/StrategicFocusSection";
 import { usePlanScenarios } from "@/hooks/usePlanScenarios";
 import { useRoadmapAnalysis } from "@/hooks/useRoadmapAnalysis";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -161,7 +162,7 @@ export default function SalesPlanningPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="glass-card p-1">
+        <TabsList className="glass-card p-1 flex-wrap">
           <TabsTrigger value="plan" className="data-[state=active]:bg-primary/20">
             <Target className="w-4 h-4 mr-2" />
             Your Plan
@@ -169,6 +170,10 @@ export default function SalesPlanningPage() {
           <TabsTrigger value="scenarios" className="data-[state=active]:bg-primary/20">
             <Layers className="w-4 h-4 mr-2" />
             Choose Your Path
+          </TabsTrigger>
+          <TabsTrigger value="strategy" className="data-[state=active]:bg-primary/20">
+            <Compass className="w-4 h-4 mr-2" />
+            Strategy
           </TabsTrigger>
           <TabsTrigger value="historical" className="data-[state=active]:bg-primary/20">
             <BarChart3 className="w-4 h-4 mr-2" />
@@ -303,6 +308,11 @@ export default function SalesPlanningPage() {
               </div>
             </div>
           </div>
+        </TabsContent>
+
+        {/* Strategy Tab */}
+        <TabsContent value="strategy" className="space-y-6">
+          <StrategicFocusSection selectedScenarioId={selectedScenarioId} />
         </TabsContent>
 
         {/* Historical Context Tab */}
