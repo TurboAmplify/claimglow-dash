@@ -14,6 +14,10 @@ export interface SalesPlan {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  approval_status: string;
+  submitted_at: string | null;
+  approved_at: string | null;
+  reviewer_notes: string | null;
 }
 
 export interface SavePlanInput {

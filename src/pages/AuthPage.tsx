@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useCurrentSalesperson } from '@/hooks/useCurrentSalesperson';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,11 +22,23 @@ export default function AuthPage() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   
   const { signIn, signUp, user, loading } = useAuth();
+  const { salesperson, isLoading: loadingSalesperson, isDirector } = useCurrentSalesperson();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Redirect if already logged in
-  if (loading) {
+  // Handle role-based redirect after login
+  useEffect(() => {
+    if (user && salesperson && !loadingSalesperson) {
+      if (isDirector) {
+        navigate('/planning');
+      } else {
+        navigate(`/sales/person/${salesperson.id}`);
+      }
+    }
+  }, [user, salesperson, loadingSalesperson, isDirector, navigate]);
+
+  // Show loading while checking auth
+  if (loading || (user && loadingSalesperson)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -33,8 +46,9 @@ export default function AuthPage() {
     );
   }
 
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
+  // Already logged in and salesperson loaded - redirect handled by useEffect
+  if (user && salesperson) {
+    return null;
   }
 
   const validateForm = () => {
@@ -81,7 +95,7 @@ export default function AuthPage() {
             title: "Welcome back!",
             description: "You have been logged in successfully.",
           });
-          navigate('/dashboard');
+          // Redirect is handled by useEffect based on role
         }
       } else {
         const { error } = await signUp(email, password);
@@ -104,7 +118,7 @@ export default function AuthPage() {
             title: "Account created!",
             description: "You have been signed up successfully.",
           });
-          navigate('/dashboard');
+          // Redirect is handled by useEffect based on role
         }
       }
     } finally {
