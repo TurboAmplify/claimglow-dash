@@ -9,9 +9,12 @@ import { ScenarioComparisonChart } from "@/components/planning/ScenarioCompariso
 import { QuarterlyBreakdown } from "@/components/planning/QuarterlyBreakdown";
 import { StrategicFocusSection } from "@/components/planning/StrategicFocusSection";
 import { ProgressTracker } from "@/components/planning/ProgressTracker";
+import { WeeklyDealsTracker } from "@/components/planning/WeeklyDealsTracker";
+import { DealPipeline } from "@/components/planning/DealPipeline";
 import { usePlanScenarios } from "@/hooks/usePlanScenarios";
 import { useRoadmapAnalysis } from "@/hooks/useRoadmapAnalysis";
 import { useSalesPlan } from "@/hooks/useSalesPlan";
+import { useProgressAlerts } from "@/hooks/useProgressAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { 
@@ -319,12 +322,29 @@ export default function SalesPlanningPage() {
 
         {/* Progress Tab */}
         <TabsContent value="progress" className="space-y-6">
+          {/* Weekly Deals Tracker */}
+          <WeeklyDealsTracker
+            commissions={commissions || []}
+            scenario={selectedScenario}
+            currentYear={currentYear}
+            formatCurrency={formatCurrency}
+          />
+
+          {/* Main Progress Tracker */}
           <ProgressTracker
             scenario={selectedScenario}
             actualCommissions={actualCommissions}
             formatCurrency={formatCurrency}
             currentYear={currentYear}
           />
+
+          {/* Deal Pipeline */}
+          {salespersonId && (
+            <DealPipeline
+              salespersonId={salespersonId}
+              formatCurrency={formatCurrency}
+            />
+          )}
         </TabsContent>
 
         {/* Choose Your Path Tab */}
