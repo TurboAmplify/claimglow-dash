@@ -1,16 +1,19 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useYearSummaries, useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions";
-import { useMemo, useState } from "react";
-import { Loader2, Target, TrendingUp, BarChart3, Calendar, Map as MapIcon, Layers, Compass } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { Loader2, Target, TrendingUp, BarChart3, Calendar, Map as MapIcon, Layers, Compass, Save, Activity } from "lucide-react";
 import { ValuesSection } from "@/components/goals/ValuesSection";
 import { PlanCreator } from "@/components/planning/PlanCreator";
 import { ScenarioCard } from "@/components/planning/ScenarioCard";
 import { ScenarioComparisonChart } from "@/components/planning/ScenarioComparisonChart";
 import { QuarterlyBreakdown } from "@/components/planning/QuarterlyBreakdown";
 import { StrategicFocusSection } from "@/components/planning/StrategicFocusSection";
+import { ProgressTracker } from "@/components/planning/ProgressTracker";
 import { usePlanScenarios } from "@/hooks/usePlanScenarios";
 import { useRoadmapAnalysis } from "@/hooks/useRoadmapAnalysis";
+import { useSalesPlan } from "@/hooks/useSalesPlan";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { 
   ResponsiveContainer, 
   BarChart, 
@@ -35,6 +38,7 @@ export default function SalesPlanningPage() {
   const {
     planInputs,
     updatePlanInput,
+    setPlanInputs,
     scenarios,
     selectedScenarioId,
     setSelectedScenarioId,
@@ -42,9 +46,74 @@ export default function SalesPlanningPage() {
     monthlyProjections,
   } = usePlanScenarios();
 
+  const { plan, savePlan, isSaving, isLoading: loadingPlan } = useSalesPlan(salespersonId, currentYear);
+
+  // Load saved plan on mount
+  useEffect(() => {
+    if (plan) {
+      setPlanInputs({
+        targetRevenue: Number(plan.target_revenue),
+        targetCommission: Number(plan.target_commission),
+        avgFeePercent: Number(plan.avg_fee_percent),
+        commissionPercent: Number(plan.commission_percent),
+      });
+      setSelectedScenarioId(plan.selected_scenario);
+    }
+  }, [plan, setPlanInputs, setSelectedScenarioId]);
+
   const { historicalPatterns } = useRoadmapAnalysis(commissions, planInputs.targetRevenue);
 
   const [activeTab, setActiveTab] = useState('plan');
+
+  // Calculate actual commissions data for progress tracking
+  const actualCommissions = useMemo(() => {
+    if (!commissions) {
+      return {
+        totalVolume: 0,
+        totalDeals: 0,
+        totalCommission: 0,
+        monthlyBreakdown: Array(12).fill({ month: '', volume: 0, deals: 0 }),
+      };
+    }
+
+    // Filter to current year
+    const currentYearCommissions = commissions.filter(c => c.year === currentYear);
+    
+    const totalVolume = currentYearCommissions.reduce((sum, c) => sum + (Number(c.revised_estimate) || 0), 0);
+    const totalDeals = currentYearCommissions.length;
+    const totalCommission = currentYearCommissions.reduce((sum, c) => sum + (Number(c.commissions_paid) || 0), 0);
+
+    // Monthly breakdown
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthlyBreakdown = monthNames.map((month, idx) => {
+      const monthCommissions = currentYearCommissions.filter(c => {
+        if (!c.date_signed) return false;
+        const date = new Date(c.date_signed);
+        return date.getMonth() === idx;
+      });
+      return {
+        month,
+        volume: monthCommissions.reduce((sum, c) => sum + (Number(c.revised_estimate) || 0), 0),
+        deals: monthCommissions.length,
+      };
+    });
+
+    return { totalVolume, totalDeals, totalCommission, monthlyBreakdown };
+  }, [commissions, currentYear]);
+
+  const handleSavePlan = () => {
+    if (!salespersonId) return;
+    
+    savePlan({
+      salesperson_id: salespersonId,
+      year: currentYear,
+      target_revenue: planInputs.targetRevenue,
+      target_commission: planInputs.targetCommission,
+      avg_fee_percent: planInputs.avgFeePercent,
+      commission_percent: planInputs.commissionPercent,
+      selected_scenario: selectedScenarioId,
+    });
+  };
 
   const formatCurrency = (value: number) => {
     if (value >= 1000000) {
@@ -107,7 +176,7 @@ export default function SalesPlanningPage() {
     };
   }, [yearSummaries]);
 
-  const isLoading = loadingSalespeople || loadingCommissions || loadingSummaries;
+  const isLoading = loadingSalespeople || loadingCommissions || loadingSummaries || loadingPlan;
 
   if (isLoading) {
     return (
@@ -162,24 +231,39 @@ export default function SalesPlanningPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="glass-card p-1 flex-wrap">
-          <TabsTrigger value="plan" className="data-[state=active]:bg-primary/20">
-            <Target className="w-4 h-4 mr-2" />
-            Your Plan
-          </TabsTrigger>
-          <TabsTrigger value="scenarios" className="data-[state=active]:bg-primary/20">
-            <Layers className="w-4 h-4 mr-2" />
-            Choose Your Path
-          </TabsTrigger>
-          <TabsTrigger value="strategy" className="data-[state=active]:bg-primary/20">
-            <Compass className="w-4 h-4 mr-2" />
-            Strategy
-          </TabsTrigger>
-          <TabsTrigger value="historical" className="data-[state=active]:bg-primary/20">
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Historical Context
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <TabsList className="glass-card p-1 flex-wrap">
+            <TabsTrigger value="plan" className="data-[state=active]:bg-primary/20">
+              <Target className="w-4 h-4 mr-2" />
+              Your Plan
+            </TabsTrigger>
+            <TabsTrigger value="progress" className="data-[state=active]:bg-primary/20">
+              <Activity className="w-4 h-4 mr-2" />
+              Progress
+            </TabsTrigger>
+            <TabsTrigger value="scenarios" className="data-[state=active]:bg-primary/20">
+              <Layers className="w-4 h-4 mr-2" />
+              Choose Your Path
+            </TabsTrigger>
+            <TabsTrigger value="strategy" className="data-[state=active]:bg-primary/20">
+              <Compass className="w-4 h-4 mr-2" />
+              Strategy
+            </TabsTrigger>
+            <TabsTrigger value="historical" className="data-[state=active]:bg-primary/20">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Historical Context
+            </TabsTrigger>
+          </TabsList>
+
+          <Button 
+            onClick={handleSavePlan} 
+            disabled={isSaving || !salespersonId}
+            className="gap-2"
+          >
+            <Save className="w-4 h-4" />
+            {isSaving ? "Saving..." : plan ? "Update Plan" : "Save Plan"}
+          </Button>
+        </div>
 
         {/* Your Plan Tab */}
         <TabsContent value="plan" className="space-y-6">
@@ -230,6 +314,16 @@ export default function SalesPlanningPage() {
             targetRevenue={planInputs.targetRevenue}
             formatCurrency={formatCurrency}
             selectedScenarioId={selectedScenarioId}
+          />
+        </TabsContent>
+
+        {/* Progress Tab */}
+        <TabsContent value="progress" className="space-y-6">
+          <ProgressTracker
+            scenario={selectedScenario}
+            actualCommissions={actualCommissions}
+            formatCurrency={formatCurrency}
+            currentYear={currentYear}
           />
         </TabsContent>
 
