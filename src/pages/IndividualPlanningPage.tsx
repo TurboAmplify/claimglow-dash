@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useYearSummaries, useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions";
 import { useMemo, useState, useEffect } from "react";
-import { Loader2, Target, TrendingUp, BarChart3, Map as MapIcon, Layers, Compass, Save, Activity, ArrowLeft } from "lucide-react";
+import { Loader2, Target, TrendingUp, BarChart3, Map as MapIcon, Layers, Compass, Save, Activity, ArrowLeft, User } from "lucide-react";
 import { ValuesSection } from "@/components/goals/ValuesSection";
 import { PlanCreator } from "@/components/planning/PlanCreator";
 import { ScenarioCard } from "@/components/planning/ScenarioCard";
@@ -207,31 +207,42 @@ export default function IndividualPlanningPage() {
 
   return (
     <DashboardLayout>
+      {/* Individual Plan Banner - Visually distinct from main planning page */}
+      <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-600/20 via-primary/20 to-purple-600/20 border-2 border-primary/30 animate-fade-in">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/sales/person/${id}`)}
+              className="gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to My Dashboard
+            </Button>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 border border-primary/30">
+            <User className="w-4 h-4 text-primary" />
+            <span className="text-sm font-semibold text-primary">{salesperson.name}'s Personal Plan</span>
+          </div>
+        </div>
+      </div>
+
       {/* Values Section at the top */}
       <div className="mb-6">
         <ValuesSection />
       </div>
 
-      {/* Header */}
+      {/* Header - More personalized */}
       <div className="mb-6 animate-fade-in">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(`/sales/person/${id}`)}
-          className="mb-4 -ml-2"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Dashboard
-        </Button>
-
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 rounded-lg bg-primary/20">
-            <MapIcon className="w-6 h-6 text-primary" />
+          <div className="p-3 rounded-xl bg-gradient-to-br from-primary/30 to-blue-600/30 border border-primary/20">
+            <MapIcon className="w-7 h-7 text-primary" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Sales Planning {currentYear}</h1>
+            <h1 className="text-3xl font-bold text-foreground">My Sales Plan {currentYear}</h1>
             <p className="text-muted-foreground">
-              {salesperson.name} — Create your annual plan and choose your path to success
+              Create your annual plan and choose your path to success
             </p>
           </div>
         </div>
@@ -242,14 +253,14 @@ export default function IndividualPlanningPage() {
             <div className="flex items-center gap-3">
               <Target className="w-5 h-5 text-primary" />
               <div>
-                <p className="text-sm text-muted-foreground">Target Revenue</p>
+                <p className="text-sm text-muted-foreground">My Target Revenue</p>
                 <p className="text-2xl font-bold text-foreground">{formatCurrency(planInputs.targetRevenue)}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <TrendingUp className="w-5 h-5 text-emerald-500" />
               <div>
-                <p className="text-sm text-muted-foreground">Projected Commission</p>
+                <p className="text-sm text-muted-foreground">My Projected Commission</p>
                 <p className="text-2xl font-bold text-emerald-500">{formatCurrency(selectedScenario.projectedCommission)}</p>
               </div>
             </div>

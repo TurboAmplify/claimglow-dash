@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useYearSummaries, useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions";
 import { useMemo, useState, useEffect } from "react";
-import { Loader2, Target, TrendingUp, BarChart3, Calendar, Map as MapIcon, Layers, Compass, Save, Activity, Users } from "lucide-react";
+import { Loader2, Target, TrendingUp, BarChart3, Calendar, Map as MapIcon, Layers, Compass, Save, Activity, Users, ShieldAlert } from "lucide-react";
 import { ValuesSection } from "@/components/goals/ValuesSection";
 import { PlanCreator } from "@/components/planning/PlanCreator";
 import { ScenarioCard } from "@/components/planning/ScenarioCard";
@@ -21,6 +21,7 @@ import { useProgressAlerts } from "@/hooks/useProgressAlerts";
 import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Navigate, useNavigate } from "react-router-dom";
 import { 
   ResponsiveContainer, 
   BarChart, 
@@ -34,9 +35,15 @@ import {
 
 export default function SalesPlanningPage() {
   const currentYear = 2026;
+  const navigate = useNavigate();
 
-  const { salesperson: currentUser, isDirector, isLoading: loadingCurrentUser } = useCurrentSalesperson();
+  const { salesperson: currentUser, isDirector, isSalesRep, isLoading: loadingCurrentUser } = useCurrentSalesperson();
   const { data: salespeople, isLoading: loadingSalespeople } = useSalespeople();
+
+  // Redirect non-directors to their individual planning page
+  if (!loadingCurrentUser && currentUser && !isDirector) {
+    return <Navigate to={`/planning/${currentUser.id}`} replace />;
+  }
   
   // Team member selection state for directors
   const [teamSelection, setTeamSelection] = useState<TeamMemberSelection>({
