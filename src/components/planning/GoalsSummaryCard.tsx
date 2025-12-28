@@ -80,15 +80,10 @@ export function GoalsSummaryCard({
 
   if (!goal) {
     return (
-      <div className="glass-card p-6 animate-fade-in border-l-4 border-amber-500">
-        <div className="flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5" />
-          <div>
-            <h3 className="font-semibold text-foreground mb-1">No 2026 Goals Set</h3>
-            <p className="text-sm text-muted-foreground">
-              Goals for {salespersonName} have not been defined yet.
-            </p>
-          </div>
+      <div className="glass-card p-4 animate-fade-in">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Clock className="w-4 h-4" />
+          <span className="text-sm">No 2026 goals assigned for {salespersonName} — goals are set by the director.</span>
         </div>
       </div>
     );
