@@ -12,7 +12,8 @@ export function useSalesGoals(salespersonId?: string, year?: number) {
         .select("*")
         .eq("salesperson_id", salespersonId!);
       
-      if (year) {
+      // Only filter by year if explicitly provided
+      if (year !== undefined) {
         query = query.eq("year", year);
       }
       
