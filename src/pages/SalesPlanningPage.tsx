@@ -291,16 +291,49 @@ export default function SalesPlanningPage() {
       {/* Team Member Selector - Always visible at the top for directors */}
       {isDirector && (
         <div className="mb-6 glass-card p-4 animate-fade-in">
-          <div className="flex flex-col md:flex-row md:items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-primary" />
-              <span className="font-medium text-foreground">Viewing:</span>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <div className="flex items-center gap-2 min-w-fit">
+                <Users className="w-5 h-5 text-primary" />
+                <span className="font-medium text-foreground">Select Team Member:</span>
+              </div>
+              <TeamMemberFilter
+                selection={teamSelection}
+                onSelectionChange={setTeamSelection}
+                className="flex-1"
+              />
             </div>
-            <TeamMemberFilter
-              selection={teamSelection}
-              onSelectionChange={setTeamSelection}
-              className="flex-1"
-            />
+            
+            {/* Team Metrics Summary when viewing team/multiple members */}
+            {isTeamView && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-border/50">
+                <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                  <p className="text-xs text-muted-foreground">Team Members</p>
+                  <p className="text-xl font-bold text-foreground flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary" />
+                    {teamMetrics.memberCount}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-secondary/30">
+                  <p className="text-xs text-muted-foreground">Combined Target</p>
+                  <p className="text-xl font-bold text-foreground">
+                    {formatCurrency(teamMetrics.totalTargetRevenue)}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-secondary/30">
+                  <p className="text-xs text-muted-foreground">Team Deals YTD</p>
+                  <p className="text-xl font-bold text-foreground">
+                    {teamMetrics.actualCommissions.totalDeals}
+                  </p>
+                </div>
+                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                  <p className="text-xs text-muted-foreground">Team Volume YTD</p>
+                  <p className="text-xl font-bold text-emerald-500">
+                    {formatCurrency(teamMetrics.actualCommissions.totalVolume)}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
