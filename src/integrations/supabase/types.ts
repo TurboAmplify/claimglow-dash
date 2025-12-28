@@ -169,6 +169,57 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          recipient_id: string
+          related_entity: string | null
+          related_id: string | null
+          sender_id: string
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          recipient_id: string
+          related_entity?: string | null
+          related_id?: string | null
+          sender_id: string
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          recipient_id?: string
+          related_entity?: string | null
+          related_id?: string | null
+          sender_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "salespeople"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "salespeople"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sales_commissions: {
         Row: {
           adjuster: string | null
@@ -292,39 +343,51 @@ export type Database = {
       }
       sales_plans: {
         Row: {
+          approval_status: string | null
+          approved_at: string | null
           avg_fee_percent: number
           commission_percent: number
           created_at: string
           id: string
           is_active: boolean
+          reviewer_notes: string | null
           salesperson_id: string
           selected_scenario: string
+          submitted_at: string | null
           target_commission: number
           target_revenue: number
           updated_at: string
           year: number
         }
         Insert: {
+          approval_status?: string | null
+          approved_at?: string | null
           avg_fee_percent?: number
           commission_percent?: number
           created_at?: string
           id?: string
           is_active?: boolean
+          reviewer_notes?: string | null
           salesperson_id: string
           selected_scenario?: string
+          submitted_at?: string | null
           target_commission?: number
           target_revenue?: number
           updated_at?: string
           year: number
         }
         Update: {
+          approval_status?: string | null
+          approved_at?: string | null
           avg_fee_percent?: number
           commission_percent?: number
           created_at?: string
           id?: string
           is_active?: boolean
+          reviewer_notes?: string | null
           salesperson_id?: string
           selected_scenario?: string
+          submitted_at?: string | null
           target_commission?: number
           target_revenue?: number
           updated_at?: string
@@ -381,15 +444,42 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "sales_director" | "sales_rep"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -516,6 +606,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["sales_director", "sales_rep"],
+    },
   },
 } as const

@@ -11,10 +11,13 @@ import { StrategicFocusSection } from "@/components/planning/StrategicFocusSecti
 import { ProgressTracker } from "@/components/planning/ProgressTracker";
 import { WeeklyDealsTracker } from "@/components/planning/WeeklyDealsTracker";
 import { DealPipeline } from "@/components/planning/DealPipeline";
+import { PendingApprovalsPanel } from "@/components/planning/PendingApprovalsPanel";
+import { SalespersonSelector } from "@/components/planning/SalespersonSelector";
 import { usePlanScenarios } from "@/hooks/usePlanScenarios";
 import { useRoadmapAnalysis } from "@/hooks/useRoadmapAnalysis";
 import { useSalesPlan } from "@/hooks/useSalesPlan";
 import { useProgressAlerts } from "@/hooks/useProgressAlerts";
+import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { 
@@ -31,9 +34,22 @@ import {
 export default function SalesPlanningPage() {
   const currentYear = 2026;
 
+  const { salesperson: currentUser, isDirector, isLoading: loadingCurrentUser } = useCurrentSalesperson();
   const { data: salespeople, isLoading: loadingSalespeople } = useSalespeople();
-  const salespersonId = salespeople?.[0]?.id;
-  const salespersonName = salespeople?.[0]?.name || 'Salesperson';
+  
+  // For directors, allow selecting any salesperson; for reps, use their own ID
+  const [selectedSalespersonId, setSelectedSalespersonId] = useState<string | undefined>(undefined);
+  
+  // Set initial selection once data loads
+  useEffect(() => {
+    if (currentUser && !selectedSalespersonId) {
+      setSelectedSalespersonId(currentUser.id);
+    }
+  }, [currentUser, selectedSalespersonId]);
+
+  const salespersonId = selectedSalespersonId;
+  const selectedSalesperson = salespeople?.find(sp => sp.id === salespersonId);
+  const salespersonName = selectedSalesperson?.name || 'Salesperson';
   
   const { data: commissions, isLoading: loadingCommissions } = useSalesCommissions(salespersonId);
   const { data: yearSummaries, isLoading: loadingSummaries } = useYearSummaries(salespersonId);
@@ -179,7 +195,10 @@ export default function SalesPlanningPage() {
     };
   }, [yearSummaries]);
 
-  const isLoading = loadingSalespeople || loadingCommissions || loadingSummaries || loadingPlan;
+  const isLoading = loadingSalespeople || loadingCommissions || loadingSummaries || loadingPlan || loadingCurrentUser;
+
+  // Get director ID for notifications
+  const directorId = salespeople?.find(sp => sp.role === "sales_director")?.id;
 
   if (isLoading) {
     return (
@@ -193,23 +212,43 @@ export default function SalesPlanningPage() {
 
   return (
     <DashboardLayout>
+      {/* Pending Approvals for Directors */}
+      {isDirector && directorId && (
+        <div className="mb-6">
+          <PendingApprovalsPanel 
+            directorId={directorId} 
+            formatCurrency={formatCurrency} 
+          />
+        </div>
+      )}
+
       {/* Values Section at the top */}
       <div className="mb-6">
         <ValuesSection />
       </div>
 
-      {/* Header */}
+      {/* Header with Salesperson Selector */}
       <div className="mb-6 animate-fade-in">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 rounded-lg bg-primary/20">
-            <MapIcon className="w-6 h-6 text-primary" />
+        <div className="flex items-center justify-between gap-4 mb-2">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/20">
+              <MapIcon className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Sales Planning {currentYear}</h1>
+              <p className="text-muted-foreground">
+                {salespersonName} — Create your annual plan and choose your path to success
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Sales Planning {currentYear}</h1>
-            <p className="text-muted-foreground">
-              {salespersonName} — Create your annual plan and choose your path to success
-            </p>
-          </div>
+          
+          {/* Salesperson Selector for Directors */}
+          {isDirector && (
+            <SalespersonSelector
+              selectedId={selectedSalespersonId}
+              onSelect={setSelectedSalespersonId}
+            />
+          )}
         </div>
         
         {/* Target Reference */}
