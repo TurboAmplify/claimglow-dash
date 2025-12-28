@@ -13,12 +13,14 @@ import { WeeklyDealsTracker } from "@/components/planning/WeeklyDealsTracker";
 import { DealPipeline } from "@/components/planning/DealPipeline";
 import { PendingApprovalsPanel } from "@/components/planning/PendingApprovalsPanel";
 import { TeamMemberFilter, TeamMemberSelection } from "@/components/planning/TeamMemberFilter";
+import { GoalsSummaryCard } from "@/components/planning/GoalsSummaryCard";
 import { usePlanScenarios } from "@/hooks/usePlanScenarios";
 import { useRoadmapAnalysis } from "@/hooks/useRoadmapAnalysis";
 import { useSalesPlan } from "@/hooks/useSalesPlan";
 import { useTeamMetrics } from "@/hooks/useTeamMetrics";
 import { useProgressAlerts } from "@/hooks/useProgressAlerts";
 import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
+import { useSalesGoals, useTeamGoals } from "@/hooks/useSalesGoals";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -79,6 +81,17 @@ export default function SalesPlanningPage() {
   
   const { data: commissions, isLoading: loadingCommissions } = useSalesCommissions(salespersonId);
   const { data: yearSummaries, isLoading: loadingSummaries } = useYearSummaries(salespersonId);
+  
+  // Fetch goals for individual or team
+  const { data: individualGoals, isLoading: loadingIndividualGoals } = useSalesGoals(salespersonId, currentYear);
+  const { data: teamGoals, isLoading: loadingTeamGoals } = useTeamGoals(
+    currentUser?.role === "sales_director" ? currentUser.id : undefined, 
+    currentYear
+  );
+
+  const currentGoal = useMemo(() => {
+    return individualGoals?.[0] || null;
+  }, [individualGoals]);
 
   const {
     planInputs,
@@ -221,7 +234,7 @@ export default function SalesPlanningPage() {
     };
   }, [yearSummaries]);
 
-  const isLoading = loadingSalespeople || loadingCommissions || loadingSummaries || loadingPlan || loadingCurrentUser || (isTeamView && loadingTeamMetrics);
+  const isLoading = loadingSalespeople || loadingCommissions || loadingSummaries || loadingPlan || loadingCurrentUser || (isTeamView && loadingTeamMetrics) || loadingIndividualGoals;
 
   // Get director ID for notifications
   const directorId = salespeople?.find(sp => sp.role === "sales_director")?.id;
@@ -252,6 +265,53 @@ export default function SalesPlanningPage() {
       <div className="mb-6">
         <ValuesSection />
       </div>
+
+      {/* 2026 Goals Card - Show for individual view */}
+      {!isTeamView && (
+        <div className="mb-6">
+          <GoalsSummaryCard
+            goal={currentGoal}
+            salespersonName={salespersonName}
+            currentPlanRevenue={planInputs.targetRevenue}
+            formatCurrency={formatCurrency}
+          />
+        </div>
+      )}
+
+      {/* Team Goals Summary - Show for team view */}
+      {isTeamView && teamGoals && teamGoals.length > 0 && (
+        <div className="mb-6 glass-card p-6 animate-fade-in">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-primary/20">
+              <Target className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Team 2026 Goals</h3>
+              <p className="text-sm text-muted-foreground">{teamGoals.length} team member{teamGoals.length !== 1 ? 's' : ''} with goals set</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total Target Revenue</p>
+              <p className="text-2xl font-bold text-foreground">
+                {formatCurrency(teamGoals.reduce((sum, g) => sum + (Number(g.target_revenue) || 0), 0))}
+              </p>
+            </div>
+            <div className="p-4 rounded-lg bg-secondary/50">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total Target Deals</p>
+              <p className="text-2xl font-bold text-foreground">
+                {teamGoals.reduce((sum, g) => sum + (g.target_deals || 0), 0)}
+              </p>
+            </div>
+            <div className="p-4 rounded-lg bg-secondary/50">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Avg Per Member</p>
+              <p className="text-2xl font-bold text-foreground">
+                {formatCurrency(teamGoals.reduce((sum, g) => sum + (Number(g.target_revenue) || 0), 0) / teamGoals.length)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <div className="mb-6 animate-fade-in">

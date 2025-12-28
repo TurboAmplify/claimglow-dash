@@ -11,9 +11,11 @@ import { StrategicFocusSection } from "@/components/planning/StrategicFocusSecti
 import { ProgressTracker } from "@/components/planning/ProgressTracker";
 import { WeeklyDealsTracker } from "@/components/planning/WeeklyDealsTracker";
 import { DealPipeline } from "@/components/planning/DealPipeline";
+import { GoalsSummaryCard } from "@/components/planning/GoalsSummaryCard";
 import { usePlanScenarios } from "@/hooks/usePlanScenarios";
 import { useRoadmapAnalysis } from "@/hooks/useRoadmapAnalysis";
 import { useSalesPlan } from "@/hooks/useSalesPlan";
+import { useSalesGoals } from "@/hooks/useSalesGoals";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate } from "react-router-dom";
@@ -35,10 +37,15 @@ export default function IndividualPlanningPage() {
   const { data: salespeople, isLoading: loadingSalespeople } = useSalespeople();
   const { data: commissions, isLoading: loadingCommissions } = useSalesCommissions(id);
   const { data: yearSummaries, isLoading: loadingSummaries } = useYearSummaries(id);
+  const { data: goals, isLoading: loadingGoals } = useSalesGoals(id, currentYear);
 
   const salesperson = useMemo(() => {
     return salespeople?.find(sp => sp.id === id);
   }, [salespeople, id]);
+
+  const currentGoal = useMemo(() => {
+    return goals?.[0] || null;
+  }, [goals]);
 
   const {
     planInputs,
@@ -179,7 +186,7 @@ export default function IndividualPlanningPage() {
     };
   }, [yearSummaries]);
 
-  const isLoading = loadingSalespeople || loadingCommissions || loadingSummaries || loadingPlan;
+  const isLoading = loadingSalespeople || loadingCommissions || loadingSummaries || loadingPlan || loadingGoals;
 
   if (isLoading) {
     return (
@@ -231,6 +238,16 @@ export default function IndividualPlanningPage() {
       {/* Values Section at the top */}
       <div className="mb-6">
         <ValuesSection />
+      </div>
+
+      {/* 2026 Goals Card */}
+      <div className="mb-6">
+        <GoalsSummaryCard
+          goal={currentGoal}
+          salespersonName={salesperson.name}
+          currentPlanRevenue={planInputs.targetRevenue}
+          formatCurrency={formatCurrency}
+        />
       </div>
 
       {/* Header - More personalized */}
