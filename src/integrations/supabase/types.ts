@@ -89,6 +89,45 @@ export type Database = {
         }
         Relationships: []
       }
+      deal_pipeline: {
+        Row: {
+          client_name: string
+          created_at: string | null
+          expected_close_date: string
+          expected_value: number | null
+          id: string
+          notes: string | null
+          probability: number | null
+          salesperson_id: string
+          stage: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_name: string
+          created_at?: string | null
+          expected_close_date: string
+          expected_value?: number | null
+          id?: string
+          notes?: string | null
+          probability?: number | null
+          salesperson_id: string
+          stage?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_name?: string
+          created_at?: string | null
+          expected_close_date?: string
+          expected_value?: number | null
+          id?: string
+          notes?: string | null
+          probability?: number | null
+          salesperson_id?: string
+          stage?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       goal_scenarios: {
         Row: {
           created_at: string | null
