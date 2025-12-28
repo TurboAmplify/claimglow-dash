@@ -296,6 +296,13 @@ export default function SalesPlanningPage() {
             formatCurrency={formatCurrency}
             hasSavedPlan={!!plan}
             isLoading={loadingIndividualGoals}
+            planData={plan ? {
+              target_revenue: plan.target_revenue,
+              target_commission: plan.target_commission,
+              approval_status: plan.approval_status,
+              submitted_at: plan.submitted_at,
+              approved_at: plan.approved_at
+            } : null}
           />
         </div>
       )}
