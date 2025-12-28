@@ -82,7 +82,7 @@ export default function SalesPlanningPage() {
 
   const { historicalPatterns } = useRoadmapAnalysis(commissions, planInputs.targetRevenue);
 
-  const [activeTab, setActiveTab] = useState('plan');
+  const [activeTab, setActiveTab] = useState('strategy');
 
   // Calculate actual commissions data for progress tracking
   const actualCommissions = useMemo(() => {
@@ -247,6 +247,7 @@ export default function SalesPlanningPage() {
             <SalespersonSelector
               selectedId={selectedSalespersonId}
               onSelect={setSelectedSalespersonId}
+              showTeamOption
             />
           )}
         </div>
@@ -275,6 +276,10 @@ export default function SalesPlanningPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <TabsList className="glass-card p-1 flex-wrap">
+            <TabsTrigger value="strategy" className="data-[state=active]:bg-primary/20">
+              <Compass className="w-4 h-4 mr-2" />
+              Strategy
+            </TabsTrigger>
             <TabsTrigger value="plan" className="data-[state=active]:bg-primary/20">
               <Target className="w-4 h-4 mr-2" />
               Your Plan
@@ -286,10 +291,6 @@ export default function SalesPlanningPage() {
             <TabsTrigger value="scenarios" className="data-[state=active]:bg-primary/20">
               <Layers className="w-4 h-4 mr-2" />
               Choose Your Path
-            </TabsTrigger>
-            <TabsTrigger value="strategy" className="data-[state=active]:bg-primary/20">
-              <Compass className="w-4 h-4 mr-2" />
-              Strategy
             </TabsTrigger>
             <TabsTrigger value="historical" className="data-[state=active]:bg-primary/20">
               <BarChart3 className="w-4 h-4 mr-2" />
