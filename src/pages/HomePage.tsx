@@ -24,7 +24,7 @@ const navigationCards = [
   {
     title: "Planning",
     description: "Goals and sales roadmap",
-    url: "/goals",
+    url: "/planning",
     icon: Target,
     color: "from-purple-500/20 to-purple-600/10",
     borderColor: "border-purple-500/30",
