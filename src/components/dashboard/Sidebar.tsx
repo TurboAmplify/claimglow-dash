@@ -51,12 +51,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { toast } = useToast();
   const { salesperson, isDirector } = useCurrentSalesperson();
 
-  // Dynamic planning nav items based on role
-  const planningNavItems = isDirector 
-    ? [{ title: "Team Planning", url: "/planning", icon: Target }]
-    : salesperson 
+  // Dynamic planning nav items based on role - always show Sales Planning for directors
+  const planningNavItems = [
+    { title: "Sales Planning", url: "/planning", icon: Map },
+    ...(salesperson && !isDirector 
       ? [{ title: "My Plan", url: `/planning/${salesperson.id}`, icon: Target }]
-      : [];
+      : []
+    ),
+  ];
 
   const handleSignOut = async () => {
     const { error } = await signOut();
