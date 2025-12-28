@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
 
 const mainNavItems = [
   { title: "Home", url: "/", icon: Home },
@@ -39,10 +40,6 @@ const salesNavItems = [
   { title: "Import Data", url: "/import-commissions", icon: Upload },
 ];
 
-const planningNavItems = [
-  { title: "Sales Planning", url: "/planning", icon: Target },
-];
-
 interface SidebarProps {
   onNavigate?: () => void;
 }
@@ -52,6 +49,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { salesperson, isDirector } = useCurrentSalesperson();
+
+  // Dynamic planning nav items based on role
+  const planningNavItems = isDirector 
+    ? [{ title: "Team Planning", url: "/planning", icon: Target }]
+    : salesperson 
+      ? [{ title: "My Plan", url: `/planning/${salesperson.id}`, icon: Target }]
+      : [];
 
   const handleSignOut = async () => {
     const { error } = await signOut();
