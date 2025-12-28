@@ -251,6 +251,56 @@ export type Database = {
           },
         ]
       }
+      sales_plans: {
+        Row: {
+          avg_fee_percent: number
+          commission_percent: number
+          created_at: string
+          id: string
+          is_active: boolean
+          salesperson_id: string
+          selected_scenario: string
+          target_commission: number
+          target_revenue: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          avg_fee_percent?: number
+          commission_percent?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          salesperson_id: string
+          selected_scenario?: string
+          target_commission?: number
+          target_revenue?: number
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          avg_fee_percent?: number
+          commission_percent?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          salesperson_id?: string
+          selected_scenario?: string
+          target_commission?: number
+          target_revenue?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_plans_salesperson_id_fkey"
+            columns: ["salesperson_id"]
+            isOneToOne: false
+            referencedRelation: "salespeople"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       salespeople: {
         Row: {
           created_at: string
