@@ -16,9 +16,12 @@ interface SalespersonOverviewProps {
   } | null;
   goal?: SalesGoal;
   salespersonName: string;
+  statsYear?: number;
 }
 
-export function SalespersonOverview({ stats, goal, salespersonName }: SalespersonOverviewProps) {
+export function SalespersonOverview({ stats, goal, salespersonName, statsYear = 2025 }: SalespersonOverviewProps) {
+  const goalYear = goal?.year || statsYear;
+  
   if (!stats) {
     return (
       <div className="glass-card p-8 text-center">
@@ -46,6 +49,11 @@ export function SalespersonOverview({ stats, goal, salespersonName }: Salesperso
 
   return (
     <div className="space-y-6">
+      {/* Year Context Header */}
+      <div className="text-sm text-muted-foreground">
+        Showing {statsYear} performance data
+      </div>
+      
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <KPICard
@@ -111,7 +119,7 @@ export function SalespersonOverview({ stats, goal, salespersonName }: Salesperso
         <div className="glass-card p-6 animate-fade-in" style={{ animationDelay: "700ms" }}>
           <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
             <Target className="w-5 h-5 text-primary" />
-            {new Date().getFullYear()} Goal Progress
+            {goalYear} Goal Progress
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -147,7 +155,7 @@ export function SalespersonOverview({ stats, goal, salespersonName }: Salesperso
       {!goal && (
         <div className="glass-card p-6 text-center animate-fade-in" style={{ animationDelay: "700ms" }}>
           <Target className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-          <p className="text-muted-foreground">No goals set for {new Date().getFullYear()}</p>
+          <p className="text-muted-foreground">No goals set for {statsYear}</p>
           <p className="text-sm text-muted-foreground mt-1">
             Switch to the Goals tab to set targets
           </p>

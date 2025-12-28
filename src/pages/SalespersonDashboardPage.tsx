@@ -19,12 +19,16 @@ import { useMemo, useEffect } from "react";
 export default function SalespersonDashboardPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const currentYear = 2026; // Planning year for 2026 goals
+  
+  // Use 2025 for current performance/stats, 2026 for planning
+  const statsYear = 2025;
+  const planningYear = 2026;
 
   const { data: salespeople, isLoading: loadingSalespeople } = useSalespeople();
   const { data: commissions, isLoading: loadingCommissions } = useSalesCommissions(id);
-  const { data: goals, isLoading: loadingGoals } = useSalesGoals(id, currentYear);
-  const { plan, isLoading: loadingPlan } = useSalesPlan(id, currentYear);
+  // Fetch goals for both years to support fallback
+  const { data: goals, isLoading: loadingGoals } = useSalesGoals(id);
+  const { plan, isLoading: loadingPlan } = useSalesPlan(id, planningYear);
   
   const {
     planInputs,
@@ -57,16 +61,17 @@ export default function SalespersonDashboardPage() {
     return salespeople?.find((sp) => sp.role === "sales_director");
   }, [salespeople]);
 
+  // Calculate stats using the stats year (2025 performance data)
   const stats = useMemo(() => {
     if (!commissions) return null;
     
-    const currentYearCommissions = commissions.filter(c => c.year === currentYear);
-    const totalDeals = currentYearCommissions.length;
-    const totalVolume = currentYearCommissions.reduce((sum, c) => sum + (c.initial_estimate || 0), 0);
-    const totalRevisedVolume = currentYearCommissions.reduce((sum, c) => sum + (c.revised_estimate || 0), 0);
-    const totalCommissions = currentYearCommissions.reduce((sum, c) => sum + (c.commissions_paid || 0), 0);
-    const totalInsuranceChecks = currentYearCommissions.reduce((sum, c) => sum + (c.insurance_checks_ytd || 0), 0);
-    const totalNewRemainder = currentYearCommissions.reduce((sum, c) => sum + (c.new_remainder || 0), 0);
+    const statsYearCommissions = commissions.filter(c => c.year === statsYear);
+    const totalDeals = statsYearCommissions.length;
+    const totalVolume = statsYearCommissions.reduce((sum, c) => sum + (c.initial_estimate || 0), 0);
+    const totalRevisedVolume = statsYearCommissions.reduce((sum, c) => sum + (c.revised_estimate || 0), 0);
+    const totalCommissions = statsYearCommissions.reduce((sum, c) => sum + (c.commissions_paid || 0), 0);
+    const totalInsuranceChecks = statsYearCommissions.reduce((sum, c) => sum + (c.insurance_checks_ytd || 0), 0);
+    const totalNewRemainder = statsYearCommissions.reduce((sum, c) => sum + (c.new_remainder || 0), 0);
     
     return {
       totalDeals,
@@ -78,9 +83,9 @@ export default function SalespersonDashboardPage() {
       avgDealSize: totalDeals > 0 ? totalVolume / totalDeals : 0,
       commissionYield: totalVolume > 0 ? (totalCommissions / totalVolume) * 100 : 0,
     };
-  }, [commissions, currentYear]);
+  }, [commissions, statsYear]);
 
-  // Actual commissions for progress tracker
+  // Actual commissions for progress tracker (use planning year for tracking 2026 progress)
   const actualCommissions = useMemo(() => {
     if (!commissions) {
       return {
@@ -91,14 +96,14 @@ export default function SalespersonDashboardPage() {
       };
     }
 
-    const currentYearCommissions = commissions.filter(c => c.year === currentYear);
-    const totalVolume = currentYearCommissions.reduce((sum, c) => sum + (Number(c.revised_estimate) || 0), 0);
-    const totalDeals = currentYearCommissions.length;
-    const totalCommission = currentYearCommissions.reduce((sum, c) => sum + (Number(c.commissions_paid) || 0), 0);
+    const planningYearCommissions = commissions.filter(c => c.year === planningYear);
+    const totalVolume = planningYearCommissions.reduce((sum, c) => sum + (Number(c.revised_estimate) || 0), 0);
+    const totalDeals = planningYearCommissions.length;
+    const totalCommission = planningYearCommissions.reduce((sum, c) => sum + (Number(c.commissions_paid) || 0), 0);
 
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const monthlyBreakdown = monthNames.map((month, idx) => {
-      const monthCommissions = currentYearCommissions.filter(c => {
+      const monthCommissions = planningYearCommissions.filter(c => {
         if (!c.date_signed) return false;
         const date = new Date(c.date_signed);
         return date.getMonth() === idx;
@@ -111,11 +116,14 @@ export default function SalespersonDashboardPage() {
     });
 
     return { totalVolume, totalDeals, totalCommission, monthlyBreakdown };
-  }, [commissions, currentYear]);
+  }, [commissions, planningYear]);
 
+  // Find goal - prioritize stats year (2025), fallback to planning year (2026)
   const currentGoal = useMemo(() => {
-    return goals?.find((g) => g.year === currentYear);
-  }, [goals, currentYear]);
+    const statsYearGoal = goals?.find((g) => g.year === statsYear);
+    const planningYearGoal = goals?.find((g) => g.year === planningYear);
+    return statsYearGoal || planningYearGoal;
+  }, [goals, statsYear, planningYear]);
 
   const formatCurrency = (value: number) => {
     if (value >= 1000000) {
@@ -205,6 +213,7 @@ export default function SalespersonDashboardPage() {
             stats={stats} 
             goal={currentGoal}
             salespersonName={salesperson.name}
+            statsYear={statsYear}
           />
         </TabsContent>
 
@@ -224,7 +233,7 @@ export default function SalespersonDashboardPage() {
               <WeeklyDealsTracker
                 commissions={commissions || []}
                 scenario={selectedScenario}
-                currentYear={currentYear}
+                currentYear={planningYear}
                 formatCurrency={formatCurrency}
               />
 
@@ -232,7 +241,7 @@ export default function SalespersonDashboardPage() {
                 scenario={selectedScenario}
                 actualCommissions={actualCommissions}
                 formatCurrency={formatCurrency}
-                currentYear={currentYear}
+                currentYear={planningYear}
               />
 
               <DealPipeline
