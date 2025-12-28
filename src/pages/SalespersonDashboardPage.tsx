@@ -215,7 +215,7 @@ export default function SalespersonDashboardPage() {
             salespersonId={id!}
             directorId={director?.id || ""}
             formatCurrency={formatCurrency}
-            onCreatePlan={() => navigate("/planning")}
+            onCreatePlan={() => navigate(`/planning/${id}`)}
           />
 
           {/* Progress Section - only show if plan exists */}
