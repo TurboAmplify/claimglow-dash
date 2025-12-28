@@ -1,4 +1,4 @@
-import { Target, TrendingUp, FileText, CheckCircle, AlertCircle } from "lucide-react";
+import { Target, TrendingUp, FileText, CheckCircle, AlertCircle, Clock } from "lucide-react";
 import { SalesGoal } from "@/types/sales";
 
 interface GoalsSummaryCardProps {
@@ -6,13 +6,15 @@ interface GoalsSummaryCardProps {
   salespersonName: string;
   currentPlanRevenue?: number;
   formatCurrency: (value: number) => string;
+  hasSavedPlan?: boolean;
 }
 
 export function GoalsSummaryCard({ 
   goal, 
   salespersonName, 
   currentPlanRevenue = 0,
-  formatCurrency 
+  formatCurrency,
+  hasSavedPlan = false
 }: GoalsSummaryCardProps) {
   if (!goal) {
     return (
@@ -76,8 +78,17 @@ export function GoalsSummaryCard({
         </div>
       </div>
 
-      {/* Plan vs Goal comparison */}
-      {currentPlanRevenue > 0 && (
+      {/* Plan Status */}
+      {!hasSavedPlan ? (
+        <div className="p-3 rounded-lg border bg-blue-500/10 border-blue-500/20">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-blue-500" />
+            <span className="text-sm font-medium text-foreground">
+              No plan confirmed yet — create your plan below and save it
+            </span>
+          </div>
+        </div>
+      ) : currentPlanRevenue > 0 && (
         <div className={`p-3 rounded-lg border ${isOnTrack ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-amber-500/10 border-amber-500/20'}`}>
           <div className="flex items-center gap-2">
             {isOnTrack ? (
