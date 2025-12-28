@@ -7,6 +7,7 @@ interface GoalsSummaryCardProps {
   currentPlanRevenue?: number;
   formatCurrency: (value: number) => string;
   hasSavedPlan?: boolean;
+  isLoading?: boolean;
 }
 
 export function GoalsSummaryCard({ 
@@ -14,8 +15,24 @@ export function GoalsSummaryCard({
   salespersonName, 
   currentPlanRevenue = 0,
   formatCurrency,
-  hasSavedPlan = false
+  hasSavedPlan = false,
+  isLoading = false
 }: GoalsSummaryCardProps) {
+  // Show loading state while goals are being fetched
+  if (isLoading) {
+    return (
+      <div className="glass-card p-6 animate-fade-in">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-muted animate-pulse w-9 h-9" />
+          <div className="space-y-2">
+            <div className="h-5 w-32 bg-muted animate-pulse rounded" />
+            <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!goal) {
     return (
       <div className="glass-card p-6 animate-fade-in border-l-4 border-amber-500">
