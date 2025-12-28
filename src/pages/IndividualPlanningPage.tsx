@@ -1,7 +1,8 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useYearSummaries, useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions";
 import { useMemo, useState, useEffect } from "react";
-import { Loader2, Target, TrendingUp, BarChart3, Map as MapIcon, Layers, Compass, Save, Activity, ArrowLeft, User } from "lucide-react";
+import { Loader2, Target, TrendingUp, BarChart3, Map as MapIcon, Layers, Compass, Save, Activity, ArrowLeft, User, Send } from "lucide-react";
+import { usePlanApproval } from "@/hooks/usePlanApproval";
 import { ValuesSection } from "@/components/goals/ValuesSection";
 import { PlanCreator } from "@/components/planning/PlanCreator";
 import { ScenarioCard } from "@/components/planning/ScenarioCard";
@@ -59,6 +60,12 @@ export default function IndividualPlanningPage() {
   } = usePlanScenarios();
 
   const { plan, savePlan, isSaving, isLoading: loadingPlan } = useSalesPlan(id, currentYear);
+  const { submitForApproval, isSubmitting } = usePlanApproval();
+
+  // Get director ID for submission
+  const directorId = useMemo(() => {
+    return salespeople?.find(sp => sp.role === "sales_director")?.id;
+  }, [salespeople]);
 
   // Load saved plan on mount, or initialize from goals if no plan exists
   useEffect(() => {
@@ -127,6 +134,21 @@ export default function IndividualPlanningPage() {
       selected_scenario: selectedScenarioId,
     });
   };
+
+  const handleSubmitForReview = () => {
+    if (!plan || !id || !directorId) return;
+    submitForApproval({
+      planId: plan.id,
+      senderId: id,
+      directorId,
+    });
+  };
+
+  const canSubmitForReview = plan && 
+    plan.approval_status !== 'pending' && 
+    plan.approval_status !== 'pending_approval' && 
+    plan.approval_status !== 'approved' &&
+    directorId;
 
   const formatCurrency = (value: number) => {
     if (value >= 1000000) {
@@ -313,14 +335,27 @@ export default function IndividualPlanningPage() {
             </TabsTrigger>
           </TabsList>
 
-          <Button 
-            onClick={handleSavePlan} 
-            disabled={isSaving || !id}
-            className="gap-2"
-          >
-            <Save className="w-4 h-4" />
-            {isSaving ? "Saving..." : plan ? "Update Plan" : "Save Plan"}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleSavePlan} 
+              disabled={isSaving || !id}
+              className="gap-2"
+            >
+              <Save className="w-4 h-4" />
+              {isSaving ? "Saving..." : plan ? "Update Plan" : "Save Plan"}
+            </Button>
+            {canSubmitForReview && (
+              <Button 
+                onClick={handleSubmitForReview} 
+                disabled={isSubmitting}
+                variant="outline"
+                className="gap-2 border-primary text-primary hover:bg-primary/10"
+              >
+                <Send className="w-4 h-4" />
+                {isSubmitting ? "Submitting..." : "Submit for Review"}
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Strategy Tab */}
