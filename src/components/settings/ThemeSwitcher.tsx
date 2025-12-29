@@ -35,6 +35,16 @@ const themes: ThemeOption[] = [
       secondary: 'bg-[hsl(142,76%,45%)]',
     },
   },
+  {
+    id: 'amber-glow',
+    name: 'Amber Glow',
+    description: 'Warm amber & gold tones',
+    preview: {
+      bg: 'bg-[hsl(25,30%,8%)]',
+      primary: 'bg-[hsl(32,95%,50%)]',
+      accent: 'bg-[hsl(15,90%,55%)]',
+    },
+  },
 ];
 
 export function ThemeSwitcher() {

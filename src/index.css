@@ -137,6 +137,74 @@
                             0 0 0 1px hsl(220 90% 55% / 0.2);
   }
 
+  /* Amber Glow Theme - warm golden tones with high contrast for readability */
+  .theme-amber-glow {
+    --background: 25 30% 8%;
+    --foreground: 40 30% 95%;
+
+    --card: 25 35% 12%;
+    --card-foreground: 40 30% 95%;
+
+    --popover: 25 35% 10%;
+    --popover-foreground: 40 30% 95%;
+
+    --primary: 32 95% 50%;
+    --primary-foreground: 25 30% 8%;
+
+    --secondary: 25 35% 16%;
+    --secondary-foreground: 40 30% 95%;
+
+    --muted: 25 30% 15%;
+    --muted-foreground: 35 20% 60%;
+
+    --accent: 15 90% 55%;
+    --accent-foreground: 40 30% 95%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 40 30% 95%;
+
+    --success: 142 76% 45%;
+    --success-foreground: 40 30% 95%;
+
+    --warning: 45 100% 50%;
+    --warning-foreground: 25 30% 8%;
+
+    --border: 30 30% 22%;
+    --input: 30 30% 20%;
+    --ring: 32 95% 50%;
+
+    --radius: 0.75rem;
+
+    /* Glassmorphic tokens - warm tinted glass */
+    --glass-bg: 25 35% 14%;
+    --glass-border: 30 35% 28%;
+    --glass-highlight: 32 95% 50%;
+    
+    /* Warm glow effects */
+    --glow-primary: 32 95% 50%;
+    --glow-accent: 15 90% 55%;
+    --glow-success: 142 76% 45%;
+    --glow-destructive: 0 84% 60%;
+
+    /* Sidebar */
+    --sidebar-background: 25 35% 10%;
+    --sidebar-foreground: 40 25% 85%;
+    --sidebar-primary: 32 95% 50%;
+    --sidebar-primary-foreground: 25 30% 8%;
+    --sidebar-accent: 25 35% 18%;
+    --sidebar-accent-foreground: 40 30% 95%;
+    --sidebar-border: 30 30% 18%;
+    --sidebar-ring: 32 95% 50%;
+
+    /* 3D elevation for cards - warm shadows */
+    --card-elevation: 0 20px 50px -12px hsl(25 50% 15% / 0.5),
+                      0 8px 20px -8px hsl(0 0% 0% / 0.4),
+                      0 0 0 1px hsl(32 95% 50% / 0.15);
+    --card-elevation-hover: 0 25px 60px -12px hsl(32 80% 30% / 0.5),
+                            0 12px 25px -8px hsl(0 0% 0% / 0.5),
+                            0 0 0 1px hsl(32 95% 50% / 0.25);
+  }
+
   .dark {
     --background: 222 47% 6%;
     --foreground: 210 40% 98%;
@@ -175,6 +243,34 @@
     radial-gradient(ellipse 400px 250px at 10% 80%, hsl(265 89% 60% / 0.1), transparent),
     /* Hexagonal pattern */
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104' viewBox='0 0 60 104'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%234a5568' fill-opacity='0.15'%3E%3Cpath d='M30 0l25.98 15v30L30 60 4.02 45V15L30 0zm0 60l25.98 15v30L30 120 4.02 105V75L30 60z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Amber glow background */
+.theme-amber-glow .amber-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: hsl(25 30% 8%);
+  background-image: 
+    url('/images/amber-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  opacity: 0.4;
+}
+
+/* Overlay to ensure text readability on amber theme */
+.theme-amber-glow .amber-background::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    hsl(25 30% 8% / 0.7) 0%,
+    hsl(25 30% 8% / 0.5) 50%,
+    hsl(25 30% 8% / 0.6) 100%
+  );
 }
 
 @layer components {
@@ -240,6 +336,41 @@
       hsl(350 85% 55% / 0.5),
       hsl(142 76% 45% / 0.5),
       hsl(265 89% 60% / 0.4)
+    );
+    opacity: 0.7;
+  }
+
+  /* Enhanced 3D cards for amber-glow theme */
+  .theme-amber-glow .glass-card {
+    background: linear-gradient(
+      145deg,
+      hsl(var(--glass-bg) / 0.92) 0%,
+      hsl(var(--glass-bg) / 0.8) 50%,
+      hsl(var(--glass-bg) / 0.88) 100%
+    );
+    border: 1px solid hsl(var(--glass-border) / 0.5);
+    box-shadow: var(--card-elevation);
+  }
+
+  .theme-amber-glow .glass-card:hover {
+    box-shadow: var(--card-elevation-hover);
+    transform: translateY(-2px);
+  }
+
+  /* Warm amber edge glow for amber-glow cards */
+  .theme-amber-glow .glass-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      hsl(32 95% 50% / 0.6),
+      hsl(15 90% 55% / 0.5),
+      hsl(45 100% 50% / 0.5),
+      hsl(32 95% 50% / 0.4)
     );
     opacity: 0.7;
   }
