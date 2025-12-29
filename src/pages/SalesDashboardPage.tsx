@@ -229,7 +229,7 @@ export default function SalesDashboardPage() {
       ) : (
         <>
           {/* KPI Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             <div className="glass-card p-5 animate-fade-in">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-lg bg-primary/20">
@@ -251,16 +251,6 @@ export default function SalesDashboardPage() {
             </div>
             
             <div className="glass-card p-5 animate-fade-in" style={{ animationDelay: '100ms' }}>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-amber-500/20">
-                  <Percent className="w-5 h-5 text-amber-500" />
-                </div>
-                <span className="text-sm text-muted-foreground">Avg Split %</span>
-              </div>
-              <p className="text-2xl font-bold text-foreground">{stats?.avgSplit.toFixed(1)}%</p>
-            </div>
-            
-            <div className="glass-card p-5 animate-fade-in" style={{ animationDelay: '150ms' }}>
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 rounded-lg bg-cyan-500/20">
                   <Target className="w-5 h-5 text-cyan-500" />
