@@ -38,11 +38,9 @@ export function useTeamGoals(managerId?: string, year?: number) {
       
       if (teamError) throw teamError;
       
-      if (!teamMembers || teamMembers.length === 0) {
-        return [];
-      }
-      
-      const teamIds = teamMembers.map(t => t.id);
+      // Include the manager's own ID in the team (for full team view)
+      const teamIds = teamMembers?.map(t => t.id) || [];
+      teamIds.push(managerId!);
       
       let query = supabase
         .from("sales_goals")
