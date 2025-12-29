@@ -16,9 +16,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 glass-sidebar border-b border-sidebar-border/30 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-            <span className="text-primary text-sm font-bold">CT</span>
+            <span className="text-primary text-sm font-bold">DM</span>
           </div>
-          <span className="font-semibold text-foreground">Commission Tracker</span>
+          <span className="font-semibold text-foreground">DealMetrics</span>
         </div>
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

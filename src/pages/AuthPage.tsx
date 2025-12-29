@@ -142,7 +142,7 @@ export default function AuthPage() {
               <BarChart3 className="w-8 h-8 text-primary" />
             </div>
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-foreground">Commission Tracker</h1>
+              <h1 className="text-2xl font-bold text-foreground">DealMetrics</h1>
               <p className="text-muted-foreground mt-1">
                 {isLogin ? 'Sign in to your account' : 'Create a new account'}
               </p>
