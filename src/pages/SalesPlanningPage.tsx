@@ -26,6 +26,7 @@ import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
 import { useSalesGoals, useTeamGoals } from "@/hooks/useSalesGoals";
 import { useHypotheticalDeals } from "@/hooks/useHypotheticalDeals";
 import { useDealPipeline } from "@/hooks/useDealPipeline";
+import { useDealSizeAnalysis } from "@/hooks/useDealSizeAnalysis";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Navigate, useNavigate } from "react-router-dom";
@@ -89,6 +90,9 @@ export default function SalesPlanningPage() {
     currentUser?.role === "sales_director" ? currentUser.id : undefined, 
     currentYear
   );
+
+  // Deal size analysis for historical insights
+  const { analysis: dealAnalysis, isLoading: loadingDealAnalysis } = useDealSizeAnalysis();
 
   const currentGoal = useMemo(() => {
     return individualGoals?.[0] || null;
@@ -532,6 +536,13 @@ export default function SalesPlanningPage() {
               updatePlanInput={updatePlanInput}
               formatCurrency={formatCurrency}
               salespersonName={selectedSalesperson?.name}
+              dealInsights={dealAnalysis ? dealAnalysis.getInsightsForTargetDealSize(
+                planInputs.targetRevenue / (planInputs.targetDeals || 1)
+              ) : null}
+              dealMix={dealAnalysis ? dealAnalysis.getDealMixEstimate(
+                planInputs.targetDeals,
+                planInputs.targetRevenue
+              ) : null}
             />
           )}
           
