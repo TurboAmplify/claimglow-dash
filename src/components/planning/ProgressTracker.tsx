@@ -1,8 +1,9 @@
 import { useMemo } from "react";
-import { TrendingUp, TrendingDown, Target, AlertCircle, CheckCircle2, Calendar } from "lucide-react";
+import { TrendingUp, TrendingDown, Target, AlertCircle, CheckCircle2, Calendar, FlaskConical } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { ScenarioPath } from "@/hooks/usePlanScenarios";
+import { HypotheticalDeal } from "@/hooks/useHypotheticalDeals";
 
 interface ProgressTrackerProps {
   scenario: ScenarioPath;
@@ -14,13 +15,15 @@ interface ProgressTrackerProps {
   };
   formatCurrency: (value: number) => string;
   currentYear: number;
+  hypotheticalDeals?: HypotheticalDeal[];
 }
 
 export function ProgressTracker({ 
   scenario, 
   actualCommissions, 
   formatCurrency,
-  currentYear 
+  currentYear,
+  hypotheticalDeals = []
 }: ProgressTrackerProps) {
   const currentMonth = new Date().getMonth(); // 0-11
   const currentQuarter = Math.floor(currentMonth / 3) + 1;
@@ -80,6 +83,31 @@ export function ProgressTracker({
     };
   }, [scenario, actualCommissions, currentMonth, currentQuarter]);
 
+  // Calculate hypothetical impact
+  const hypotheticalImpact = useMemo(() => {
+    if (hypotheticalDeals.length === 0) return null;
+    
+    const totalValue = hypotheticalDeals.reduce((sum, d) => sum + d.expected_value, 0);
+    const weightedValue = hypotheticalDeals.reduce((sum, d) => sum + (d.expected_value * d.probability / 100), 0);
+    const dealCount = hypotheticalDeals.length;
+    
+    const combinedVolume = actualCommissions.totalVolume + weightedValue;
+    const combinedDeals = actualCommissions.totalDeals + dealCount;
+    
+    const combinedVolumeProgress = scenario.totalVolume > 0 
+      ? (combinedVolume / scenario.totalVolume) * 100 
+      : 0;
+    
+    return {
+      totalValue,
+      weightedValue,
+      dealCount,
+      combinedVolume,
+      combinedDeals,
+      combinedVolumeProgress: Math.min(combinedVolumeProgress, 100),
+    };
+  }, [hypotheticalDeals, actualCommissions, scenario]);
+
   const getStatusColor = (variance: number) => {
     if (variance >= 5) return "text-emerald-500";
     if (variance >= -5) return "text-amber-500";
@@ -129,6 +157,42 @@ export function ProgressTracker({
           </div>
         </div>
       </div>
+
+      {/* Hypothetical Impact Banner */}
+      {hypotheticalImpact && (
+        <div className="p-4 rounded-xl border-2 border-dashed border-violet-500/50 bg-violet-500/5 animate-fade-in">
+          <div className="flex items-center gap-3 mb-3">
+            <FlaskConical className="w-5 h-5 text-violet-500" />
+            <span className="font-semibold text-foreground">With Hypothetical Deals</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">Additional Volume</p>
+              <p className="text-lg font-bold text-violet-600">
+                +{formatCurrency(hypotheticalImpact.weightedValue)}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">Additional Deals</p>
+              <p className="text-lg font-bold text-violet-600">
+                +{hypotheticalImpact.dealCount}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">Combined Volume</p>
+              <p className="text-lg font-bold text-foreground">
+                {formatCurrency(hypotheticalImpact.combinedVolume)}
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">Combined Progress</p>
+              <p className="text-lg font-bold text-foreground">
+                {hypotheticalImpact.combinedVolumeProgress.toFixed(1)}%
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Key Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
