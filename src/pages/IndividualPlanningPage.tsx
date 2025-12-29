@@ -370,6 +370,7 @@ export default function IndividualPlanningPage() {
             planInputs={planInputs}
             updatePlanInput={updatePlanInput}
             formatCurrency={formatCurrency}
+            salespersonName={salesperson?.name}
           />
 
           {/* Quick Scenario Preview */}
