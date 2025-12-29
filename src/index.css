@@ -5,8 +5,9 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* Dark glassmorphic theme */
+  :root,
+  .theme-cyan-glass {
+    /* Dark glassmorphic theme - Cyan Glass */
     --background: 222 47% 6%;
     --foreground: 210 40% 98%;
 
@@ -63,6 +64,72 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 222 47% 16%;
     --sidebar-ring: 172 66% 50%;
+
+    /* Theme-specific background */
+    --theme-bg-pattern: none;
+  }
+
+  /* Neon Hex Theme */
+  .theme-neon-hex {
+    --background: 225 50% 5%;
+    --foreground: 210 40% 98%;
+
+    --card: 225 50% 8%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 225 50% 7%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 220 90% 55%;
+    --primary-foreground: 225 50% 5%;
+
+    --secondary: 225 50% 12%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 225 50% 12%;
+    --muted-foreground: 220 20% 55%;
+
+    --accent: 350 85% 55%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 350 85% 55%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 142 76% 45%;
+    --success-foreground: 210 40% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 225 50% 5%;
+
+    --border: 225 50% 15%;
+    --input: 225 50% 15%;
+    --ring: 220 90% 55%;
+
+    --radius: 0.75rem;
+
+    /* Glassmorphic tokens */
+    --glass-bg: 225 50% 8%;
+    --glass-border: 225 50% 18%;
+    --glass-highlight: 220 90% 55%;
+    
+    /* Multi-color glow effects */
+    --glow-primary: 220 90% 55%;
+    --glow-accent: 350 85% 55%;
+    --glow-success: 142 76% 45%;
+    --glow-destructive: 350 85% 55%;
+
+    /* Sidebar */
+    --sidebar-background: 225 50% 6%;
+    --sidebar-foreground: 210 40% 85%;
+    --sidebar-primary: 220 90% 55%;
+    --sidebar-primary-foreground: 225 50% 5%;
+    --sidebar-accent: 225 50% 12%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 225 50% 14%;
+    --sidebar-ring: 220 90% 55%;
+
+    /* Hexagonal background pattern */
+    --theme-bg-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23334155' fill-opacity='0.08'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
 
   .dark {
@@ -79,6 +146,13 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Plus Jakarta Sans', sans-serif;
+    background-image: var(--theme-bg-pattern);
+    transition: background-color 0.3s ease, background-image 0.3s ease;
+  }
+
+  /* Theme transition for smooth switching */
+  :root {
+    transition: all 0.3s ease;
   }
 }
 

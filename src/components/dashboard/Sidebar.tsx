@@ -20,6 +20,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
+import { SettingsPanel } from "@/components/settings/SettingsPanel";
 
 const mainNavItems = [
   { title: "Home", url: "/", icon: Home },
@@ -198,6 +199,9 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 
       {/* User section and Collapse Toggle */}
       <div className="p-4 border-t border-sidebar-border/30 space-y-2">
+        {/* Settings Panel */}
+        <SettingsPanel collapsed={collapsed} />
+        
         {/* Sign Out Button */}
         {user && (
           <button
