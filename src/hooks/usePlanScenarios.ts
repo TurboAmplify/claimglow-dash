@@ -56,21 +56,18 @@ export function usePlanScenarios() {
   }, []);
 
   const scenarios = useMemo<ScenarioPath[]>(() => {
-    const { targetCommission, avgFeePercent, commissionPercent } = planInputs;
+    const { targetRevenue, targetCommission, targetDeals, avgFeePercent, commissionPercent } = planInputs;
     
-    // Reverse calculate required volume from target commission
-    // targetCommission = volume * (avgFeePercent/100) * (commissionPercent/100)
-    // volume = targetCommission / (avgFeePercent/100) / (commissionPercent/100)
-    const calcRequiredVolume = (commission: number) => {
-      if (avgFeePercent === 0 || commissionPercent === 0) return 0;
-      return commission / (avgFeePercent / 100) / (commissionPercent / 100);
-    };
+    // Use targetRevenue from plan inputs as the base volume
+    const requiredVolume = targetRevenue;
 
-    const requiredVolume = calcRequiredVolume(targetCommission);
+    // Base deal count from user's plan - scenarios adjust around this
+    const baseDealCount = targetDeals || 40;
 
-    // Scenario 1: Conservative / Defensive Execution - More deals, smaller avg size
-    const conservativeDealCount = 48;
+    // Scenario 1: Conservative / Defensive Execution - 30% more deals, smaller avg size
+    const conservativeDealCount = Math.round(baseDealCount * 1.3);
     const conservativeAvgSize = requiredVolume / conservativeDealCount;
+    const conservativeCommission = requiredVolume * (avgFeePercent / 100) * (commissionPercent / 100);
     const conservativeScenario: ScenarioPath = {
       id: "conservative",
       name: "Conservative",
@@ -81,7 +78,7 @@ export function usePlanScenarios() {
       dealCount: conservativeDealCount,
       avgDealSize: conservativeAvgSize,
       totalVolume: requiredVolume,
-      projectedCommission: targetCommission,
+      projectedCommission: conservativeCommission,
       quarterlyBreakdown: {
         q1: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q1), volume: requiredVolume * QUARTERLY_WEIGHTS.q1 },
         q2: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q2), volume: requiredVolume * QUARTERLY_WEIGHTS.q2 },
@@ -98,9 +95,10 @@ export function usePlanScenarios() {
       color: "hsl(142, 76%, 36%)", // emerald
     };
 
-    // Scenario 2: Balanced / Base-Plus Performance - Moderate deals, moderate avg size
-    const balancedDealCount = 33;
+    // Scenario 2: Balanced / Base-Plus Performance - Uses exact deal count from plan
+    const balancedDealCount = baseDealCount;
     const balancedAvgSize = requiredVolume / balancedDealCount;
+    const balancedCommission = requiredVolume * (avgFeePercent / 100) * (commissionPercent / 100);
     const balancedScenario: ScenarioPath = {
       id: "balanced",
       name: "Balanced",
@@ -111,7 +109,7 @@ export function usePlanScenarios() {
       dealCount: balancedDealCount,
       avgDealSize: balancedAvgSize,
       totalVolume: requiredVolume,
-      projectedCommission: targetCommission,
+      projectedCommission: balancedCommission,
       quarterlyBreakdown: {
         q1: { deals: Math.round(balancedDealCount * QUARTERLY_WEIGHTS.q1), volume: requiredVolume * QUARTERLY_WEIGHTS.q1 },
         q2: { deals: Math.round(balancedDealCount * QUARTERLY_WEIGHTS.q2), volume: requiredVolume * QUARTERLY_WEIGHTS.q2 },
@@ -128,9 +126,10 @@ export function usePlanScenarios() {
       color: "hsl(var(--primary))", // primary blue
     };
 
-    // Scenario 3: Commercial & Industrial Heavy Outcome - Fewer deals, larger avg size
-    const commercialHeavyDealCount = 22;
+    // Scenario 3: Commercial & Industrial Heavy Outcome - 30% fewer deals, larger avg size
+    const commercialHeavyDealCount = Math.round(baseDealCount * 0.7);
     const commercialHeavyAvgSize = requiredVolume / commercialHeavyDealCount;
+    const commercialHeavyCommission = requiredVolume * (avgFeePercent / 100) * (commissionPercent / 100);
     const commercialHeavyScenario: ScenarioPath = {
       id: "commercial-heavy",
       name: "Commercial & Industrial Heavy",
@@ -141,7 +140,7 @@ export function usePlanScenarios() {
       dealCount: commercialHeavyDealCount,
       avgDealSize: commercialHeavyAvgSize,
       totalVolume: requiredVolume,
-      projectedCommission: targetCommission,
+      projectedCommission: commercialHeavyCommission,
       quarterlyBreakdown: {
         q1: { deals: Math.round(commercialHeavyDealCount * 0.15), volume: requiredVolume * 0.15 },
         q2: { deals: Math.round(commercialHeavyDealCount * 0.25), volume: requiredVolume * 0.25 },
