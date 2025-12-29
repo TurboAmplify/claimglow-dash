@@ -471,13 +471,13 @@ export default function SalesPlanningPage() {
               <TrendingUp className="w-4 h-4 mr-2" />
               Your Plan
             </TabsTrigger>
-            <TabsTrigger value="progress" className="data-[state=active]:bg-primary/20">
-              <Activity className="w-4 h-4 mr-2" />
-              Progress
-            </TabsTrigger>
             <TabsTrigger value="scenarios" className="data-[state=active]:bg-primary/20">
               <Layers className="w-4 h-4 mr-2" />
               Choose Your Path
+            </TabsTrigger>
+            <TabsTrigger value="progress" className="data-[state=active]:bg-primary/20">
+              <Activity className="w-4 h-4 mr-2" />
+              Progress
             </TabsTrigger>
             <TabsTrigger value="historical" className="data-[state=active]:bg-primary/20">
               <BarChart3 className="w-4 h-4 mr-2" />
