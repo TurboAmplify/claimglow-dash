@@ -273,6 +273,74 @@
                             0 0 0 1px hsl(220 10% 40% / 0.3);
   }
 
+  /* Violet Dew Theme - fresh purple and lavender */
+  .theme-violet-dew {
+    --background: 270 50% 12%;
+    --foreground: 270 20% 95%;
+
+    --card: 270 45% 16%;
+    --card-foreground: 270 20% 95%;
+
+    --popover: 270 45% 14%;
+    --popover-foreground: 270 20% 95%;
+
+    --primary: 270 70% 60%;
+    --primary-foreground: 270 50% 10%;
+
+    --secondary: 270 40% 22%;
+    --secondary-foreground: 270 20% 95%;
+
+    --muted: 270 35% 20%;
+    --muted-foreground: 270 20% 60%;
+
+    --accent: 280 80% 70%;
+    --accent-foreground: 270 50% 10%;
+
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 270 20% 95%;
+
+    --success: 160 60% 45%;
+    --success-foreground: 270 20% 95%;
+
+    --warning: 45 90% 55%;
+    --warning-foreground: 270 50% 10%;
+
+    --border: 270 40% 28%;
+    --input: 270 40% 24%;
+    --ring: 270 70% 60%;
+
+    --radius: 0.75rem;
+
+    /* Glassmorphic tokens - violet tinted glass */
+    --glass-bg: 270 45% 18%;
+    --glass-border: 270 40% 32%;
+    --glass-highlight: 270 70% 65%;
+    
+    /* Violet glow effects */
+    --glow-primary: 270 70% 60%;
+    --glow-accent: 280 80% 70%;
+    --glow-success: 160 60% 45%;
+    --glow-destructive: 0 70% 55%;
+
+    /* Sidebar */
+    --sidebar-background: 270 50% 14%;
+    --sidebar-foreground: 270 20% 85%;
+    --sidebar-primary: 270 70% 60%;
+    --sidebar-primary-foreground: 270 50% 10%;
+    --sidebar-accent: 270 40% 22%;
+    --sidebar-accent-foreground: 270 20% 95%;
+    --sidebar-border: 270 40% 22%;
+    --sidebar-ring: 270 70% 60%;
+
+    /* 3D elevation for cards - purple shadows */
+    --card-elevation: 0 20px 50px -12px hsl(270 60% 20% / 0.5),
+                      0 8px 20px -8px hsl(0 0% 0% / 0.4),
+                      0 0 0 1px hsl(270 70% 60% / 0.15);
+    --card-elevation-hover: 0 25px 60px -12px hsl(270 70% 30% / 0.6),
+                            0 12px 25px -8px hsl(0 0% 0% / 0.5),
+                            0 0 0 1px hsl(270 70% 60% / 0.25);
+  }
+
   .dark {
     --background: 222 47% 6%;
     --foreground: 210 40% 98%;
@@ -443,6 +511,34 @@
   );
 }
 
+/* Violet dew background */
+.theme-violet-dew .violet-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: hsl(270 50% 12%);
+  background-image: 
+    url('/images/violet-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  opacity: 0.45;
+}
+
+/* Overlay for violet theme readability */
+.theme-violet-dew .violet-background::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    hsl(270 50% 12% / 0.6) 0%,
+    hsl(270 50% 12% / 0.4) 50%,
+    hsl(270 50% 12% / 0.55) 100%
+  );
+}
+
 @layer components {
   /* Glassmorphic card */
   .glass-card {
@@ -579,6 +675,41 @@
       hsl(220 10% 40% / 0.3)
     );
     opacity: 0.8;
+  }
+
+  /* Enhanced 3D cards for violet-dew theme */
+  .theme-violet-dew .glass-card {
+    background: linear-gradient(
+      145deg,
+      hsl(var(--glass-bg) / 0.92) 0%,
+      hsl(var(--glass-bg) / 0.78) 50%,
+      hsl(var(--glass-bg) / 0.88) 100%
+    );
+    border: 1px solid hsl(var(--glass-border) / 0.45);
+    box-shadow: var(--card-elevation);
+  }
+
+  .theme-violet-dew .glass-card:hover {
+    box-shadow: var(--card-elevation-hover);
+    transform: translateY(-2px);
+  }
+
+  /* Purple edge glow for violet-dew cards */
+  .theme-violet-dew .glass-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      hsl(270 70% 60% / 0.5),
+      hsl(280 80% 70% / 0.6),
+      hsl(260 70% 55% / 0.5),
+      hsl(270 70% 60% / 0.4)
+    );
+    opacity: 0.75;
   }
 
   /* Neon glow effects */
