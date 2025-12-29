@@ -26,6 +26,8 @@ interface DealSizeAnalysis {
     medium: number;
     large: number;
     veryLarge: number;
+    enterprise: number;
+    mega: number;
     avgDealSize: number;
   };
 }
@@ -33,8 +35,10 @@ interface DealSizeAnalysis {
 const DEAL_BUCKETS = [
   { label: "Small", min: 0, max: 25000 },
   { label: "Medium", min: 25000, max: 75000 },
-  { label: "Large", min: 75000, max: 200000 },
-  { label: "Very Large", min: 200000, max: Infinity },
+  { label: "Large", min: 75000, max: 150000 },
+  { label: "Very Large", min: 150000, max: 300000 },
+  { label: "Enterprise", min: 300000, max: 500000 },
+  { label: "Mega", min: 500000, max: Infinity },
 ];
 
 export function useDealSizeAnalysis(): {
@@ -124,20 +128,21 @@ export function useDealSizeAnalysis(): {
   const getDealMixEstimate = (targetDeals: number, targetRevenue: number) => {
     const avgDealSize = targetRevenue / (targetDeals || 1);
 
-    // Calculate distribution based on historical patterns
-    const totalHistoricalDeals = buckets.reduce((sum, b) => sum + b.count, 0);
-
-    // Weight the distribution based on target deal size
-    let weights = { small: 0.25, medium: 0.35, large: 0.25, veryLarge: 0.15 };
+    // Weight the distribution based on target deal size with new granular buckets
+    let weights = { small: 0.20, medium: 0.30, large: 0.25, veryLarge: 0.15, enterprise: 0.07, mega: 0.03 };
 
     if (avgDealSize < 25000) {
-      weights = { small: 0.5, medium: 0.3, large: 0.15, veryLarge: 0.05 };
+      weights = { small: 0.50, medium: 0.30, large: 0.12, veryLarge: 0.05, enterprise: 0.02, mega: 0.01 };
     } else if (avgDealSize < 75000) {
-      weights = { small: 0.2, medium: 0.45, large: 0.25, veryLarge: 0.1 };
-    } else if (avgDealSize < 200000) {
-      weights = { small: 0.1, medium: 0.25, large: 0.45, veryLarge: 0.2 };
+      weights = { small: 0.20, medium: 0.45, large: 0.20, veryLarge: 0.10, enterprise: 0.04, mega: 0.01 };
+    } else if (avgDealSize < 150000) {
+      weights = { small: 0.10, medium: 0.25, large: 0.40, veryLarge: 0.15, enterprise: 0.07, mega: 0.03 };
+    } else if (avgDealSize < 300000) {
+      weights = { small: 0.05, medium: 0.15, large: 0.25, veryLarge: 0.35, enterprise: 0.15, mega: 0.05 };
+    } else if (avgDealSize < 500000) {
+      weights = { small: 0.03, medium: 0.10, large: 0.15, veryLarge: 0.25, enterprise: 0.35, mega: 0.12 };
     } else {
-      weights = { small: 0.05, medium: 0.15, large: 0.3, veryLarge: 0.5 };
+      weights = { small: 0.02, medium: 0.05, large: 0.10, veryLarge: 0.18, enterprise: 0.25, mega: 0.40 };
     }
 
     return {
@@ -145,6 +150,8 @@ export function useDealSizeAnalysis(): {
       medium: Math.round(targetDeals * weights.medium),
       large: Math.round(targetDeals * weights.large),
       veryLarge: Math.round(targetDeals * weights.veryLarge),
+      enterprise: Math.round(targetDeals * weights.enterprise),
+      mega: Math.round(targetDeals * weights.mega),
       avgDealSize,
     };
   };
