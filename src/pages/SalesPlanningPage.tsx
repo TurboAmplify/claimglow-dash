@@ -14,7 +14,7 @@ import { WeeklyDealsTracker } from "@/components/planning/WeeklyDealsTracker";
 import { DealPipeline } from "@/components/planning/DealPipeline";
 import { PlanAlertsIndicator } from "@/components/planning/PlanAlertsIndicator";
 import { TeamMemberFilter, TeamMemberSelection } from "@/components/planning/TeamMemberFilter";
-import { GoalsSummaryCard } from "@/components/planning/GoalsSummaryCard";
+
 import { WhatIfSandbox } from "@/components/planning/WhatIfSandbox";
 import { ScenarioTargetsSection } from "@/components/planning/ScenarioTargetsSection";
 import { ScenarioImpactChart } from "@/components/planning/ScenarioImpactChart";
@@ -372,26 +372,6 @@ export default function SalesPlanningPage() {
         </div>
       </div>
 
-      {/* 2026 Goals Card - Show for individual view */}
-      {!isTeamView && (
-        <div className="mb-6">
-          <GoalsSummaryCard
-            goal={currentGoal}
-            salespersonName={salespersonName}
-            currentPlanRevenue={planInputs.targetRevenue}
-            formatCurrency={formatCurrency}
-            hasSavedPlan={!!plan}
-            isLoading={loadingIndividualGoals}
-            planData={plan ? {
-              target_revenue: plan.target_revenue,
-              target_commission: plan.target_commission,
-              approval_status: plan.approval_status,
-              submitted_at: plan.submitted_at,
-              approved_at: plan.approved_at
-            } : null}
-          />
-        </div>
-      )}
 
       {/* Team Goals Summary - Show for team view */}
       {isTeamView && teamGoals && teamGoals.length > 0 && (
