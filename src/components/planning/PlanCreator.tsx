@@ -1,7 +1,8 @@
-import { Target, DollarSign, Hash, TrendingUp, Info } from "lucide-react";
+import { Target, DollarSign, Hash, TrendingUp, Info, Sparkles } from "lucide-react";
 import { PlanInputs } from "@/hooks/usePlanScenarios";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useDealSizeAnalysis } from "@/hooks/useDealSizeAnalysis";
 import { useMemo } from "react";
@@ -184,14 +185,27 @@ export function PlanCreator({
             {/* Historical Fee for This Size */}
             <div className="p-3 rounded-lg bg-muted/20 border border-border/30">
               <p className="text-xs text-muted-foreground mb-1">Avg Fee for This Deal Size</p>
-              <p className="text-sm font-medium text-foreground">
-                {dealInsights.suggestedFeePercent.toFixed(2)}%
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-medium text-foreground">
+                  {dealInsights.suggestedFeePercent.toFixed(2)}%
+                  {hasFeeInsight && (
+                    <span className={`ml-2 text-xs ${dealInsights.suggestedFeePercent > avgFeePercent ? 'text-green-500' : 'text-amber-500'}`}>
+                      ({dealInsights.suggestedFeePercent > avgFeePercent ? '+' : ''}{(dealInsights.suggestedFeePercent - avgFeePercent).toFixed(2)}% vs target)
+                    </span>
+                  )}
+                </p>
                 {hasFeeInsight && (
-                  <span className={`ml-2 text-xs ${dealInsights.suggestedFeePercent > avgFeePercent ? 'text-green-500' : 'text-amber-500'}`}>
-                    ({dealInsights.suggestedFeePercent > avgFeePercent ? '+' : ''}{(dealInsights.suggestedFeePercent - avgFeePercent).toFixed(2)}% vs target)
-                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-xs gap-1 border-primary/50 text-primary hover:bg-primary/10"
+                    onClick={() => updatePlanInput('avgFeePercent', Math.round(dealInsights.suggestedFeePercent * 100) / 100)}
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    Apply
+                  </Button>
                 )}
-              </p>
+              </div>
             </div>
 
             {/* Historical Avg Deal Size */}
