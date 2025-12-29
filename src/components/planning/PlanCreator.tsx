@@ -3,6 +3,8 @@ import { PlanInputs } from "@/hooks/usePlanScenarios";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useDealSizeAnalysis } from "@/hooks/useDealSizeAnalysis";
+import { useMemo } from "react";
 
 // Hardcoded commission percentages per salesperson
 const SALESPERSON_COMMISSION: Record<string, number> = {
@@ -11,27 +13,11 @@ const SALESPERSON_COMMISSION: Record<string, number> = {
   "Richard Goldsmith": 15, // Will change to 20% then 25% at TBD points
 };
 
-interface DealInsights {
-  bucket: { label: string; avgFeePercent: number; count: number } | null;
-  suggestedFeePercent: number;
-  historicalAvgForBucket: number;
-}
-
-interface DealMixEstimate {
-  small: number;
-  medium: number;
-  large: number;
-  veryLarge: number;
-  avgDealSize: number;
-}
-
 interface PlanCreatorProps {
   planInputs: PlanInputs;
   updatePlanInput: <K extends keyof PlanInputs>(key: K, value: PlanInputs[K]) => void;
   formatCurrency: (value: number) => string;
   salespersonName?: string;
-  dealInsights?: DealInsights | null;
-  dealMix?: DealMixEstimate | null;
 }
 
 export function PlanCreator({ 
@@ -39,8 +25,6 @@ export function PlanCreator({
   updatePlanInput, 
   formatCurrency, 
   salespersonName,
-  dealInsights,
-  dealMix 
 }: PlanCreatorProps) {
   const { targetRevenue, targetCommission, targetDeals, avgFeePercent } = planInputs;
   
@@ -53,6 +37,21 @@ export function PlanCreator({
     : 0;
 
   const avgDealSize = requiredVolume / (targetDeals || 1);
+
+  // Get deal analysis directly in component so it reacts to calculated values
+  const { analysis: dealAnalysis } = useDealSizeAnalysis();
+
+  // Calculate insights based on current avgDealSize
+  const dealInsights = useMemo(() => {
+    if (!dealAnalysis) return null;
+    return dealAnalysis.getInsightsForTargetDealSize(avgDealSize);
+  }, [dealAnalysis, avgDealSize]);
+
+  // Calculate deal mix based on current targets
+  const dealMix = useMemo(() => {
+    if (!dealAnalysis) return null;
+    return dealAnalysis.getDealMixEstimate(targetDeals, requiredVolume);
+  }, [dealAnalysis, targetDeals, requiredVolume]);
 
   const handleCommissionChange = (value: string) => {
     const numValue = parseFloat(value.replace(/[^0-9.]/g, '')) || 0;
