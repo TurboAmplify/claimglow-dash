@@ -17,6 +17,7 @@ import { usePlanScenarios } from "@/hooks/usePlanScenarios";
 import { useRoadmapAnalysis } from "@/hooks/useRoadmapAnalysis";
 import { useSalesPlan } from "@/hooks/useSalesPlan";
 import { useSalesGoals } from "@/hooks/useSalesGoals";
+import { useDealSizeAnalysis } from "@/hooks/useDealSizeAnalysis";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useParams, useNavigate } from "react-router-dom";
@@ -58,6 +59,9 @@ export default function IndividualPlanningPage() {
     selectedScenario,
     monthlyProjections,
   } = usePlanScenarios();
+
+  // Deal size analysis for historical insights
+  const { analysis: dealAnalysis, isLoading: loadingDealAnalysis } = useDealSizeAnalysis();
 
   const { plan, savePlan, isSaving, isLoading: loadingPlan } = useSalesPlan(id, currentYear);
   const { submitForApproval, isSubmitting } = usePlanApproval();
@@ -371,6 +375,13 @@ export default function IndividualPlanningPage() {
             updatePlanInput={updatePlanInput}
             formatCurrency={formatCurrency}
             salespersonName={salesperson?.name}
+            dealInsights={dealAnalysis ? dealAnalysis.getInsightsForTargetDealSize(
+              planInputs.targetRevenue / (planInputs.targetDeals || 1)
+            ) : null}
+            dealMix={dealAnalysis ? dealAnalysis.getDealMixEstimate(
+              planInputs.targetDeals,
+              planInputs.targetRevenue
+            ) : null}
           />
 
           {/* Quick Scenario Preview */}
