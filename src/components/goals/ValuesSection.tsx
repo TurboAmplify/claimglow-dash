@@ -1,9 +1,120 @@
 import { useState } from "react";
-import { Heart, ChevronDown, Target, TrendingUp, Scale, Compass, Eye, Sparkles } from "lucide-react";
+import { Heart, ChevronDown, Target, TrendingUp, Scale, Compass, Eye, Sparkles, Briefcase, Building2, Church, Home, Factory, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const PURPOSE = "To help others by being a light through happiness and kindness—building trust through honesty.";
+
+const STRATEGIC_PURPOSE = "Approach 2026 with clarity, organization, and disciplined execution. Maximize high-value opportunities across residential, commercial, industrial, and religious verticals. Build and strengthen relationships strategically. Finish 2026 strong while setting up 2027 for momentum.";
+
+const STRATEGIC_PHILOSOPHY = [
+  {
+    title: "Clarity Over Activity",
+    description: "Everything done must support high-value opportunities. Focus on actions that move the needle.",
+  },
+  {
+    title: "Quality Over Quantity",
+    description: "Fewer, stronger relationships outperform mass outreach. Be selective with claim intake.",
+  },
+  {
+    title: "Consistency Wins",
+    description: "Weekly actions, small or big, produce compounding results over time.",
+  },
+  {
+    title: "Metrics Drive Decisions",
+    description: "Every opportunity and meeting must be tracked. No guessing—all decisions from data.",
+  },
+  {
+    title: "Seasonal Alignment",
+    description: "Adjust intensity based on known seasonal loss patterns and market conditions.",
+  },
+];
+
+const OPPORTUNITY_TARGETS = [
+  {
+    title: "Residential",
+    icon: Home,
+    value: "$350k–$500k",
+    quarterlyTarget: "6–9",
+    annualTarget: "24–36",
+    contribution: "$10M–$15M",
+    notes: "High-value total-loss or heavy-smoke homes; summer storms; high-income ZIP codes.",
+    color: "bg-blue-500/10 border-blue-500/30 text-blue-600",
+  },
+  {
+    title: "Mid-Size Commercial",
+    icon: Building2,
+    value: "$1M–$1.5M",
+    quarterlyTarget: "3",
+    annualTarget: "12",
+    contribution: "$2M–$4M",
+    notes: "Schools, offices, restaurants, retail, multi-tenant properties.",
+    color: "bg-green-500/10 border-green-500/30 text-green-600",
+  },
+  {
+    title: "Large Commercial/Industrial",
+    icon: Factory,
+    value: "$750k–$10M",
+    quarterlyTarget: "2–3",
+    annualTarget: "8–12",
+    contribution: "$20M–$30M",
+    notes: "Manufacturing, warehouses, automotive, distribution, regional chains.",
+    color: "bg-amber-500/10 border-amber-500/30 text-amber-600",
+  },
+  {
+    title: "Religious Organizations",
+    icon: Church,
+    value: "$1M+",
+    quarterlyTarget: "2–5",
+    annualTarget: "8–20",
+    contribution: "Variable",
+    notes: "Large churches, temples, synagogues, mosques, ministries, retreat centers.",
+    color: "bg-purple-500/10 border-purple-500/30 text-purple-600",
+  },
+];
+
+const QUARTERLY_THEMES = [
+  {
+    quarter: "Q1",
+    title: "Foundation & Pipeline Building",
+    focus: [
+      "Reconnect with top contractors, adjusters, and referral partners",
+      "Review prior-year pipeline; identify early opportunities",
+      "Schedule initial high-quality school meetings",
+      "Identify strategic religious organizations ($1M+ potential)",
+    ],
+  },
+  {
+    quarter: "Q2",
+    title: "Commercial Development",
+    focus: [
+      "Focus on mid-size and large commercial opportunities (1–2 per month)",
+      "Engage actively with Life Styles Organization and Allen Chamber",
+      "Initiate engagement with target school-industry organization and IIAD",
+      "Pre-qualify pipeline for upcoming residential and seasonal losses",
+    ],
+  },
+  {
+    quarter: "Q3",
+    title: "Seasonal Momentum",
+    focus: [
+      "Leverage summer residential opportunities (2–3 per month)",
+      "Aggressively follow up on pending mid-size and large opportunities",
+      "Attend all strategic church fires",
+      "Mid-year pipeline review; adjust targets and priorities",
+    ],
+  },
+  {
+    quarter: "Q4",
+    title: "Close Strong & Position 2027",
+    focus: [
+      "Prioritize closing: Residential 2–3/month, Mid-size 1/month, Large 1–2/month",
+      "Intensify follow-ups with contractors, adjusters, schools, religious orgs",
+      "Attend end-of-year strategic networking events",
+      "Pre-plan and schedule high-potential Q1 2027 opportunities",
+    ],
+  },
+];
 
 const CORE_VALUES = [
   {
@@ -118,7 +229,7 @@ export function ValuesSection() {
         className={cn(
           "transition-all duration-300 ease-out",
           isExpanded
-            ? "mt-6 opacity-100 max-h-[800px]"
+            ? "mt-6 opacity-100 max-h-[1200px]"
             : "max-h-0 opacity-0 overflow-hidden mt-0"
         )}
       >
@@ -132,13 +243,146 @@ export function ValuesSection() {
         </div>
 
         {/* Tabbed Content */}
-        <Tabs defaultValue="values" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-4">
+        <Tabs defaultValue="strategy" className="w-full">
+          <TabsList className="grid w-full grid-cols-5 mb-4">
+            <TabsTrigger value="strategy" className="text-xs sm:text-sm">Strategy</TabsTrigger>
+            <TabsTrigger value="targets" className="text-xs sm:text-sm">Targets</TabsTrigger>
             <TabsTrigger value="values" className="text-xs sm:text-sm">Values</TabsTrigger>
             <TabsTrigger value="character" className="text-xs sm:text-sm">Character</TabsTrigger>
-            <TabsTrigger value="philosophy" className="text-xs sm:text-sm">Philosophy</TabsTrigger>
             <TabsTrigger value="vision" className="text-xs sm:text-sm">Vision</TabsTrigger>
           </TabsList>
+
+          {/* Strategy Tab - NEW */}
+          <TabsContent value="strategy" className="mt-0 space-y-4">
+            {/* Strategic Purpose */}
+            <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Briefcase className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-primary">2026 Strategic Intent</span>
+              </div>
+              <p className="text-sm text-foreground leading-relaxed">{STRATEGIC_PURPOSE}</p>
+            </div>
+
+            {/* Strategic Philosophy */}
+            <div>
+              <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                <Compass className="w-4 h-4 text-primary" />
+                Strategic Philosophy
+              </h3>
+              <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                {STRATEGIC_PHILOSOPHY.map((item, i) => (
+                  <div
+                    key={item.title}
+                    className="p-4 rounded-lg bg-secondary/30 border border-border/50 transition-all duration-200 hover:bg-secondary/50 hover:border-primary/30"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-bold text-primary">#{i + 1}</span>
+                      <h4 className="font-semibold text-foreground text-sm">{item.title}</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quarterly Themes */}
+            <div>
+              <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-primary" />
+                Quarterly Themes
+              </h3>
+              <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
+                {QUARTERLY_THEMES.map((q) => (
+                  <div
+                    key={q.quarter}
+                    className="p-4 rounded-lg bg-secondary/20 border border-border/50"
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="px-2 py-0.5 rounded bg-primary/20 text-primary text-xs font-bold">{q.quarter}</span>
+                      <h4 className="font-medium text-foreground text-sm">{q.title}</h4>
+                    </div>
+                    <ul className="space-y-1">
+                      {q.focus.slice(0, 2).map((item, i) => (
+                        <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                          <span className="text-primary mt-0.5">•</span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Targets Tab - NEW */}
+          <TabsContent value="targets" className="mt-0 space-y-4">
+            {/* Annual Target Banner */}
+            <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/30">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-1">2026 Annual Contribution Goal</p>
+                  <p className="text-2xl font-bold text-foreground">$45M – $60M</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Pipeline at Any Time</p>
+                  <p className="text-lg font-semibold text-foreground">$8M–$12M</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Opportunity Targets Grid */}
+            <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
+              {OPPORTUNITY_TARGETS.map((target) => {
+                const Icon = target.icon;
+                return (
+                  <div
+                    key={target.title}
+                    className={cn(
+                      "p-4 rounded-lg border transition-all duration-200 hover:scale-[1.02]",
+                      target.color
+                    )}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <Icon className="w-5 h-5" />
+                      <h4 className="font-semibold text-foreground">{target.title}</h4>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 mb-3 text-center">
+                      <div className="p-2 rounded bg-background/50">
+                        <p className="text-xs text-muted-foreground">Typical Value</p>
+                        <p className="text-sm font-semibold text-foreground">{target.value}</p>
+                      </div>
+                      <div className="p-2 rounded bg-background/50">
+                        <p className="text-xs text-muted-foreground">Quarterly</p>
+                        <p className="text-sm font-semibold text-foreground">{target.quarterlyTarget}</p>
+                      </div>
+                      <div className="p-2 rounded bg-background/50">
+                        <p className="text-xs text-muted-foreground">Annual</p>
+                        <p className="text-sm font-semibold text-foreground">{target.annualTarget}</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{target.notes}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Pipeline Expectations */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="p-3 rounded-lg bg-secondary/30 border border-border/50 text-center">
+                <p className="text-xs text-muted-foreground mb-1">Active Pipeline</p>
+                <p className="text-lg font-bold text-foreground">$8M–$12M</p>
+              </div>
+              <div className="p-3 rounded-lg bg-secondary/30 border border-border/50 text-center">
+                <p className="text-xs text-muted-foreground mb-1">Quarterly New</p>
+                <p className="text-lg font-bold text-foreground">$10M–$15M</p>
+              </div>
+              <div className="p-3 rounded-lg bg-secondary/30 border border-border/50 text-center">
+                <p className="text-xs text-muted-foreground mb-1">Quarterly Closed</p>
+                <p className="text-lg font-bold text-foreground">$4M–$7M</p>
+              </div>
+            </div>
+          </TabsContent>
 
           {/* Values Tab */}
           <TabsContent value="values" className="mt-0">
@@ -199,11 +443,8 @@ export function ValuesSection() {
                 ))}
               </div>
             </div>
-          </TabsContent>
 
-          {/* Philosophy Tab */}
-          <TabsContent value="philosophy" className="mt-0 space-y-4">
-            {/* Decision Making */}
+            {/* Philosophy */}
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <Scale className="w-4 h-4 text-blue-400" />
@@ -221,7 +462,10 @@ export function ValuesSection() {
                 ))}
               </div>
             </div>
+          </TabsContent>
 
+          {/* Vision Tab */}
+          <TabsContent value="vision" className="mt-0 space-y-4">
             {/* Faith & Integrity */}
             <div>
               <div className="flex items-center gap-2 mb-3">
@@ -240,10 +484,7 @@ export function ValuesSection() {
                 ))}
               </div>
             </div>
-          </TabsContent>
 
-          {/* Vision Tab */}
-          <TabsContent value="vision" className="mt-0 space-y-4">
             {/* Vision */}
             <div className="p-5 rounded-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/30">
               <div className="flex items-center gap-2 mb-3">
