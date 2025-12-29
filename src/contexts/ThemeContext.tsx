@@ -1,17 +1,22 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export type ThemeVariant = 'cyan-glass' | 'neon-hex' | 'amber-glow';
+export type DensityVariant = 'comfortable' | 'compact';
 
 interface ThemeContextType {
   theme: ThemeVariant;
   setTheme: (theme: ThemeVariant) => void;
+  density: DensityVariant;
+  setDensity: (density: DensityVariant) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const THEME_STORAGE_KEY = 'dealmetrics-theme';
+const DENSITY_STORAGE_KEY = 'dealmetrics-density';
 
 const validThemes: ThemeVariant[] = ['cyan-glass', 'neon-hex', 'amber-glow'];
+const validDensities: DensityVariant[] = ['comfortable', 'compact'];
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeVariant>(() => {
@@ -24,6 +29,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return 'cyan-glass';
   });
 
+  const [density, setDensityState] = useState<DensityVariant>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem(DENSITY_STORAGE_KEY);
+      if (stored && validDensities.includes(stored as DensityVariant)) {
+        return stored as DensityVariant;
+      }
+    }
+    return 'comfortable';
+  });
+
   useEffect(() => {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
     
@@ -32,12 +47,24 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.classList.add(`theme-${theme}`);
   }, [theme]);
 
+  useEffect(() => {
+    localStorage.setItem(DENSITY_STORAGE_KEY, density);
+    
+    // Remove all density classes and add the current one
+    document.documentElement.classList.remove('density-comfortable', 'density-compact');
+    document.documentElement.classList.add(`density-${density}`);
+  }, [density]);
+
   const setTheme = (newTheme: ThemeVariant) => {
     setThemeState(newTheme);
   };
 
+  const setDensity = (newDensity: DensityVariant) => {
+    setDensityState(newDensity);
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, density, setDensity }}>
       {children}
     </ThemeContext.Provider>
   );
