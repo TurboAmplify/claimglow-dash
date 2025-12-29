@@ -244,9 +244,8 @@ export function ValuesSection() {
 
         {/* Tabbed Content */}
         <Tabs defaultValue="strategy" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-4">
+          <TabsList className="grid w-full grid-cols-4 mb-4">
             <TabsTrigger value="strategy" className="text-xs sm:text-sm">Strategy</TabsTrigger>
-            <TabsTrigger value="targets" className="text-xs sm:text-sm">Targets</TabsTrigger>
             <TabsTrigger value="values" className="text-xs sm:text-sm">Values</TabsTrigger>
             <TabsTrigger value="character" className="text-xs sm:text-sm">Character</TabsTrigger>
             <TabsTrigger value="vision" className="text-xs sm:text-sm">Vision</TabsTrigger>
@@ -315,74 +314,6 @@ export function ValuesSection() {
             </div>
           </TabsContent>
 
-          {/* Targets Tab - NEW */}
-          <TabsContent value="targets" className="mt-0 space-y-4">
-            {/* Annual Target Banner */}
-            <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/30">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-1">2026 Annual Contribution Goal</p>
-                  <p className="text-2xl font-bold text-foreground">$45M – $60M</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">Pipeline at Any Time</p>
-                  <p className="text-lg font-semibold text-foreground">$8M–$12M</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Opportunity Targets Grid */}
-            <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
-              {OPPORTUNITY_TARGETS.map((target) => {
-                const Icon = target.icon;
-                return (
-                  <div
-                    key={target.title}
-                    className={cn(
-                      "p-4 rounded-lg border transition-all duration-200 hover:scale-[1.02]",
-                      target.color
-                    )}
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <Icon className="w-5 h-5" />
-                      <h4 className="font-semibold text-foreground">{target.title}</h4>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-                      <div className="p-2 rounded bg-background/50">
-                        <p className="text-xs text-muted-foreground">Typical Value</p>
-                        <p className="text-sm font-semibold text-foreground">{target.value}</p>
-                      </div>
-                      <div className="p-2 rounded bg-background/50">
-                        <p className="text-xs text-muted-foreground">Quarterly</p>
-                        <p className="text-sm font-semibold text-foreground">{target.quarterlyTarget}</p>
-                      </div>
-                      <div className="p-2 rounded bg-background/50">
-                        <p className="text-xs text-muted-foreground">Annual</p>
-                        <p className="text-sm font-semibold text-foreground">{target.annualTarget}</p>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{target.notes}</p>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Pipeline Expectations */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="p-3 rounded-lg bg-secondary/30 border border-border/50 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Active Pipeline</p>
-                <p className="text-lg font-bold text-foreground">$8M–$12M</p>
-              </div>
-              <div className="p-3 rounded-lg bg-secondary/30 border border-border/50 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Quarterly New</p>
-                <p className="text-lg font-bold text-foreground">$10M–$15M</p>
-              </div>
-              <div className="p-3 rounded-lg bg-secondary/30 border border-border/50 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Quarterly Closed</p>
-                <p className="text-lg font-bold text-foreground">$4M–$7M</p>
-              </div>
-            </div>
-          </TabsContent>
 
           {/* Values Tab */}
           <TabsContent value="values" className="mt-0">
