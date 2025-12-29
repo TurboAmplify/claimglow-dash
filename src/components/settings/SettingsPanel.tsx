@@ -42,9 +42,9 @@ export function SettingsPanel({ collapsed }: SettingsPanelProps) {
       {/* Settings Dropdown */}
       {isOpen && (
         <>
-          {/* Backdrop for mobile */}
+          {/* Backdrop - closes menu when clicking outside */}
           <div 
-            className="fixed inset-0 z-40 bg-background/50 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
           
