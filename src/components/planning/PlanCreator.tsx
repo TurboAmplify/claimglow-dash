@@ -238,7 +238,13 @@ export function PlanCreator({
                     variant="outline"
                     size="sm"
                     className="h-7 px-2 text-xs gap-1 border-primary/50 text-primary hover:bg-primary/10"
-                    onClick={() => updatePlanInput('avgFeePercent', Math.round(dealInsights.suggestedFeePercent * 100) / 100)}
+                    onClick={() => {
+                      const newFee = Math.round(dealInsights.suggestedFeePercent * 100) / 100;
+                      // Recalculate commission based on current revenue and new fee
+                      const newCommission = requiredVolume * (newFee / 100) * (commissionPercent / 100);
+                      updatePlanInput('avgFeePercent', newFee);
+                      updatePlanInput('targetCommission', Math.round(newCommission));
+                    }}
                   >
                     <Sparkles className="w-3 h-3" />
                     Apply
