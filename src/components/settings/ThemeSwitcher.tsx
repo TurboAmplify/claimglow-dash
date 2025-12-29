@@ -45,6 +45,16 @@ const themes: ThemeOption[] = [
       accent: 'bg-[hsl(15,90%,55%)]',
     },
   },
+  {
+    id: 'liquid-chrome',
+    name: 'Liquid Chrome',
+    description: 'Sleek metallic & silver',
+    preview: {
+      bg: 'bg-[hsl(220,10%,6%)]',
+      primary: 'bg-[hsl(220,10%,70%)]',
+      accent: 'bg-[hsl(220,15%,50%)]',
+    },
+  },
 ];
 
 export function ThemeSwitcher() {

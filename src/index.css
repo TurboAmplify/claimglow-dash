@@ -205,6 +205,74 @@
                             0 0 0 1px hsl(32 95% 50% / 0.25);
   }
 
+  /* Liquid Chrome Theme - sleek metallic dark aesthetic */
+  .theme-liquid-chrome {
+    --background: 220 10% 5%;
+    --foreground: 220 10% 95%;
+
+    --card: 220 10% 9%;
+    --card-foreground: 220 10% 95%;
+
+    --popover: 220 10% 7%;
+    --popover-foreground: 220 10% 95%;
+
+    --primary: 220 10% 75%;
+    --primary-foreground: 220 10% 5%;
+
+    --secondary: 220 10% 14%;
+    --secondary-foreground: 220 10% 95%;
+
+    --muted: 220 10% 12%;
+    --muted-foreground: 220 8% 55%;
+
+    --accent: 220 15% 60%;
+    --accent-foreground: 220 10% 95%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 220 10% 95%;
+
+    --success: 160 60% 45%;
+    --success-foreground: 220 10% 95%;
+
+    --warning: 45 80% 50%;
+    --warning-foreground: 220 10% 5%;
+
+    --border: 220 10% 18%;
+    --input: 220 10% 16%;
+    --ring: 220 10% 70%;
+
+    --radius: 0.75rem;
+
+    /* Glassmorphic tokens - chrome tinted glass */
+    --glass-bg: 220 10% 11%;
+    --glass-border: 220 10% 25%;
+    --glass-highlight: 220 10% 80%;
+    
+    /* Metallic glow effects */
+    --glow-primary: 220 10% 70%;
+    --glow-accent: 220 15% 55%;
+    --glow-success: 160 60% 45%;
+    --glow-destructive: 0 70% 50%;
+
+    /* Sidebar */
+    --sidebar-background: 220 10% 7%;
+    --sidebar-foreground: 220 8% 80%;
+    --sidebar-primary: 220 10% 75%;
+    --sidebar-primary-foreground: 220 10% 5%;
+    --sidebar-accent: 220 10% 14%;
+    --sidebar-accent-foreground: 220 10% 95%;
+    --sidebar-border: 220 10% 15%;
+    --sidebar-ring: 220 10% 70%;
+
+    /* 3D elevation for cards - metallic shadows */
+    --card-elevation: 0 20px 50px -12px hsl(220 10% 3% / 0.6),
+                      0 8px 20px -8px hsl(0 0% 0% / 0.5),
+                      0 0 0 1px hsl(220 10% 30% / 0.2);
+    --card-elevation-hover: 0 25px 60px -12px hsl(220 10% 5% / 0.7),
+                            0 12px 25px -8px hsl(0 0% 0% / 0.6),
+                            0 0 0 1px hsl(220 10% 40% / 0.3);
+  }
+
   .dark {
     --background: 222 47% 6%;
     --foreground: 210 40% 98%;
@@ -347,6 +415,34 @@
   );
 }
 
+/* Chrome background for liquid-chrome theme */
+.theme-liquid-chrome .chrome-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: hsl(220 10% 5%);
+  background-image: 
+    url('/images/chrome-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  opacity: 0.35;
+}
+
+/* Overlay for chrome theme readability */
+.theme-liquid-chrome .chrome-background::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    hsl(220 10% 5% / 0.75) 0%,
+    hsl(220 10% 5% / 0.5) 50%,
+    hsl(220 10% 5% / 0.65) 100%
+  );
+}
+
 @layer components {
   /* Glassmorphic card */
   .glass-card {
@@ -447,6 +543,42 @@
       hsl(32 95% 50% / 0.4)
     );
     opacity: 0.7;
+  }
+
+  /* Enhanced 3D cards for liquid-chrome theme */
+  .theme-liquid-chrome .glass-card {
+    background: linear-gradient(
+      145deg,
+      hsl(var(--glass-bg) / 0.95) 0%,
+      hsl(var(--glass-bg) / 0.8) 50%,
+      hsl(var(--glass-bg) / 0.9) 100%
+    );
+    border: 1px solid hsl(var(--glass-border) / 0.4);
+    box-shadow: var(--card-elevation);
+  }
+
+  .theme-liquid-chrome .glass-card:hover {
+    box-shadow: var(--card-elevation-hover);
+    transform: translateY(-2px);
+  }
+
+  /* Metallic silver edge glow for liquid-chrome cards */
+  .theme-liquid-chrome .glass-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      hsl(220 10% 40% / 0.3),
+      hsl(220 10% 80% / 0.6),
+      hsl(220 10% 60% / 0.4),
+      hsl(220 10% 70% / 0.5),
+      hsl(220 10% 40% / 0.3)
+    );
+    opacity: 0.8;
   }
 
   /* Neon glow effects */
