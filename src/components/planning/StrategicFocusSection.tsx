@@ -9,7 +9,11 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronUp,
-  CheckCircle2
+  CheckCircle2,
+  Briefcase,
+  Heart,
+  BarChart3,
+  Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +33,7 @@ export const STRATEGIC_FOCUS_AREAS: StrategicFocusArea[] = [
     shortDescription: "Prioritize higher-value commercial and multifamily claims",
     fullDescription: "Be selective with claim intake and move away from low-ceiling residential files. The goal is fewer files with higher outcomes and less friction.",
     icon: Target,
-    alignment: ["high-value", "balanced"]
+    alignment: ["high-value", "balanced", "commercial-heavy"]
   },
   {
     id: 2,
@@ -37,7 +41,7 @@ export const STRATEGIC_FOCUS_AREAS: StrategicFocusArea[] = [
     shortDescription: "Identify coverage opportunities before committing resources",
     fullDescription: "Conduct early policy reviews to identify ordinance & law, business interruption, extended replacement cost, and other coverage opportunities before committing heavy time resources.",
     icon: FileSearch,
-    alignment: ["high-value", "balanced"]
+    alignment: ["high-value", "balanced", "commercial-heavy"]
   },
   {
     id: 3,
@@ -45,7 +49,7 @@ export const STRATEGIC_FOCUS_AREAS: StrategicFocusArea[] = [
     shortDescription: "Better referrals, not more referrals",
     fullDescription: "Strengthen relationships with restoration contractors, property managers, attorneys, and brokers who work on larger and more complex claims.",
     icon: Users,
-    alignment: ["high-value", "balanced"]
+    alignment: ["high-value", "balanced", "commercial-heavy"]
   },
   {
     id: 4,
@@ -53,7 +57,7 @@ export const STRATEGIC_FOCUS_AREAS: StrategicFocusArea[] = [
     shortDescription: "Approximately one deal per week",
     fullDescription: "Maintain a consistent pace of approximately one deal per week. Track monthly deal count, average claim size, and stalled files to stay on pace throughout the year.",
     icon: Calendar,
-    alignment: ["balanced", "high-volume"]
+    alignment: ["balanced", "conservative"]
   },
   {
     id: 5,
@@ -61,7 +65,7 @@ export const STRATEGIC_FOCUS_AREAS: StrategicFocusArea[] = [
     shortDescription: "Limit low-value activities, standardize processes",
     fullDescription: "Protect time by limiting low-value activities and standardizing documentation, follow-ups, and escalation points. Focus energy on files with the highest ROI.",
     icon: Clock,
-    alignment: ["high-value", "balanced", "high-volume"]
+    alignment: ["high-value", "balanced", "conservative", "commercial-heavy"]
   },
   {
     id: 6,
@@ -69,7 +73,7 @@ export const STRATEGIC_FOCUS_AREAS: StrategicFocusArea[] = [
     shortDescription: "Go-to adjuster for complex claims",
     fullDescription: "Position yourself as the go-to adjuster for complex and large-loss claims. Build credibility through confident communication, negotiation skill, and results.",
     icon: Award,
-    alignment: ["high-value"]
+    alignment: ["high-value", "commercial-heavy"]
   },
   {
     id: 7,
@@ -77,8 +81,44 @@ export const STRATEGIC_FOCUS_AREAS: StrategicFocusArea[] = [
     shortDescription: "Review production metrics each quarter",
     fullDescription: "At the end of each quarter, review production metrics, income pacing, and bottlenecks. Adjust strategy, deal selection, and time allocation as needed.",
     icon: RefreshCw,
-    alignment: ["high-value", "balanced", "high-volume"]
+    alignment: ["high-value", "balanced", "conservative", "commercial-heavy"]
   }
+];
+
+export const KEY_PRINCIPLES = [
+  {
+    title: "Consistency",
+    description: "Every week, every month, every quarter — same disciplined actions.",
+    icon: Calendar,
+  },
+  {
+    title: "Quality Over Quantity",
+    description: "Be selective about meetings, organizations, and opportunities.",
+    icon: Target,
+  },
+  {
+    title: "Metrics Drive Everything",
+    description: "No guessing. All decisions come from pipeline, priority, and performance data.",
+    icon: BarChart3,
+  },
+  {
+    title: "Seasonal Adjustment",
+    description: "Push residential in summer, commercial year-round, religious whenever opportunities arise.",
+    icon: Zap,
+  },
+  {
+    title: "Professional Compassion",
+    description: "Especially for religious organizations and fire scenes. Don't become numb to losses.",
+    icon: Heart,
+  },
+];
+
+export const GROWTH_FOCUS_AREAS = [
+  "Strengthening relationships with contractors, adjusters, and referral partners",
+  "Increasing visibility with commercial and industrial contacts",
+  "Maintaining consistent follow-up and communication",
+  "Staying disciplined with activity even during slow periods",
+  "Being present and available when unexpected opportunities arise",
 ];
 
 export const GUIDING_PRINCIPLE = "Fewer files. Bigger outcomes. Cleaner execution.";
@@ -110,6 +150,62 @@ export function StrategicFocusSection({ selectedScenarioId }: StrategicFocusSect
           <blockquote className="text-2xl md:text-3xl font-bold text-foreground italic">
             "{GUIDING_PRINCIPLE}"
           </blockquote>
+        </div>
+      </div>
+
+      {/* Key Principles */}
+      <div className="glass-card p-6 animate-fade-in">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 rounded-lg bg-primary/20">
+            <Briefcase className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">Key Principles</h3>
+            <p className="text-sm text-muted-foreground">Foundation for execution</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+          {KEY_PRINCIPLES.map((principle) => {
+            const Icon = principle.icon;
+            return (
+              <div
+                key={principle.title}
+                className="p-3 rounded-lg bg-secondary/30 border border-border/50 hover:border-primary/30 transition-all"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Icon className="w-4 h-4 text-primary" />
+                  <h4 className="font-medium text-foreground text-sm">{principle.title}</h4>
+                </div>
+                <p className="text-xs text-muted-foreground">{principle.description}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Growth Focus Areas */}
+      <div className="glass-card p-6 animate-fade-in">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 rounded-lg bg-emerald-500/20">
+            <Users className="w-5 h-5 text-emerald-500" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-foreground">How I Plan to Pursue Growth in 2026</h3>
+            <p className="text-sm text-muted-foreground">Key areas of focus for relationship and opportunity development</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {GROWTH_FOCUS_AREAS.map((area, i) => (
+            <div
+              key={i}
+              className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-2"
+            >
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              <p className="text-sm text-foreground">{area}</p>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -233,14 +329,17 @@ export function StrategicFocusSection({ selectedScenarioId }: StrategicFocusSect
             <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
               <h4 className="font-medium text-foreground mb-2">Key Takeaway</h4>
               <p className="text-sm text-muted-foreground">
-                {selectedScenarioId === "high-value" && (
-                  "Your High-Value Path aligns strongly with deal quality focus, large-loss positioning, and strategic referral development. Success requires patience and selective intake."
+                {selectedScenarioId === "commercial-heavy" && (
+                  "Your Commercial & Industrial Heavy path aligns strongly with deal quality focus, large-loss positioning, and strategic referral development. Success requires patience and selective intake."
                 )}
                 {selectedScenarioId === "balanced" && (
-                  "Your Balanced Path benefits from all focus areas. Maintain weekly production rhythm while being selective about deal quality and leveraging key relationships."
+                  "Your Balanced path benefits from all focus areas. Maintain weekly production rhythm while being selective about deal quality and leveraging key relationships."
                 )}
-                {selectedScenarioId === "high-volume" && (
-                  "Your High-Volume Path emphasizes consistent weekly rhythm, time protection, and process efficiency. Focus on standardization to handle increased deal flow."
+                {selectedScenarioId === "conservative" && (
+                  "Your Conservative path emphasizes consistent weekly rhythm, time protection, and process efficiency. Focus on standardization to handle steady deal flow."
+                )}
+                {!["commercial-heavy", "balanced", "conservative"].includes(selectedScenarioId) && (
+                  "Your selected path aligns with key strategic focus areas. Maintain discipline and leverage relationships for optimal results."
                 )}
               </p>
             </div>

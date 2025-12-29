@@ -75,8 +75,8 @@ export function usePlanScenarios() {
       id: "conservative",
       name: "Conservative",
       subtitle: "Defensive Execution",
-      description: "This scenario assumes a softer commercial and industrial environment, where fewer large-loss opportunities materialize or close. In response, focus shifts toward residential volume and smaller institutional opportunities to maintain overall production. Residential activity increases slightly to offset reduced large-loss flow. Religious organizations and schools contribute selectively, with an emphasis on preparedness rather than aggressive expansion.",
-      closingNote: "This approach reduces reliance on high-risk, timing-dependent losses while maintaining forward momentum.",
+      description: "This scenario assumes a softer commercial and industrial environment, where fewer large-loss opportunities materialize or close. In response, focus shifts toward residential volume and smaller institutional opportunities to maintain overall production. Residential activity increases slightly (aim for 2-3 per month) to offset reduced large-loss flow. Religious organizations and schools contribute selectively, with an emphasis on preparedness rather than aggressive expansion.",
+      closingNote: "This approach reduces reliance on high-risk, timing-dependent losses while maintaining forward momentum. Focus on consistency over upside.",
       riskLevel: "low",
       dealCount: conservativeDealCount,
       avgDealSize: conservativeAvgSize,
@@ -89,9 +89,11 @@ export function usePlanScenarios() {
         q4: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q4), volume: requiredVolume * QUARTERLY_WEIGHTS.q4 },
       },
       keyAssumptions: [
-        "Stability over upside",
+        "Residential: 2-3 new qualified leads per month ($350k-$500k typical)",
+        "Stability over upside—protecting the downside",
         "Consistent activity during slower periods",
-        "Protecting the downside while staying positioned for unexpected opportunities",
+        "Stay disciplined with weekly production rhythm",
+        "Be present when unexpected opportunities arise",
       ],
       color: "hsl(142, 76%, 36%)", // emerald
     };
@@ -103,8 +105,8 @@ export function usePlanScenarios() {
       id: "balanced",
       name: "Balanced",
       subtitle: "Base-Plus Performance",
-      description: "This scenario reflects strong but realistic execution of the 2026 strategy. Opportunity flow improves modestly across all categories without requiring exceptional or rare losses. Residential volume remains healthy, commercial opportunities convert at a solid rate, and large commercial/industrial losses close as expected. Religious organizations and schools contribute meaningfully through disciplined outreach and follow-up.",
-      closingNote: "This is the most representative model of a successful, well-executed year.",
+      description: "This scenario reflects strong but realistic execution of the 2026 strategy. Opportunity flow improves modestly across all categories without requiring exceptional or rare losses. Residential volume remains healthy (6-9 per quarter), commercial opportunities convert at a solid rate (3 mid-size per quarter), and large commercial/industrial losses close as expected (2-3 per quarter). Religious organizations and schools contribute meaningfully through disciplined outreach and follow-up.",
+      closingNote: "This is the most representative model of a successful, well-executed year. Expected range: $45M–$60M annually.",
       riskLevel: "medium",
       dealCount: balancedDealCount,
       avgDealSize: balancedAvgSize,
@@ -117,9 +119,11 @@ export function usePlanScenarios() {
         q4: { deals: Math.round(balancedDealCount * QUARTERLY_WEIGHTS.q4), volume: requiredVolume * QUARTERLY_WEIGHTS.q4 },
       },
       keyAssumptions: [
+        "Residential: $10M-$15M contribution (24-36 deals)",
+        "Mid-Size Commercial: $2M-$4M contribution (12 deals)",
+        "Large Commercial/Industrial: $20M-$30M contribution (8-12 deals)",
         "High consistency in outreach and follow-through",
-        "Effective relationship leverage",
-        "Strong CRM discipline and pipeline management",
+        "Strong CRM discipline and pipeline management ($8M-$12M active)",
       ],
       color: "hsl(var(--primary))", // primary blue
     };
@@ -131,8 +135,8 @@ export function usePlanScenarios() {
       id: "commercial-heavy",
       name: "Commercial & Industrial Heavy",
       subtitle: "High-Value Outcome",
-      description: "This scenario assumes successful capture of multiple high-value commercial and industrial losses, resulting in significantly higher average deal sizes and overall production. Residential volume decreases slightly as time and focus shift toward fewer, larger opportunities. Religious organizations and schools contribute through campus-style or multi-building claims rather than smaller single-structure losses.",
-      closingNote: "While upside is substantial, this scenario is more sensitive to timing and conversion risk.",
+      description: "This scenario assumes successful capture of multiple high-value commercial and industrial losses ($750k–$10M range), resulting in significantly higher average deal sizes and overall production. Residential volume decreases slightly as time and focus shift toward fewer, larger opportunities. Religious organizations and schools contribute through campus-style or multi-building claims ($1M+) rather than smaller single-structure losses.",
+      closingNote: "While upside is substantial, this scenario is more sensitive to timing and conversion risk. Pursue 8–12 large-loss opportunities knowing this depends on market conditions.",
       riskLevel: "high",
       dealCount: commercialHeavyDealCount,
       avgDealSize: commercialHeavyAvgSize,
@@ -145,9 +149,11 @@ export function usePlanScenarios() {
         q4: { deals: Math.round(commercialHeavyDealCount * 0.25), volume: requiredVolume * 0.25 },
       },
       keyAssumptions: [
-        "Deep relationship leverage",
-        "Patience and timing",
-        "Strategic focus on fewer, higher-impact opportunities",
+        "Large Commercial/Industrial: $750k–$10M per opportunity",
+        "Religious Organizations: Focus on $1M+ structures only",
+        "Deep relationship leverage with contractors and adjusters",
+        "Patience and timing—fewer files, bigger outcomes",
+        "Position as large-loss specialist for complex claims",
       ],
       color: "hsl(45, 93%, 47%)", // amber
     };
