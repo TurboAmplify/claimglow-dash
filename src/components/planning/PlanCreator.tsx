@@ -28,9 +28,16 @@ export function PlanCreator({ planInputs, updatePlanInput, formatCurrency, sales
     ? targetCommission / (avgFeePercent / 100) / (commissionPercent / 100)
     : 0;
 
-  const handleNumberChange = (key: keyof PlanInputs, value: string) => {
+  const handleCommissionChange = (value: string) => {
     const numValue = parseFloat(value.replace(/[^0-9.]/g, '')) || 0;
-    updatePlanInput(key, numValue);
+    updatePlanInput('targetCommission', numValue);
+  };
+
+  const handleRevenueChange = (value: string) => {
+    const numValue = parseFloat(value.replace(/[^0-9.]/g, '')) || 0;
+    // Calculate commission from revenue: Commission = Revenue × Fee% × Commission%
+    const calculatedCommission = numValue * (avgFeePercent / 100) * (commissionPercent / 100);
+    updatePlanInput('targetCommission', calculatedCommission);
   };
 
   return (
@@ -67,7 +74,7 @@ export function PlanCreator({ planInputs, updatePlanInput, formatCurrency, sales
               id="targetCommission"
               type="text"
               value={targetCommission.toLocaleString()}
-              onChange={(e) => handleNumberChange('targetCommission', e.target.value)}
+              onChange={(e) => handleCommissionChange(e.target.value)}
               className="pl-7 text-lg font-semibold border-primary/50 focus:border-primary"
             />
           </div>
@@ -93,14 +100,21 @@ export function PlanCreator({ planInputs, updatePlanInput, formatCurrency, sales
           <p className="text-xs text-muted-foreground">Avg deal size: {formatCurrency(requiredVolume / (targetDeals || 1))}</p>
         </div>
 
-        {/* Required Revenue (Calculated) */}
+        {/* Required Revenue (Editable - bidirectional) */}
         <div className="space-y-2">
-          <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Label htmlFor="requiredRevenue" className="flex items-center gap-2 text-sm text-muted-foreground">
             <Target className="w-4 h-4" />
             Required Revenue
           </Label>
-          <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-            <p className="text-2xl font-bold text-primary">{formatCurrency(requiredVolume)}</p>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+            <Input
+              id="requiredRevenue"
+              type="text"
+              value={Math.round(requiredVolume).toLocaleString()}
+              onChange={(e) => handleRevenueChange(e.target.value)}
+              className="pl-7 text-lg font-semibold border-primary/50 focus:border-primary"
+            />
           </div>
           <p className="text-xs text-muted-foreground">
             Volume needed @ {avgFeePercent}% fee × {commissionPercent}% split
