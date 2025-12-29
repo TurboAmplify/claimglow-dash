@@ -137,34 +137,28 @@ const Index = () => {
           </div>
           
           {/* Filter Dropdowns */}
-          <div className="flex flex-wrap gap-4">
-            <div className="w-32">
-              <FilterDropdown
-                label="Year"
-                value={selectedYear}
-                options={years}
-                onChange={setSelectedYear}
-                placeholder="All Years"
-              />
-            </div>
-            <div className="w-48">
-              <MultiSelectFilter
-                label="Salesperson"
-                options={salespeopleNames}
-                selected={selectedSalespeople}
-                onChange={setSelectedSalespeople}
-                placeholder="All Salespeople"
-              />
-            </div>
-            <div className="w-48">
-              <MultiSelectFilter
-                label="Adjuster"
-                options={adjusters}
-                selected={selectedAdjusters}
-                onChange={setSelectedAdjusters}
-                placeholder="All Adjusters"
-              />
-            </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <FilterDropdown
+              label="Year"
+              value={selectedYear}
+              options={years}
+              onChange={setSelectedYear}
+              placeholder="All Years"
+            />
+            <MultiSelectFilter
+              label="Salesperson"
+              options={salespeopleNames}
+              selected={selectedSalespeople}
+              onChange={setSelectedSalespeople}
+              placeholder="All Salespeople"
+            />
+            <MultiSelectFilter
+              label="Adjuster"
+              options={adjusters}
+              selected={selectedAdjusters}
+              onChange={setSelectedAdjusters}
+              placeholder="All Adjusters"
+            />
           </div>
         </div>
       </div>
