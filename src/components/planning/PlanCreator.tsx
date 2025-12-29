@@ -42,11 +42,12 @@ export function PlanCreator({
   // Get deal analysis directly in component so it reacts to calculated values
   const { analysis: dealAnalysis } = useDealSizeAnalysis();
 
-  // Calculate insights based on current avgDealSize
+  // Calculate insights based on current avgDealSize - use avgDealSize as primary dependency
   const dealInsights = useMemo(() => {
     if (!dealAnalysis) return null;
+    // Call the function with the current avgDealSize
     return dealAnalysis.getInsightsForTargetDealSize(avgDealSize);
-  }, [dealAnalysis, avgDealSize]);
+  }, [dealAnalysis, avgDealSize, targetDeals, targetCommission, avgFeePercent]);
 
   // Calculate deal mix based on current targets
   const dealMix = useMemo(() => {
