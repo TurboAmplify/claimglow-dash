@@ -91,22 +91,43 @@ export function useTeamMetrics(selection: TeamMemberSelection, year: number) {
     const goals = allGoals || [];
     const commissions = allCommissions || [];
     
-    // Aggregate plan targets - fall back to goals if no plans exist
-    const totalTargetRevenue = plans.length > 0
-      ? plans.reduce((sum, p) => sum + Number(p.target_revenue), 0)
-      : goals.reduce((sum, g) => sum + Number(g.target_revenue || 0), 0);
+    // Build a map of salesperson_id -> plan for quick lookup
+    const plansByPerson = new Map(plans.map(p => [p.salesperson_id, p]));
+    const goalsByPerson = new Map(goals.map(g => [g.salesperson_id, g]));
     
-    const totalTargetCommission = plans.length > 0
-      ? plans.reduce((sum, p) => sum + Number(p.target_commission), 0)
-      : totalTargetRevenue * 0.075 * 0.20; // Estimate based on default rates if no plans
+    // Aggregate targets by combining plan data (if available) with goal data (fallback)
+    // This ensures members without plans still have their goals counted
+    let totalTargetRevenue = 0;
+    let totalTargetCommission = 0;
+    let totalFeePercent = 0;
+    let totalCommissionPercent = 0;
+    let countWithRates = 0;
     
-    // Average fee/commission percentages (weighted by target revenue or simple avg)
-    const avgFeePercent = plans.length > 0
-      ? plans.reduce((sum, p) => sum + Number(p.avg_fee_percent), 0) / plans.length
-      : 7.5;
-    const commissionPercent = plans.length > 0
-      ? plans.reduce((sum, p) => sum + Number(p.commission_percent), 0) / plans.length
-      : 20;
+    effectiveIds.forEach(id => {
+      const plan = plansByPerson.get(id);
+      const goal = goalsByPerson.get(id);
+      
+      if (plan) {
+        // Use plan data
+        totalTargetRevenue += Number(plan.target_revenue) || 0;
+        totalTargetCommission += Number(plan.target_commission) || 0;
+        totalFeePercent += Number(plan.avg_fee_percent) || 7.5;
+        totalCommissionPercent += Number(plan.commission_percent) || 20;
+        countWithRates++;
+      } else if (goal) {
+        // Fall back to goal data, estimate commission
+        const goalRevenue = Number(goal.target_revenue) || 0;
+        totalTargetRevenue += goalRevenue;
+        // Estimate commission using default rates (7.5% fee, 20% commission)
+        totalTargetCommission += goalRevenue * 0.075 * 0.20;
+        totalFeePercent += 7.5;
+        totalCommissionPercent += 20;
+        countWithRates++;
+      }
+    });
+    
+    const avgFeePercent = countWithRates > 0 ? totalFeePercent / countWithRates : 7.5;
+    const commissionPercent = countWithRates > 0 ? totalCommissionPercent / countWithRates : 20;
 
     // Aggregate actual commissions
     const totalVolume = commissions.reduce((sum, c) => sum + (Number(c.revised_estimate) || 0), 0);
