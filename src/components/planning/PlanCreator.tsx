@@ -127,7 +127,17 @@ export function PlanCreator({
               className="text-lg font-semibold"
             />
           </div>
-          <p className="text-xs text-muted-foreground">Avg deal size: {formatCurrency(avgDealSize)}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-muted-foreground">Avg deal size:</p>
+            <span className="px-2 py-0.5 rounded bg-primary/20 text-primary text-xs font-semibold transition-all">
+              {formatCurrency(avgDealSize)}
+            </span>
+            {dealInsights?.bucket && (
+              <span className="px-2 py-0.5 rounded bg-muted text-muted-foreground text-xs transition-all">
+                {dealInsights.bucket.label}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Required Revenue (Editable - bidirectional) */}
@@ -236,12 +246,22 @@ export function PlanCreator({
             )}
             {dealMix.large > 0 && (
               <span className="px-2 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs">
-                {dealMix.large} Large ($75K-$200K)
+                {dealMix.large} Large ($75K-$150K)
               </span>
             )}
             {dealMix.veryLarge > 0 && (
               <span className="px-2 py-1 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs">
-                {dealMix.veryLarge} Very Large (&gt;$200K)
+                {dealMix.veryLarge} V.Large ($150K-$300K)
+              </span>
+            )}
+            {dealMix.enterprise > 0 && (
+              <span className="px-2 py-1 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs">
+                {dealMix.enterprise} Enterprise ($300K-$500K)
+              </span>
+            )}
+            {dealMix.mega > 0 && (
+              <span className="px-2 py-1 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs">
+                {dealMix.mega} Mega (&gt;$500K)
               </span>
             )}
           </div>
