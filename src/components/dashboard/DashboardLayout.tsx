@@ -19,6 +19,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {theme === 'amber-glow' && <div className="amber-background" />}
       {theme === 'liquid-chrome' && <div className="chrome-background" />}
       {theme === 'violet-dew' && <div className="violet-background" />}
+      {theme === 'ocean-depth' && <div className="ocean-background" />}
       
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 glass-sidebar border-b border-sidebar-border/30 px-4 py-3 flex items-center justify-between">

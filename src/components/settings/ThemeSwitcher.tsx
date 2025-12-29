@@ -65,6 +65,16 @@ const themes: ThemeOption[] = [
       accent: 'bg-[hsl(280,80%,70%)]',
     },
   },
+  {
+    id: 'ocean-depth',
+    name: 'Ocean Depth',
+    description: 'Deep sea teal & aqua',
+    preview: {
+      bg: 'bg-[hsl(195,60%,8%)]',
+      primary: 'bg-[hsl(185,70%,45%)]',
+      accent: 'bg-[hsl(200,80%,55%)]',
+    },
+  },
 ];
 
 export function ThemeSwitcher() {
