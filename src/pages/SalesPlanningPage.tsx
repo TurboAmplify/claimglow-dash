@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useYearSummaries, useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions";
 import { useMemo, useState, useEffect } from "react";
-import { Loader2, Target, TrendingUp, BarChart3, Calendar, Map as MapIcon, Layers, Compass, Save, Activity, Users, ShieldAlert, Send } from "lucide-react";
+import { Loader2, Target, TrendingUp, BarChart3, Calendar, Map as MapIcon, Layers, Compass, Save, Activity, Users, ShieldAlert, Send, FlaskConical } from "lucide-react";
 import { usePlanApproval } from "@/hooks/usePlanApproval";
 import { ValuesSection } from "@/components/goals/ValuesSection";
 import { PlanCreator } from "@/components/planning/PlanCreator";
@@ -15,6 +15,8 @@ import { DealPipeline } from "@/components/planning/DealPipeline";
 import { PendingApprovalsPanel } from "@/components/planning/PendingApprovalsPanel";
 import { TeamMemberFilter, TeamMemberSelection } from "@/components/planning/TeamMemberFilter";
 import { GoalsSummaryCard } from "@/components/planning/GoalsSummaryCard";
+import { WhatIfSandbox } from "@/components/planning/WhatIfSandbox";
+import { ScenarioImpactChart } from "@/components/planning/ScenarioImpactChart";
 import { usePlanScenarios } from "@/hooks/usePlanScenarios";
 import { useRoadmapAnalysis } from "@/hooks/useRoadmapAnalysis";
 import { useSalesPlan } from "@/hooks/useSalesPlan";
@@ -22,9 +24,12 @@ import { useTeamMetrics } from "@/hooks/useTeamMetrics";
 import { useProgressAlerts } from "@/hooks/useProgressAlerts";
 import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
 import { useSalesGoals, useTeamGoals } from "@/hooks/useSalesGoals";
+import { useHypotheticalDeals } from "@/hooks/useHypotheticalDeals";
+import { useDealPipeline } from "@/hooks/useDealPipeline";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Navigate, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { 
   ResponsiveContainer, 
   BarChart, 
@@ -99,6 +104,35 @@ export default function SalesPlanningPage() {
     selectedScenario,
     monthlyProjections,
   } = usePlanScenarios();
+
+  // Hypothetical deals for What-If Sandbox
+  const {
+    deals: hypotheticalDeals,
+    isActive: sandboxActive,
+    toggleSandbox,
+    addDeal: addHypotheticalDeal,
+    removeDeal: removeHypotheticalDeal,
+    clearAll: clearHypotheticals,
+    aggregates: hypotheticalAggregates,
+  } = useHypotheticalDeals();
+
+  // Deal pipeline for converting hypotheticals
+  const { addDeal: addToPipeline } = useDealPipeline(salespersonId);
+
+  const handleConvertToPipeline = (deal: typeof hypotheticalDeals[0]) => {
+    if (!salespersonId) return;
+    addToPipeline({
+      salesperson_id: salespersonId,
+      client_name: deal.client_name,
+      expected_value: deal.expected_value,
+      expected_close_date: deal.expected_close_date,
+      probability: deal.probability,
+      notes: deal.notes,
+      stage: 'prospecting',
+    });
+    removeHypotheticalDeal(deal.id);
+    toast.success("Deal moved to pipeline!");
+  };
 
   const { plan, savePlan, isSaving, isLoading: loadingPlan } = useSalesPlan(salespersonId, currentYear);
 
@@ -559,6 +593,43 @@ export default function SalesPlanningPage() {
 
         {/* Progress Tab */}
         <TabsContent value="progress" className="space-y-6">
+          {/* What-If Sandbox Toggle */}
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-foreground">Track Your Progress</h3>
+            <Button
+              variant={sandboxActive ? "default" : "outline"}
+              onClick={toggleSandbox}
+              className={sandboxActive ? "bg-violet-600 hover:bg-violet-700" : "border-violet-500/50 text-violet-600 hover:bg-violet-500/10"}
+            >
+              <FlaskConical className="w-4 h-4 mr-2" />
+              {sandboxActive ? "Exit Sandbox" : "What-If Sandbox"}
+            </Button>
+          </div>
+
+          {/* What-If Sandbox */}
+          {sandboxActive && (
+            <>
+              <WhatIfSandbox
+                deals={hypotheticalDeals}
+                aggregates={hypotheticalAggregates}
+                onAddDeal={addHypotheticalDeal}
+                onRemoveDeal={removeHypotheticalDeal}
+                onClearAll={clearHypotheticals}
+                onConvertToPipeline={salespersonId ? handleConvertToPipeline : undefined}
+                formatCurrency={formatCurrency}
+              />
+              {hypotheticalDeals.length > 0 && (
+                <ScenarioImpactChart
+                  baseVolume={actualCommissions.totalVolume}
+                  baseDeals={actualCommissions.totalDeals}
+                  hypotheticalVolume={hypotheticalAggregates.weightedValue}
+                  hypotheticalDeals={hypotheticalAggregates.dealCount}
+                  formatCurrency={formatCurrency}
+                />
+              )}
+            </>
+          )}
+
           {/* Weekly Deals Tracker */}
           <WeeklyDealsTracker
             commissions={commissions || []}
@@ -573,6 +644,7 @@ export default function SalesPlanningPage() {
             actualCommissions={actualCommissions}
             formatCurrency={formatCurrency}
             currentYear={currentYear}
+            hypotheticalDeals={sandboxActive ? hypotheticalDeals : undefined}
           />
 
           {/* Deal Pipeline */}
