@@ -235,34 +235,34 @@ export function PlanCreator({
         <div className="mt-4">
           <p className="text-xs text-muted-foreground mb-2">Estimated Deal Mix (based on avg deal size of {formatCurrency(dealMix.avgDealSize)})</p>
           <div className="flex flex-wrap gap-2">
-            {dealMix.small > 0 && (
+            {dealMix.residential > 0 && (
               <span className="px-2 py-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs">
-                {dealMix.small} Small (&lt;$25K)
+                {dealMix.residential} Residential (&lt;$350K)
               </span>
             )}
-            {dealMix.medium > 0 && (
+            {dealMix.residentialPlus > 0 && (
               <span className="px-2 py-1 rounded-md bg-green-500/10 text-green-600 dark:text-green-400 text-xs">
-                {dealMix.medium} Medium ($25K-$75K)
+                {dealMix.residentialPlus} Residential+ ($350K-$750K)
               </span>
             )}
-            {dealMix.large > 0 && (
+            {dealMix.midCommercial > 0 && (
               <span className="px-2 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs">
-                {dealMix.large} Large ($75K-$150K)
+                {dealMix.midCommercial} Mid-Commercial ($750K-$1.5M)
               </span>
             )}
-            {dealMix.veryLarge > 0 && (
+            {dealMix.largeCommercial > 0 && (
               <span className="px-2 py-1 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs">
-                {dealMix.veryLarge} V.Large ($150K-$300K)
+                {dealMix.largeCommercial} Large Commercial ($1.5M-$3M)
               </span>
             )}
-            {dealMix.enterprise > 0 && (
+            {dealMix.industrial > 0 && (
               <span className="px-2 py-1 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs">
-                {dealMix.enterprise} Enterprise ($300K-$500K)
+                {dealMix.industrial} Industrial ($3M-$7.5M)
               </span>
             )}
             {dealMix.mega > 0 && (
               <span className="px-2 py-1 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs">
-                {dealMix.mega} Mega (&gt;$500K)
+                {dealMix.mega} Mega (&gt;$7.5M)
               </span>
             )}
           </div>
