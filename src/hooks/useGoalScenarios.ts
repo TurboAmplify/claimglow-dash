@@ -20,6 +20,7 @@ export interface DealMixScenario {
   name: string;
   subtitle: string;
   description: string;
+  closingNote: string;
   priorities: string[];
   assumptions: string[];
   riskLevel: RiskLevel;
@@ -47,17 +48,18 @@ export const SCENARIO_TEMPLATES: Omit<DealMixScenario, 'totalVolume' | 'totalDea
   {
     id: "base-reference",
     name: "Base Reference",
-    subtitle: "Control Scenario",
-    description: "Balanced execution based on historical performance, realistic opportunity flow, and disciplined activity across all verticals. Residential provides steady pipeline momentum, while mid-size commercial and large commercial/industrial opportunities form the backbone of annual production.",
+    subtitle: "Core Planning Assumptions",
+    description: "This scenario represents a balanced execution of the 2026 plan based on historical performance, realistic opportunity flow, and disciplined activity across all verticals. Residential provides steady pipeline momentum, while mid-size commercial and large commercial/industrial opportunities form the backbone of annual production. Religious organizations and schools supplement the pipeline through relationship-driven and situational opportunities.",
+    closingNote: "This serves as the baseline against which all alternative scenarios are measured.",
     priorities: [
       "Consistent monthly activity",
-      "Balanced verticals execution",
-      "Historical pattern alignment"
+      "No extraordinary market disruption",
+      "Normal variability in claim timing and size"
     ],
     assumptions: [
+      "Consistent monthly activity",
       "No extraordinary market disruption",
-      "Normal variability in claim timing and size",
-      "Consistent monthly activity levels"
+      "Normal variability in claim timing and size"
     ],
     riskLevel: "moderate",
     isTemplate: true,
@@ -72,14 +74,15 @@ export const SCENARIO_TEMPLATES: Omit<DealMixScenario, 'totalVolume' | 'totalDea
     id: "conservative",
     name: "Conservative",
     subtitle: "Defensive Execution",
-    description: "Assumes a softer commercial and industrial environment with fewer large-loss opportunities. Focus shifts toward residential volume and smaller institutional opportunities to maintain overall production while protecting downside.",
+    description: "This scenario assumes a softer commercial and industrial environment, where fewer large-loss opportunities materialize or close. In response, focus shifts toward residential volume and smaller institutional opportunities to maintain overall production. Residential activity increases slightly to offset reduced large-loss flow. Religious organizations and schools contribute selectively, with an emphasis on preparedness rather than aggressive expansion.",
+    closingNote: "This approach reduces reliance on high-risk, timing-dependent losses while maintaining forward momentum.",
     priorities: [
       "Stability over upside",
       "Consistent activity during slower periods",
-      "Protecting downside while staying positioned"
+      "Protecting the downside while staying positioned for unexpected opportunities"
     ],
     assumptions: [
-      "Softer commercial/industrial market",
+      "Softer commercial/industrial environment",
       "Fewer large-loss opportunities materialize",
       "Residential volume offsets reduced large-loss flow"
     ],
@@ -96,7 +99,8 @@ export const SCENARIO_TEMPLATES: Omit<DealMixScenario, 'totalVolume' | 'totalDea
     id: "balanced",
     name: "Balanced",
     subtitle: "Base-Plus Performance",
-    description: "Strong but realistic execution of the 2026 strategy. Opportunity flow improves modestly across all categories. Residential volume remains healthy, commercial converts solidly, and religious organizations contribute meaningfully through disciplined outreach.",
+    description: "This scenario reflects strong but realistic execution of the 2026 strategy. Opportunity flow improves modestly across all categories without requiring exceptional or rare losses. Residential volume remains healthy, commercial opportunities convert at a solid rate, and large commercial/industrial losses close as expected. Religious organizations and schools contribute meaningfully through disciplined outreach and follow-up.",
+    closingNote: "This is the most representative model of a successful, well-executed year.",
     priorities: [
       "High consistency in outreach and follow-through",
       "Effective relationship leverage",
@@ -104,8 +108,8 @@ export const SCENARIO_TEMPLATES: Omit<DealMixScenario, 'totalVolume' | 'totalDea
     ],
     assumptions: [
       "Modest improvement in opportunity flow",
-      "Strong conversion rates",
-      "Disciplined outreach execution"
+      "Strong conversion rates across categories",
+      "Disciplined outreach and follow-up execution"
     ],
     riskLevel: "moderate",
     isTemplate: true,
@@ -118,18 +122,19 @@ export const SCENARIO_TEMPLATES: Omit<DealMixScenario, 'totalVolume' | 'totalDea
   },
   {
     id: "commercial-heavy",
-    name: "Commercial Heavy",
-    subtitle: "High-Value Focus",
-    description: "Successful capture of multiple high-value commercial and industrial losses, resulting in significantly higher average deal sizes. Residential volume decreases as time shifts toward fewer, larger opportunities with campus-style or multi-building claims.",
+    name: "Commercial & Industrial Heavy",
+    subtitle: "High-Value Outcome",
+    description: "This scenario assumes successful capture of multiple high-value commercial and industrial losses, resulting in significantly higher average deal sizes and overall production. Residential volume decreases slightly as time and focus shift toward fewer, larger opportunities. Religious organizations and schools contribute through campus-style or multi-building claims rather than smaller single-structure losses.",
+    closingNote: "While upside is substantial, this scenario is more sensitive to timing and conversion risk.",
     priorities: [
       "Deep relationship leverage",
       "Patience and timing",
       "Strategic focus on fewer, higher-impact opportunities"
     ],
     assumptions: [
-      "Multiple high-value opportunities close",
-      "Strong industrial/commercial market",
-      "Successful capture of large claims"
+      "Multiple high-value opportunities close successfully",
+      "Strong industrial/commercial market conditions",
+      "Successful capture of large multi-building claims"
     ],
     riskLevel: "high",
     isTemplate: true,
@@ -142,18 +147,19 @@ export const SCENARIO_TEMPLATES: Omit<DealMixScenario, 'totalVolume' | 'totalDea
   },
   {
     id: "volume-institutional",
-    name: "Volume + Institutional",
+    name: "Volume + Institutional Heavy",
     subtitle: "Diversified Model",
-    description: "Prioritizes breadth, consistency, and resilience. Residential volume increases and institutional opportunities—particularly churches and schools—become a major driver. Total production achieved through a diversified mix rather than large individual deals.",
+    description: "This scenario prioritizes breadth, consistency, and resilience. Residential volume increases, and institutional opportunities — particularly churches and schools — become a major driver of annual production. Large commercial and industrial opportunities remain present but are not the primary revenue driver. Instead, total production is achieved through a diversified mix of residential, religious, and educational facilities.",
+    closingNote: "This model reduces dependency on any single deal type and provides strong protection against market volatility.",
     priorities: [
       "Strong systems and organization",
       "High-touch relationship management",
       "Consistent weekly and monthly activity"
     ],
     assumptions: [
-      "Institutional pipeline converts well",
-      "Diversified mix reduces volatility",
-      "Volume compensates for fewer large deals"
+      "Institutional pipeline converts consistently",
+      "Diversified mix reduces overall volatility",
+      "Volume compensates for fewer large individual deals"
     ],
     riskLevel: "low",
     isTemplate: true,
@@ -169,6 +175,7 @@ export const SCENARIO_TEMPLATES: Omit<DealMixScenario, 'totalVolume' | 'totalDea
     name: "Custom",
     subtitle: "User-Defined",
     description: "Build your own deal mix for each quarter based on your unique market insight and strategic priorities.",
+    closingNote: "",
     priorities: ["User-defined priorities"],
     assumptions: ["User-defined assumptions"],
     riskLevel: "moderate",

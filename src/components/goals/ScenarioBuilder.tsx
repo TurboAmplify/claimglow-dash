@@ -112,6 +112,13 @@ export function ScenarioBuilder({
 
           {/* Description */}
           <p className="text-muted-foreground leading-relaxed">{activeScenario.description}</p>
+          
+          {/* Closing Note */}
+          {activeScenario.closingNote && (
+            <p className="text-sm italic text-muted-foreground/80 border-l-2 border-primary/30 pl-3">
+              {activeScenario.closingNote}
+            </p>
+          )}
 
           {/* Priorities and Assumptions Grid */}
           {activeScenario.id !== "custom" && (

@@ -12,6 +12,7 @@ export interface ScenarioPath {
   name: string;
   subtitle: string;
   description: string;
+  closingNote: string;
   riskLevel: "low" | "medium" | "high";
   dealCount: number;
   avgDealSize: number;
@@ -61,43 +62,43 @@ export function usePlanScenarios() {
       return companyFee * (commissionPercent / 100);
     };
 
-    // Scenario 1: High-Volume Path (45-50 deals, smaller avg size)
-    const highVolumeDealCount = 48;
-    const highVolumeAvgSize = targetRevenue / highVolumeDealCount;
-    const highVolumeScenario: ScenarioPath = {
-      id: "high-volume",
-      name: "High-Volume Path",
-      subtitle: "More Deals, Consistent Pipeline",
-      description: "Focus on a higher number of smaller to medium deals. Lower individual risk with steadier cash flow throughout the year. Requires consistent prospecting activity and relationship maintenance.",
+    // Scenario 1: Conservative / Defensive Execution
+    const conservativeDealCount = 48;
+    const conservativeAvgSize = targetRevenue / conservativeDealCount;
+    const conservativeScenario: ScenarioPath = {
+      id: "conservative",
+      name: "Conservative",
+      subtitle: "Defensive Execution",
+      description: "This scenario assumes a softer commercial and industrial environment, where fewer large-loss opportunities materialize or close. In response, focus shifts toward residential volume and smaller institutional opportunities to maintain overall production. Residential activity increases slightly to offset reduced large-loss flow. Religious organizations and schools contribute selectively, with an emphasis on preparedness rather than aggressive expansion.",
+      closingNote: "This approach reduces reliance on high-risk, timing-dependent losses while maintaining forward momentum.",
       riskLevel: "low",
-      dealCount: highVolumeDealCount,
-      avgDealSize: highVolumeAvgSize,
+      dealCount: conservativeDealCount,
+      avgDealSize: conservativeAvgSize,
       totalVolume: targetRevenue,
       projectedCommission: calcCommission(targetRevenue),
       quarterlyBreakdown: {
-        q1: { deals: Math.round(highVolumeDealCount * QUARTERLY_WEIGHTS.q1), volume: targetRevenue * QUARTERLY_WEIGHTS.q1 },
-        q2: { deals: Math.round(highVolumeDealCount * QUARTERLY_WEIGHTS.q2), volume: targetRevenue * QUARTERLY_WEIGHTS.q2 },
-        q3: { deals: Math.round(highVolumeDealCount * QUARTERLY_WEIGHTS.q3), volume: targetRevenue * QUARTERLY_WEIGHTS.q3 },
-        q4: { deals: Math.round(highVolumeDealCount * QUARTERLY_WEIGHTS.q4), volume: targetRevenue * QUARTERLY_WEIGHTS.q4 },
+        q1: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q1), volume: targetRevenue * QUARTERLY_WEIGHTS.q1 },
+        q2: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q2), volume: targetRevenue * QUARTERLY_WEIGHTS.q2 },
+        q3: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q3), volume: targetRevenue * QUARTERLY_WEIGHTS.q3 },
+        q4: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q4), volume: targetRevenue * QUARTERLY_WEIGHTS.q4 },
       },
       keyAssumptions: [
-        "48 deals averaging ~$1.15M each",
-        "Mix of residential and small commercial",
-        "Consistent weekly prospecting activity",
-        "Strong CRM discipline required",
-        "Lower variance, steadier income",
+        "Stability over upside",
+        "Consistent activity during slower periods",
+        "Protecting the downside while staying positioned for unexpected opportunities",
       ],
       color: "hsl(142, 76%, 36%)", // emerald
     };
 
-    // Scenario 2: Balanced Path (30-35 deals, medium avg size)
+    // Scenario 2: Balanced / Base-Plus Performance
     const balancedDealCount = 33;
     const balancedAvgSize = targetRevenue / balancedDealCount;
     const balancedScenario: ScenarioPath = {
       id: "balanced",
-      name: "Balanced Path",
-      subtitle: "Moderate Deals, Solid Execution",
-      description: "A balanced approach combining mid-size commercial opportunities with select large deals. Matches historical performance patterns with improved execution.",
+      name: "Balanced",
+      subtitle: "Base-Plus Performance",
+      description: "This scenario reflects strong but realistic execution of the 2026 strategy. Opportunity flow improves modestly across all categories without requiring exceptional or rare losses. Residential volume remains healthy, commercial opportunities convert at a solid rate, and large commercial/industrial losses close as expected. Religious organizations and schools contribute meaningfully through disciplined outreach and follow-up.",
+      closingNote: "This is the most representative model of a successful, well-executed year.",
       riskLevel: "medium",
       dealCount: balancedDealCount,
       avgDealSize: balancedAvgSize,
@@ -110,45 +111,42 @@ export function usePlanScenarios() {
         q4: { deals: Math.round(balancedDealCount * QUARTERLY_WEIGHTS.q4), volume: targetRevenue * QUARTERLY_WEIGHTS.q4 },
       },
       keyAssumptions: [
-        "33 deals averaging ~$1.67M each",
-        "Mix of commercial and institutional",
-        "Quarterly impact deals required",
-        "Relationship leverage essential",
-        "Moderate variance, proven approach",
+        "High consistency in outreach and follow-through",
+        "Effective relationship leverage",
+        "Strong CRM discipline and pipeline management",
       ],
       color: "hsl(var(--primary))", // primary blue
     };
 
-    // Scenario 3: High-Value Path (18-25 deals, larger avg size)
-    const highValueDealCount = 22;
-    const highValueAvgSize = targetRevenue / highValueDealCount;
-    const highValueScenario: ScenarioPath = {
-      id: "high-value",
-      name: "High-Value Path",
-      subtitle: "Fewer Deals, Bigger Opportunities",
-      description: "Pursue fewer but significantly larger commercial and industrial opportunities. Requires patience, deep relationships, and ability to close high-value deals.",
+    // Scenario 3: Commercial & Industrial Heavy Outcome
+    const commercialHeavyDealCount = 22;
+    const commercialHeavyAvgSize = targetRevenue / commercialHeavyDealCount;
+    const commercialHeavyScenario: ScenarioPath = {
+      id: "commercial-heavy",
+      name: "Commercial & Industrial Heavy",
+      subtitle: "High-Value Outcome",
+      description: "This scenario assumes successful capture of multiple high-value commercial and industrial losses, resulting in significantly higher average deal sizes and overall production. Residential volume decreases slightly as time and focus shift toward fewer, larger opportunities. Religious organizations and schools contribute through campus-style or multi-building claims rather than smaller single-structure losses.",
+      closingNote: "While upside is substantial, this scenario is more sensitive to timing and conversion risk.",
       riskLevel: "high",
-      dealCount: highValueDealCount,
-      avgDealSize: highValueAvgSize,
+      dealCount: commercialHeavyDealCount,
+      avgDealSize: commercialHeavyAvgSize,
       totalVolume: targetRevenue,
       projectedCommission: calcCommission(targetRevenue),
       quarterlyBreakdown: {
-        q1: { deals: Math.round(highValueDealCount * 0.15), volume: targetRevenue * 0.15 },
-        q2: { deals: Math.round(highValueDealCount * 0.25), volume: targetRevenue * 0.25 },
-        q3: { deals: Math.round(highValueDealCount * 0.35), volume: targetRevenue * 0.35 },
-        q4: { deals: Math.round(highValueDealCount * 0.25), volume: targetRevenue * 0.25 },
+        q1: { deals: Math.round(commercialHeavyDealCount * 0.15), volume: targetRevenue * 0.15 },
+        q2: { deals: Math.round(commercialHeavyDealCount * 0.25), volume: targetRevenue * 0.25 },
+        q3: { deals: Math.round(commercialHeavyDealCount * 0.35), volume: targetRevenue * 0.35 },
+        q4: { deals: Math.round(commercialHeavyDealCount * 0.25), volume: targetRevenue * 0.25 },
       },
       keyAssumptions: [
-        "22 deals averaging ~$2.5M each",
-        "Focus on large commercial/industrial",
-        "Pre-loss relationship positioning",
-        "Back-loaded deal flow expected",
-        "Higher variance, higher potential",
+        "Deep relationship leverage",
+        "Patience and timing",
+        "Strategic focus on fewer, higher-impact opportunities",
       ],
       color: "hsl(45, 93%, 47%)", // amber
     };
 
-    return [highVolumeScenario, balancedScenario, highValueScenario];
+    return [conservativeScenario, balancedScenario, commercialHeavyScenario];
   }, [planInputs]);
 
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>("balanced");
