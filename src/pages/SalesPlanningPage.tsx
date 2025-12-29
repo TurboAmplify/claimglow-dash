@@ -463,10 +463,6 @@ export default function SalesPlanningPage() {
               <Compass className="w-4 h-4 mr-2" />
               Strategy
             </TabsTrigger>
-            <TabsTrigger value="targets" className="data-[state=active]:bg-primary/20">
-              <Target className="w-4 h-4 mr-2" />
-              Targets
-            </TabsTrigger>
             <TabsTrigger value="plan" className="data-[state=active]:bg-primary/20">
               <TrendingUp className="w-4 h-4 mr-2" />
               Your Plan
@@ -474,6 +470,10 @@ export default function SalesPlanningPage() {
             <TabsTrigger value="scenarios" className="data-[state=active]:bg-primary/20">
               <Layers className="w-4 h-4 mr-2" />
               Choose Your Path
+            </TabsTrigger>
+            <TabsTrigger value="targets" className="data-[state=active]:bg-primary/20">
+              <Target className="w-4 h-4 mr-2" />
+              Targets
             </TabsTrigger>
             <TabsTrigger value="progress" className="data-[state=active]:bg-primary/20">
               <Activity className="w-4 h-4 mr-2" />
