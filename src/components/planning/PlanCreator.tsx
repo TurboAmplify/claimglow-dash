@@ -195,7 +195,35 @@ export function PlanCreator({
 
             {/* Historical Fee for This Size */}
             <div className="p-3 rounded-lg bg-muted/20 border border-border/30">
-              <p className="text-xs text-muted-foreground mb-1">Avg Fee for This Deal Size</p>
+              <div className="flex items-center gap-1.5 mb-1">
+                <p className="text-xs text-muted-foreground">Avg Fee for This Deal Size</p>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="w-72 p-3">
+                      <p className="text-xs font-semibold mb-2">Historical Avg Fee by Deal Size</p>
+                      <div className="space-y-1.5">
+                        {dealAnalysis?.buckets.map((bucket) => (
+                          <div key={bucket.label} className="flex justify-between text-xs">
+                            <span className={`${dealInsights?.bucket?.label === bucket.label ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+                              {bucket.label} {bucket.max === Infinity ? `(>$${(bucket.min / 1000000).toFixed(1)}M)` : `($${bucket.min >= 1000000 ? (bucket.min / 1000000).toFixed(1) + 'M' : Math.round(bucket.min / 1000) + 'K'}-$${bucket.max >= 1000000 ? (bucket.max / 1000000).toFixed(1) + 'M' : Math.round(bucket.max / 1000) + 'K'})`}
+                            </span>
+                            <span className={`font-mono ${dealInsights?.bucket?.label === bucket.label ? 'text-primary font-semibold' : 'text-foreground'}`}>
+                              {bucket.count > 0 ? `${bucket.avgFeePercent.toFixed(2)}%` : '—'}
+                              <span className="text-muted-foreground ml-1">({bucket.count})</span>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">
+                        Current selection highlighted. Count shows historical deals.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-medium text-foreground">
                   {dealInsights.suggestedFeePercent.toFixed(2)}%
