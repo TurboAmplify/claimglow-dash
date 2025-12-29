@@ -16,6 +16,7 @@ import { PlanAlertsIndicator } from "@/components/planning/PlanAlertsIndicator";
 import { TeamMemberFilter, TeamMemberSelection } from "@/components/planning/TeamMemberFilter";
 import { GoalsSummaryCard } from "@/components/planning/GoalsSummaryCard";
 import { WhatIfSandbox } from "@/components/planning/WhatIfSandbox";
+import { ScenarioTargetsSection } from "@/components/planning/ScenarioTargetsSection";
 import { ScenarioImpactChart } from "@/components/planning/ScenarioImpactChart";
 import { usePlanScenarios } from "@/hooks/usePlanScenarios";
 import { useRoadmapAnalysis } from "@/hooks/useRoadmapAnalysis";
@@ -747,137 +748,10 @@ export default function SalesPlanningPage() {
 
         {/* Targets Tab */}
         <TabsContent value="targets" className="space-y-6">
-          <div className="glass-card p-6 animate-fade-in">
-            {/* Annual Target Banner */}
-            <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border border-emerald-500/30 mb-6">
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div>
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-1">2026 Annual Contribution Goal</p>
-                  <p className="text-2xl font-bold text-foreground">$45M – $60M</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">Pipeline at Any Time</p>
-                  <p className="text-lg font-semibold text-foreground">$8M–$12M</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Opportunity Targets Grid */}
-            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Target className="w-5 h-5 text-primary" />
-              Core Opportunity Targets
-            </h3>
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 mb-6">
-              {/* Residential */}
-              <div className="p-4 rounded-lg border transition-all duration-200 hover:scale-[1.02] bg-blue-500/10 border-blue-500/30">
-                <div className="flex items-center gap-2 mb-3">
-                  <Home className="w-5 h-5 text-blue-600" />
-                  <h4 className="font-semibold text-foreground">Residential</h4>
-                </div>
-                <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-                  <div className="p-2 rounded bg-background/50">
-                    <p className="text-xs text-muted-foreground">Typical Value</p>
-                    <p className="text-sm font-semibold text-foreground">$350k–$500k</p>
-                  </div>
-                  <div className="p-2 rounded bg-background/50">
-                    <p className="text-xs text-muted-foreground">Quarterly</p>
-                    <p className="text-sm font-semibold text-foreground">6–9</p>
-                  </div>
-                  <div className="p-2 rounded bg-background/50">
-                    <p className="text-xs text-muted-foreground">Annual</p>
-                    <p className="text-sm font-semibold text-foreground">24–36</p>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground">High-value total-loss or heavy-smoke homes; summer storms; high-income ZIP codes.</p>
-              </div>
-
-              {/* Mid-Size Commercial */}
-              <div className="p-4 rounded-lg border transition-all duration-200 hover:scale-[1.02] bg-green-500/10 border-green-500/30">
-                <div className="flex items-center gap-2 mb-3">
-                  <Building2 className="w-5 h-5 text-green-600" />
-                  <h4 className="font-semibold text-foreground">Mid-Size Commercial</h4>
-                </div>
-                <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-                  <div className="p-2 rounded bg-background/50">
-                    <p className="text-xs text-muted-foreground">Typical Value</p>
-                    <p className="text-sm font-semibold text-foreground">$1M–$1.5M</p>
-                  </div>
-                  <div className="p-2 rounded bg-background/50">
-                    <p className="text-xs text-muted-foreground">Quarterly</p>
-                    <p className="text-sm font-semibold text-foreground">3</p>
-                  </div>
-                  <div className="p-2 rounded bg-background/50">
-                    <p className="text-xs text-muted-foreground">Annual</p>
-                    <p className="text-sm font-semibold text-foreground">12</p>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground">Schools, offices, restaurants, retail, multi-tenant properties.</p>
-              </div>
-
-              {/* Large Commercial/Industrial */}
-              <div className="p-4 rounded-lg border transition-all duration-200 hover:scale-[1.02] bg-amber-500/10 border-amber-500/30">
-                <div className="flex items-center gap-2 mb-3">
-                  <Factory className="w-5 h-5 text-amber-600" />
-                  <h4 className="font-semibold text-foreground">Large Commercial/Industrial</h4>
-                </div>
-                <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-                  <div className="p-2 rounded bg-background/50">
-                    <p className="text-xs text-muted-foreground">Typical Value</p>
-                    <p className="text-sm font-semibold text-foreground">$750k–$10M</p>
-                  </div>
-                  <div className="p-2 rounded bg-background/50">
-                    <p className="text-xs text-muted-foreground">Quarterly</p>
-                    <p className="text-sm font-semibold text-foreground">2–3</p>
-                  </div>
-                  <div className="p-2 rounded bg-background/50">
-                    <p className="text-xs text-muted-foreground">Annual</p>
-                    <p className="text-sm font-semibold text-foreground">8–12</p>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground">Manufacturing, warehouses, automotive, distribution, regional chains.</p>
-              </div>
-
-              {/* Religious Organizations */}
-              <div className="p-4 rounded-lg border transition-all duration-200 hover:scale-[1.02] bg-purple-500/10 border-purple-500/30">
-                <div className="flex items-center gap-2 mb-3">
-                  <Church className="w-5 h-5 text-purple-600" />
-                  <h4 className="font-semibold text-foreground">Religious Organizations</h4>
-                </div>
-                <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-                  <div className="p-2 rounded bg-background/50">
-                    <p className="text-xs text-muted-foreground">Typical Value</p>
-                    <p className="text-sm font-semibold text-foreground">$1M+</p>
-                  </div>
-                  <div className="p-2 rounded bg-background/50">
-                    <p className="text-xs text-muted-foreground">Quarterly</p>
-                    <p className="text-sm font-semibold text-foreground">2–5</p>
-                  </div>
-                  <div className="p-2 rounded bg-background/50">
-                    <p className="text-xs text-muted-foreground">Annual</p>
-                    <p className="text-sm font-semibold text-foreground">8–20</p>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground">Large churches, temples, synagogues, mosques, ministries, retreat centers.</p>
-              </div>
-            </div>
-
-            {/* Pipeline Expectations */}
-            <h3 className="text-lg font-semibold text-foreground mb-4">Pipeline Expectations</h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="p-4 rounded-lg bg-secondary/30 border border-border/50 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Active Pipeline</p>
-                <p className="text-xl font-bold text-foreground">$8M–$12M</p>
-              </div>
-              <div className="p-4 rounded-lg bg-secondary/30 border border-border/50 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Quarterly New</p>
-                <p className="text-xl font-bold text-foreground">$10M–$15M</p>
-              </div>
-              <div className="p-4 rounded-lg bg-secondary/30 border border-border/50 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Quarterly Closed</p>
-                <p className="text-xl font-bold text-foreground">$4M–$7M</p>
-              </div>
-            </div>
-          </div>
+          <ScenarioTargetsSection 
+            selectedScenario={selectedScenario}
+            formatCurrency={formatCurrency}
+          />
         </TabsContent>
 
         {/* Historical Context Tab */}
