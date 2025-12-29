@@ -71,7 +71,7 @@
 
   /* Neon Hex Theme */
   .theme-neon-hex {
-    --background: 225 50% 5%;
+    --background: 225 50% 4%;
     --foreground: 210 40% 98%;
 
     --card: 225 50% 8%;
@@ -107,9 +107,9 @@
 
     --radius: 0.75rem;
 
-    /* Glassmorphic tokens */
-    --glass-bg: 225 50% 8%;
-    --glass-border: 225 50% 18%;
+    /* Glassmorphic tokens - slightly more opaque for 3D effect */
+    --glass-bg: 225 50% 10%;
+    --glass-border: 225 50% 22%;
     --glass-highlight: 220 90% 55%;
     
     /* Multi-color glow effects */
@@ -128,8 +128,13 @@
     --sidebar-border: 225 50% 14%;
     --sidebar-ring: 220 90% 55%;
 
-    /* Hexagonal background pattern */
-    --theme-bg-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23334155' fill-opacity='0.08'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    /* 3D elevation for cards */
+    --card-elevation: 0 20px 50px -12px hsl(220 90% 30% / 0.4),
+                      0 8px 20px -8px hsl(0 0% 0% / 0.5),
+                      0 0 0 1px hsl(220 90% 55% / 0.1);
+    --card-elevation-hover: 0 25px 60px -12px hsl(220 90% 40% / 0.5),
+                            0 12px 25px -8px hsl(0 0% 0% / 0.6),
+                            0 0 0 1px hsl(220 90% 55% / 0.2);
   }
 
   .dark {
@@ -146,8 +151,7 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background-image: var(--theme-bg-pattern);
-    transition: background-color 0.3s ease, background-image 0.3s ease;
+    transition: background-color 0.3s ease;
   }
 
   /* Theme transition for smooth switching */
@@ -156,20 +160,55 @@
   }
 }
 
+/* Hexagonal background for neon-hex theme */
+.theme-neon-hex .hex-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: hsl(225 50% 4%);
+  background-image: 
+    /* Animated gradient glow spots */
+    radial-gradient(ellipse 600px 400px at 20% 30%, hsl(220 90% 50% / 0.15), transparent),
+    radial-gradient(ellipse 500px 350px at 80% 20%, hsl(350 85% 50% / 0.12), transparent),
+    radial-gradient(ellipse 450px 300px at 60% 70%, hsl(142 76% 45% / 0.1), transparent),
+    radial-gradient(ellipse 400px 250px at 10% 80%, hsl(265 89% 60% / 0.1), transparent),
+    /* Hexagonal pattern */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104' viewBox='0 0 60 104'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%234a5568' fill-opacity='0.15'%3E%3Cpath d='M30 0l25.98 15v30L30 60 4.02 45V15L30 0zm0 60l25.98 15v30L30 120 4.02 105V75L30 60z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
 @layer components {
   /* Glassmorphic card */
   .glass-card {
     @apply relative overflow-hidden rounded-2xl;
     background: linear-gradient(
       135deg,
-      hsl(var(--glass-bg) / 0.8) 0%,
-      hsl(var(--glass-bg) / 0.4) 100%
+      hsl(var(--glass-bg) / 0.85) 0%,
+      hsl(var(--glass-bg) / 0.6) 100%
     );
     backdrop-filter: blur(20px);
-    border: 1px solid hsl(var(--glass-border) / 0.3);
+    border: 1px solid hsl(var(--glass-border) / 0.4);
     box-shadow: 
       0 8px 32px hsl(var(--background) / 0.4),
       inset 0 1px 0 hsl(var(--foreground) / 0.05);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  /* Enhanced 3D cards for neon-hex theme */
+  .theme-neon-hex .glass-card {
+    background: linear-gradient(
+      145deg,
+      hsl(var(--glass-bg) / 0.95) 0%,
+      hsl(var(--glass-bg) / 0.75) 50%,
+      hsl(var(--glass-bg) / 0.85) 100%
+    );
+    border: 1px solid hsl(var(--glass-border) / 0.5);
+    box-shadow: var(--card-elevation);
+  }
+
+  .theme-neon-hex .glass-card:hover {
+    box-shadow: var(--card-elevation-hover);
+    transform: translateY(-2px);
   }
 
   .glass-card::before {
@@ -182,9 +221,27 @@
     background: linear-gradient(
       90deg,
       transparent,
-      hsl(var(--glass-highlight) / 0.3),
+      hsl(var(--glass-highlight) / 0.4),
       transparent
     );
+  }
+
+  /* Multi-color edge glow for neon-hex cards */
+  .theme-neon-hex .glass-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      hsl(220 90% 55% / 0.6),
+      hsl(350 85% 55% / 0.5),
+      hsl(142 76% 45% / 0.5),
+      hsl(265 89% 60% / 0.4)
+    );
+    opacity: 0.7;
   }
 
   /* Neon glow effects */
