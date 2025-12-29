@@ -1,5 +1,5 @@
-import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { X } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { DensitySwitcher } from './DensitySwitcher';
@@ -10,6 +10,19 @@ interface SettingsPanelProps {
 
 export function SettingsPanel({ collapsed }: SettingsPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setShouldRender(true);
+      requestAnimationFrame(() => setIsAnimating(true));
+    } else {
+      setIsAnimating(false);
+      const timer = setTimeout(() => setShouldRender(false), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   return (
     <div className="relative">
@@ -40,18 +53,24 @@ export function SettingsPanel({ collapsed }: SettingsPanelProps) {
       </button>
 
       {/* Settings Dropdown */}
-      {isOpen && (
+      {shouldRender && (
         <>
           {/* Backdrop - closes menu when clicking outside */}
           <div 
-            className="fixed inset-0 z-40"
+            className={cn(
+              "fixed inset-0 z-40 transition-opacity duration-200",
+              isAnimating ? "opacity-100" : "opacity-0"
+            )}
             onClick={() => setIsOpen(false)}
           />
           
           {/* Panel */}
           <div className={cn(
-            "absolute z-50 bottom-full mb-2 left-0 right-0 min-w-[260px] glass-card p-4 animate-fade-in",
-            collapsed && "left-full ml-2 bottom-0 mb-0"
+            "absolute z-50 bottom-full mb-2 left-0 right-0 min-w-[260px] glass-card p-4 transition-all duration-200 ease-out",
+            collapsed && "left-full ml-2 bottom-0 mb-0",
+            isAnimating 
+              ? "opacity-100 translate-y-0 scale-100" 
+              : "opacity-0 translate-y-2 scale-95"
           )}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-foreground">Settings</h3>
