@@ -12,7 +12,7 @@ import { StrategicFocusSection } from "@/components/planning/StrategicFocusSecti
 import { ProgressTracker } from "@/components/planning/ProgressTracker";
 import { WeeklyDealsTracker } from "@/components/planning/WeeklyDealsTracker";
 import { DealPipeline } from "@/components/planning/DealPipeline";
-import { PendingApprovalsPanel } from "@/components/planning/PendingApprovalsPanel";
+import { PlanAlertsIndicator } from "@/components/planning/PlanAlertsIndicator";
 import { TeamMemberFilter, TeamMemberSelection } from "@/components/planning/TeamMemberFilter";
 import { GoalsSummaryCard } from "@/components/planning/GoalsSummaryCard";
 import { WhatIfSandbox } from "@/components/planning/WhatIfSandbox";
@@ -306,12 +306,13 @@ export default function SalesPlanningPage() {
 
   return (
     <DashboardLayout>
-      {/* Pending Approvals for Directors */}
+      {/* Plan Alerts Indicator for Directors - positioned at top right */}
       {isDirector && directorId && (
-        <div className="mb-6">
-          <PendingApprovalsPanel 
+        <div className="flex justify-end mb-4">
+          <PlanAlertsIndicator 
             directorId={directorId} 
-            formatCurrency={formatCurrency} 
+            formatCurrency={formatCurrency}
+            currentYear={currentYear}
           />
         </div>
       )}
