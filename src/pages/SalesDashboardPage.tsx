@@ -2,9 +2,11 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useSalesCommissions, useSalespeople, useAvailableYears, useYearSummaries } from "@/hooks/useSalesCommissions";
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Loader2, TrendingUp, TrendingDown, DollarSign, FileText, Percent, Target, Upload } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, DollarSign, FileText, Percent, Target, Upload, Users, Check } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart, Line, PieChart, Pie, Cell, Legend } from "recharts";
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', '#22c55e', '#f59e0b', '#ef4444'];
@@ -13,13 +15,37 @@ export default function SalesDashboardPage() {
   const { data: salespeople } = useSalespeople();
   const { data: availableYears } = useAvailableYears();
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [selectedSalespersonIds, setSelectedSalespersonIds] = useState<string[]>([]);
   
-  // Fetch ALL commissions (no salesperson filter) for team-wide dashboard
-  const { data: commissions, isLoading } = useSalesCommissions(
-    undefined, // No filter - show all salespeople
+  // Fetch ALL commissions then filter client-side for multi-select
+  const { data: allCommissions, isLoading } = useSalesCommissions(
+    undefined,
     selectedYear || undefined
   );
-  const { data: yearSummaries } = useYearSummaries(); // No filter - show all
+  const { data: yearSummaries } = useYearSummaries();
+  
+  // Filter commissions based on selected salespeople
+  const commissions = useMemo(() => {
+    if (!allCommissions) return [];
+    if (selectedSalespersonIds.length === 0) return allCommissions; // Show all if none selected
+    return allCommissions.filter(c => c.salesperson_id && selectedSalespersonIds.includes(c.salesperson_id));
+  }, [allCommissions, selectedSalespersonIds]);
+  
+  const toggleSalesperson = (id: string) => {
+    setSelectedSalespersonIds(prev => 
+      prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id]
+    );
+  };
+  
+  const selectAllSalespeople = () => {
+    if (salespeople) {
+      setSelectedSalespersonIds(salespeople.map(sp => sp.id));
+    }
+  };
+  
+  const clearSalespeopleSelection = () => {
+    setSelectedSalespersonIds([]);
+  };
 
   const formatCurrency = (value: number) => {
     if (value >= 1000000) {
@@ -119,24 +145,71 @@ export default function SalesDashboardPage() {
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Sales Dashboard</h1>
           <p className="text-muted-foreground">
-            Team Overview - {salespeople?.length || 0} Salespeople
+            {selectedSalespersonIds.length === 0 
+              ? `Team Overview - ${salespeople?.length || 0} Salespeople`
+              : selectedSalespersonIds.length === 1 
+                ? salespeople?.find(sp => sp.id === selectedSalespersonIds[0])?.name || 'Salesperson'
+                : `${selectedSalespersonIds.length} Salespeople Selected`
+            }
           </p>
         </div>
         
-        <Select
-          value={selectedYear?.toString() || "all"}
-          onValueChange={(v) => setSelectedYear(v === "all" ? null : parseInt(v))}
-        >
-          <SelectTrigger className="w-40 bg-background">
-            <SelectValue placeholder="Select Year" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Years</SelectItem>
-            {availableYears?.map(year => (
-              <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-3">
+          {/* Salesperson Filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-48 justify-between bg-background">
+                <span className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  {selectedSalespersonIds.length === 0 
+                    ? "All Salespeople" 
+                    : `${selectedSalespersonIds.length} Selected`}
+                </span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-2 bg-popover border border-border z-50" align="end">
+              <div className="flex justify-between mb-2 px-1">
+                <Button variant="ghost" size="sm" className="text-xs h-7" onClick={selectAllSalespeople}>
+                  Select All
+                </Button>
+                <Button variant="ghost" size="sm" className="text-xs h-7" onClick={clearSalespeopleSelection}>
+                  Clear
+                </Button>
+              </div>
+              <div className="space-y-1">
+                {salespeople?.map(sp => (
+                  <div
+                    key={sp.id}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-secondary/50 cursor-pointer"
+                    onClick={() => toggleSalesperson(sp.id)}
+                  >
+                    <Checkbox 
+                      checked={selectedSalespersonIds.includes(sp.id)}
+                      className="pointer-events-none"
+                    />
+                    <span className="text-sm">{sp.name}</span>
+                  </div>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+          
+          {/* Year Filter */}
+          <Select
+            value={selectedYear?.toString() || "all"}
+            onValueChange={(v) => setSelectedYear(v === "all" ? null : parseInt(v))}
+          >
+            <SelectTrigger className="w-40 bg-background">
+              <SelectValue placeholder="Select Year" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Years</SelectItem>
+              {availableYears?.map(year => (
+                <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {!commissions || commissions.length === 0 ? (
