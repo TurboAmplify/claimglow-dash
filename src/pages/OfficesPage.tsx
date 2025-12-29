@@ -6,15 +6,43 @@ import { useClaims, useOfficeSummaries, useAdjusterSummaries } from "@/hooks/use
 import { Loader2, X, ChevronRight } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function OfficesPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedOffice = searchParams.get("selected") || "all";
+  const [selectedYear, setSelectedYear] = useState<string>("all");
   
   const { data: claims, isLoading, error } = useClaims();
-  const officeSummaries = useOfficeSummaries(claims);
-  const adjusterSummaries = useAdjusterSummaries(claims);
+
+  // Extract available years from claims data
+  const availableYears = useMemo(() => {
+    if (!claims) return [];
+    const years = new Set<number>();
+    claims.forEach((c) => {
+      if (c.date_signed) {
+        const year = new Date(c.date_signed).getFullYear();
+        years.add(year);
+      }
+    });
+    return Array.from(years).sort((a, b) => b - a);
+  }, [claims]);
+
+  // Filter claims by year first
+  const yearFilteredClaims = useMemo(() => {
+    if (!claims) return [];
+    if (selectedYear === "all") return claims;
+    const yearNum = parseInt(selectedYear);
+    return claims.filter((c) => {
+      if (!c.date_signed) return false;
+      const claimYear = new Date(c.date_signed).getFullYear();
+      return claimYear === yearNum;
+    });
+  }, [claims, selectedYear]);
+
+  const officeSummaries = useOfficeSummaries(yearFilteredClaims);
+  const adjusterSummaries = useAdjusterSummaries(yearFilteredClaims);
 
   const offices = useMemo(() => {
     return officeSummaries.map((o) => o.office);
@@ -77,16 +105,35 @@ export default function OfficesPage() {
         </p>
       </div>
 
-      {/* Filter */}
+      {/* Filters */}
       <div className="glass-card p-6 mb-8 animate-fade-in">
-        <div className="max-w-md">
-          <FilterDropdown
-            label="Filter by Office"
-            value={selectedOffice}
-            options={offices}
-            onChange={handleOfficeSelect}
-            placeholder="Select office..."
-          />
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="flex-1 min-w-[200px] max-w-md">
+            <FilterDropdown
+              label="Filter by Office"
+              value={selectedOffice}
+              options={offices}
+              onChange={handleOfficeSelect}
+              placeholder="Select office..."
+            />
+          </div>
+          <div className="w-40">
+            <label className="block text-sm font-medium text-muted-foreground mb-2">Year</label>
+            <Select
+              value={selectedYear}
+              onValueChange={setSelectedYear}
+            >
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="All Years" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border border-border z-50">
+                <SelectItem value="all">All Years</SelectItem>
+                {availableYears.map(year => (
+                  <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
