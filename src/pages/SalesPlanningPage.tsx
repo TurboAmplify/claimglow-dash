@@ -42,11 +42,6 @@ export default function SalesPlanningPage() {
 
   const { salesperson: currentUser, isDirector, isSalesRep, isLoading: loadingCurrentUser } = useCurrentSalesperson();
   const { data: salespeople, isLoading: loadingSalespeople } = useSalespeople();
-
-  // Redirect non-directors to their individual planning page
-  if (!loadingCurrentUser && currentUser && !isDirector) {
-    return <Navigate to={`/planning/${currentUser.id}`} replace />;
-  }
   
   // Team member selection state for directors
   const [teamSelection, setTeamSelection] = useState<TeamMemberSelection>({
@@ -128,6 +123,10 @@ export default function SalesPlanningPage() {
 
   const { historicalPatterns } = useRoadmapAnalysis(commissions, planInputs.targetRevenue);
 
+  // Redirect non-directors to their individual planning page - AFTER all hooks
+  if (!loadingCurrentUser && currentUser && !isDirector) {
+    return <Navigate to={`/planning/${currentUser.id}`} replace />;
+  }
   const [activeTab, setActiveTab] = useState('strategy');
 
   // Calculate actual commissions data for progress tracking
