@@ -99,6 +99,8 @@ export function useSalesPlan(salespersonId: string | undefined, year: number) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sales-plan", salespersonId, year] });
+      queryClient.invalidateQueries({ queryKey: ["team-plans"] });
+      queryClient.invalidateQueries({ queryKey: ["team-goals-metrics"] });
       toast.success("Plan saved successfully!");
     },
     onError: (error) => {
