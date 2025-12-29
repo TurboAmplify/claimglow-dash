@@ -42,8 +42,7 @@ const HomePage = () => {
             <BarChart3 className="w-10 h-10 text-primary" />
           </div>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-2">Commission</h1>
-        <p className="text-xl md:text-2xl text-muted-foreground mb-12">Tracker</p>
+        <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-12">DealMetrics</h1>
 
         {/* Navigation Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl px-4">

@@ -92,8 +92,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           </div>
           {!collapsed && (
             <div className="animate-fade-in">
-              <h1 className="text-lg font-bold text-foreground">Commission</h1>
-              <p className="text-xs text-muted-foreground">Tracker</p>
+              <h1 className="text-lg font-bold text-foreground">DealMetrics</h1>
             </div>
           )}
         </div>
