@@ -12,7 +12,7 @@ import { StrategicFocusSection } from "@/components/planning/StrategicFocusSecti
 import { ProgressTracker } from "@/components/planning/ProgressTracker";
 import { WeeklyDealsTracker } from "@/components/planning/WeeklyDealsTracker";
 import { DealPipeline } from "@/components/planning/DealPipeline";
-import { GoalsSummaryCard } from "@/components/planning/GoalsSummaryCard";
+
 import { usePlanScenarios } from "@/hooks/usePlanScenarios";
 import { useRoadmapAnalysis } from "@/hooks/useRoadmapAnalysis";
 import { useSalesPlan } from "@/hooks/useSalesPlan";
@@ -266,15 +266,6 @@ export default function IndividualPlanningPage() {
         <ValuesSection />
       </div>
 
-      {/* 2026 Goals Card */}
-      <div className="mb-6">
-        <GoalsSummaryCard
-          goal={currentGoal}
-          salespersonName={salesperson.name}
-          currentPlanRevenue={planInputs.targetRevenue}
-          formatCurrency={formatCurrency}
-        />
-      </div>
 
       {/* Header - More personalized */}
       <div className="mb-6 animate-fade-in">
