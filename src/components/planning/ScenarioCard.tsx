@@ -76,9 +76,16 @@ export function ScenarioCard({ scenario, isSelected, onSelect, formatCurrency }:
       </div>
 
       {/* Description */}
-      <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+      <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
         {scenario.description}
       </p>
+
+      {/* Closing Note */}
+      {scenario.closingNote && (
+        <p className="text-xs italic text-muted-foreground/80 mb-4 border-l-2 border-primary/30 pl-2">
+          {scenario.closingNote}
+        </p>
+      )}
 
       {/* Key Assumptions */}
       <div className="space-y-1">
