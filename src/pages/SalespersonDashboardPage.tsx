@@ -45,6 +45,7 @@ export default function SalespersonDashboardPage() {
       setPlanInputs({
         targetRevenue: Number(plan.target_revenue),
         targetCommission: Number(plan.target_commission),
+        targetDeals: 40, // Default value since not stored in plan yet
         avgFeePercent: Number(plan.avg_fee_percent),
         commissionPercent: Number(plan.commission_percent),
       });

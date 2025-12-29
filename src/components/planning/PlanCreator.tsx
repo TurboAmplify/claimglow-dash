@@ -1,4 +1,4 @@
-import { Target, DollarSign, Percent, Calculator } from "lucide-react";
+import { Target, DollarSign, Hash, Percent } from "lucide-react";
 import { PlanInputs } from "@/hooks/usePlanScenarios";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,11 +10,12 @@ interface PlanCreatorProps {
 }
 
 export function PlanCreator({ planInputs, updatePlanInput, formatCurrency }: PlanCreatorProps) {
-  const { targetRevenue, targetCommission, avgFeePercent, commissionPercent } = planInputs;
+  const { targetRevenue, targetCommission, targetDeals, avgFeePercent, commissionPercent } = planInputs;
 
-  // Calculated values
-  const companyFee = targetRevenue * (avgFeePercent / 100);
-  const calculatedCommission = companyFee * (commissionPercent / 100);
+  // Calculate required volume from target commission
+  const requiredVolume = avgFeePercent > 0 && commissionPercent > 0
+    ? targetCommission / (avgFeePercent / 100) / (commissionPercent / 100)
+    : 0;
 
   const handleNumberChange = (key: keyof PlanInputs, value: string) => {
     const numValue = parseFloat(value.replace(/[^0-9.]/g, '')) || 0;
@@ -29,50 +30,54 @@ export function PlanCreator({ planInputs, updatePlanInput, formatCurrency }: Pla
         </div>
         <div>
           <h2 className="text-lg font-semibold text-foreground">Your 2026 Plan</h2>
-          <p className="text-sm text-muted-foreground">Set your annual targets and commission structure</p>
+          <p className="text-sm text-muted-foreground">Set your commission target and see how to achieve it</p>
         </div>
       </div>
 
+      {/* Average Fee Target Note */}
+      <div className="mb-6 px-4 py-2 bg-muted/30 rounded-lg border border-border/50">
+        <p className="text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">Average Target Fee Goal:</span> {avgFeePercent}%
+        </p>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Target Revenue */}
+        {/* Target Commission (Editable) */}
         <div className="space-y-2">
-          <Label htmlFor="targetRevenue" className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Label htmlFor="targetCommission" className="flex items-center gap-2 text-sm text-muted-foreground">
             <DollarSign className="w-4 h-4" />
-            Target Revenue
+            Target Commission
           </Label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
             <Input
-              id="targetRevenue"
+              id="targetCommission"
               type="text"
-              value={targetRevenue.toLocaleString()}
-              onChange={(e) => handleNumberChange('targetRevenue', e.target.value)}
-              className="pl-7 text-lg font-semibold"
+              value={targetCommission.toLocaleString()}
+              onChange={(e) => handleNumberChange('targetCommission', e.target.value)}
+              className="pl-7 text-lg font-semibold border-primary/50 focus:border-primary"
             />
           </div>
-          <p className="text-xs text-muted-foreground">{formatCurrency(targetRevenue)} annual goal</p>
+          <p className="text-xs text-muted-foreground">Your annual commission goal</p>
         </div>
 
-        {/* Average Fee % */}
+        {/* Number of Deals */}
         <div className="space-y-2">
-          <Label htmlFor="avgFeePercent" className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Percent className="w-4 h-4" />
-            Average Fee %
+          <Label htmlFor="targetDeals" className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Hash className="w-4 h-4" />
+            Number of Deals
           </Label>
           <div className="relative">
             <Input
-              id="avgFeePercent"
+              id="targetDeals"
               type="number"
-              step="0.1"
-              min="0"
-              max="100"
-              value={avgFeePercent}
-              onChange={(e) => updatePlanInput('avgFeePercent', parseFloat(e.target.value) || 0)}
-              className="pr-7 text-lg font-semibold"
+              min="1"
+              value={targetDeals}
+              onChange={(e) => updatePlanInput('targetDeals', parseInt(e.target.value) || 1)}
+              className="text-lg font-semibold"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
           </div>
-          <p className="text-xs text-muted-foreground">Company fee: {formatCurrency(companyFee)}</p>
+          <p className="text-xs text-muted-foreground">Avg deal size: {formatCurrency(requiredVolume / (targetDeals || 1))}</p>
         </div>
 
         {/* Commission % */}
@@ -97,17 +102,17 @@ export function PlanCreator({ planInputs, updatePlanInput, formatCurrency }: Pla
           <p className="text-xs text-muted-foreground">Your split of company fee</p>
         </div>
 
-        {/* Projected Commission */}
+        {/* Required Revenue (Calculated) */}
         <div className="space-y-2">
           <Label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calculator className="w-4 h-4" />
-            Projected Commission
+            <Target className="w-4 h-4" />
+            Required Revenue
           </Label>
           <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-            <p className="text-2xl font-bold text-primary">{formatCurrency(calculatedCommission)}</p>
+            <p className="text-2xl font-bold text-primary">{formatCurrency(requiredVolume)}</p>
           </div>
           <p className="text-xs text-muted-foreground">
-            Based on {avgFeePercent}% fee × {commissionPercent}% split
+            Volume needed @ {avgFeePercent}% fee × {commissionPercent}% split
           </p>
         </div>
       </div>
@@ -118,13 +123,13 @@ export function PlanCreator({ planInputs, updatePlanInput, formatCurrency }: Pla
           <div>
             <span className="text-muted-foreground">Formula: </span>
             <span className="font-mono text-foreground">
-              Revenue × Fee% × Commission% = Your Commission
+              Commission ÷ Fee% ÷ Split% = Required Revenue
             </span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Calculation: </span>
             <span className="font-mono text-foreground">
-              {formatCurrency(targetRevenue)} × {avgFeePercent}% × {commissionPercent}% = {formatCurrency(calculatedCommission)}
+              {formatCurrency(targetCommission)} ÷ {avgFeePercent}% ÷ {commissionPercent}% = {formatCurrency(requiredVolume)}
             </span>
           </div>
         </div>

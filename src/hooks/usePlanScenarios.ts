@@ -3,6 +3,7 @@ import { useState, useMemo, useCallback } from "react";
 export interface PlanInputs {
   targetRevenue: number;
   targetCommission: number;
+  targetDeals: number;
   avgFeePercent: number;
   commissionPercent: number;
 }
@@ -31,6 +32,7 @@ export interface ScenarioPath {
 const DEFAULT_PLAN: PlanInputs = {
   targetRevenue: 10000000, // Reasonable default, will be overridden by salesperson's goal
   targetCommission: 150000,
+  targetDeals: 40,
   avgFeePercent: 7.5,
   commissionPercent: 20,
 };
@@ -54,17 +56,21 @@ export function usePlanScenarios() {
   }, []);
 
   const scenarios = useMemo<ScenarioPath[]>(() => {
-    const { targetRevenue, avgFeePercent, commissionPercent } = planInputs;
+    const { targetCommission, avgFeePercent, commissionPercent } = planInputs;
     
-    // Calculate company fee and commission based on volume
-    const calcCommission = (volume: number) => {
-      const companyFee = volume * (avgFeePercent / 100);
-      return companyFee * (commissionPercent / 100);
+    // Reverse calculate required volume from target commission
+    // targetCommission = volume * (avgFeePercent/100) * (commissionPercent/100)
+    // volume = targetCommission / (avgFeePercent/100) / (commissionPercent/100)
+    const calcRequiredVolume = (commission: number) => {
+      if (avgFeePercent === 0 || commissionPercent === 0) return 0;
+      return commission / (avgFeePercent / 100) / (commissionPercent / 100);
     };
 
-    // Scenario 1: Conservative / Defensive Execution
+    const requiredVolume = calcRequiredVolume(targetCommission);
+
+    // Scenario 1: Conservative / Defensive Execution - More deals, smaller avg size
     const conservativeDealCount = 48;
-    const conservativeAvgSize = targetRevenue / conservativeDealCount;
+    const conservativeAvgSize = requiredVolume / conservativeDealCount;
     const conservativeScenario: ScenarioPath = {
       id: "conservative",
       name: "Conservative",
@@ -74,13 +80,13 @@ export function usePlanScenarios() {
       riskLevel: "low",
       dealCount: conservativeDealCount,
       avgDealSize: conservativeAvgSize,
-      totalVolume: targetRevenue,
-      projectedCommission: calcCommission(targetRevenue),
+      totalVolume: requiredVolume,
+      projectedCommission: targetCommission,
       quarterlyBreakdown: {
-        q1: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q1), volume: targetRevenue * QUARTERLY_WEIGHTS.q1 },
-        q2: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q2), volume: targetRevenue * QUARTERLY_WEIGHTS.q2 },
-        q3: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q3), volume: targetRevenue * QUARTERLY_WEIGHTS.q3 },
-        q4: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q4), volume: targetRevenue * QUARTERLY_WEIGHTS.q4 },
+        q1: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q1), volume: requiredVolume * QUARTERLY_WEIGHTS.q1 },
+        q2: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q2), volume: requiredVolume * QUARTERLY_WEIGHTS.q2 },
+        q3: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q3), volume: requiredVolume * QUARTERLY_WEIGHTS.q3 },
+        q4: { deals: Math.round(conservativeDealCount * QUARTERLY_WEIGHTS.q4), volume: requiredVolume * QUARTERLY_WEIGHTS.q4 },
       },
       keyAssumptions: [
         "Stability over upside",
@@ -90,9 +96,9 @@ export function usePlanScenarios() {
       color: "hsl(142, 76%, 36%)", // emerald
     };
 
-    // Scenario 2: Balanced / Base-Plus Performance
+    // Scenario 2: Balanced / Base-Plus Performance - Moderate deals, moderate avg size
     const balancedDealCount = 33;
-    const balancedAvgSize = targetRevenue / balancedDealCount;
+    const balancedAvgSize = requiredVolume / balancedDealCount;
     const balancedScenario: ScenarioPath = {
       id: "balanced",
       name: "Balanced",
@@ -102,13 +108,13 @@ export function usePlanScenarios() {
       riskLevel: "medium",
       dealCount: balancedDealCount,
       avgDealSize: balancedAvgSize,
-      totalVolume: targetRevenue,
-      projectedCommission: calcCommission(targetRevenue),
+      totalVolume: requiredVolume,
+      projectedCommission: targetCommission,
       quarterlyBreakdown: {
-        q1: { deals: Math.round(balancedDealCount * QUARTERLY_WEIGHTS.q1), volume: targetRevenue * QUARTERLY_WEIGHTS.q1 },
-        q2: { deals: Math.round(balancedDealCount * QUARTERLY_WEIGHTS.q2), volume: targetRevenue * QUARTERLY_WEIGHTS.q2 },
-        q3: { deals: Math.round(balancedDealCount * QUARTERLY_WEIGHTS.q3), volume: targetRevenue * QUARTERLY_WEIGHTS.q3 },
-        q4: { deals: Math.round(balancedDealCount * QUARTERLY_WEIGHTS.q4), volume: targetRevenue * QUARTERLY_WEIGHTS.q4 },
+        q1: { deals: Math.round(balancedDealCount * QUARTERLY_WEIGHTS.q1), volume: requiredVolume * QUARTERLY_WEIGHTS.q1 },
+        q2: { deals: Math.round(balancedDealCount * QUARTERLY_WEIGHTS.q2), volume: requiredVolume * QUARTERLY_WEIGHTS.q2 },
+        q3: { deals: Math.round(balancedDealCount * QUARTERLY_WEIGHTS.q3), volume: requiredVolume * QUARTERLY_WEIGHTS.q3 },
+        q4: { deals: Math.round(balancedDealCount * QUARTERLY_WEIGHTS.q4), volume: requiredVolume * QUARTERLY_WEIGHTS.q4 },
       },
       keyAssumptions: [
         "High consistency in outreach and follow-through",
@@ -118,9 +124,9 @@ export function usePlanScenarios() {
       color: "hsl(var(--primary))", // primary blue
     };
 
-    // Scenario 3: Commercial & Industrial Heavy Outcome
+    // Scenario 3: Commercial & Industrial Heavy Outcome - Fewer deals, larger avg size
     const commercialHeavyDealCount = 22;
-    const commercialHeavyAvgSize = targetRevenue / commercialHeavyDealCount;
+    const commercialHeavyAvgSize = requiredVolume / commercialHeavyDealCount;
     const commercialHeavyScenario: ScenarioPath = {
       id: "commercial-heavy",
       name: "Commercial & Industrial Heavy",
@@ -130,13 +136,13 @@ export function usePlanScenarios() {
       riskLevel: "high",
       dealCount: commercialHeavyDealCount,
       avgDealSize: commercialHeavyAvgSize,
-      totalVolume: targetRevenue,
-      projectedCommission: calcCommission(targetRevenue),
+      totalVolume: requiredVolume,
+      projectedCommission: targetCommission,
       quarterlyBreakdown: {
-        q1: { deals: Math.round(commercialHeavyDealCount * 0.15), volume: targetRevenue * 0.15 },
-        q2: { deals: Math.round(commercialHeavyDealCount * 0.25), volume: targetRevenue * 0.25 },
-        q3: { deals: Math.round(commercialHeavyDealCount * 0.35), volume: targetRevenue * 0.35 },
-        q4: { deals: Math.round(commercialHeavyDealCount * 0.25), volume: targetRevenue * 0.25 },
+        q1: { deals: Math.round(commercialHeavyDealCount * 0.15), volume: requiredVolume * 0.15 },
+        q2: { deals: Math.round(commercialHeavyDealCount * 0.25), volume: requiredVolume * 0.25 },
+        q3: { deals: Math.round(commercialHeavyDealCount * 0.35), volume: requiredVolume * 0.35 },
+        q4: { deals: Math.round(commercialHeavyDealCount * 0.25), volume: requiredVolume * 0.25 },
       },
       keyAssumptions: [
         "Deep relationship leverage",
