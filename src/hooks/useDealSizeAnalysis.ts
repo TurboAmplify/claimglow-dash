@@ -22,23 +22,24 @@ interface DealSizeAnalysis {
     historicalAvgForBucket: number;
   };
   getDealMixEstimate: (targetDeals: number, targetRevenue: number) => {
-    small: number;
-    medium: number;
-    large: number;
-    veryLarge: number;
-    enterprise: number;
+    residential: number;
+    residentialPlus: number;
+    midCommercial: number;
+    largeCommercial: number;
+    industrial: number;
     mega: number;
     avgDealSize: number;
   };
 }
 
+// Business-aligned deal size buckets based on actual historical data
 const DEAL_BUCKETS = [
-  { label: "Small", min: 0, max: 25000 },
-  { label: "Medium", min: 25000, max: 75000 },
-  { label: "Large", min: 75000, max: 150000 },
-  { label: "Very Large", min: 150000, max: 300000 },
-  { label: "Enterprise", min: 300000, max: 500000 },
-  { label: "Mega", min: 500000, max: Infinity },
+  { label: "Residential", min: 0, max: 350000 },              // Standard residential claims
+  { label: "Residential+", min: 350000, max: 750000 },        // High-end residential
+  { label: "Mid-Commercial", min: 750000, max: 1500000 },     // Mid-size commercial
+  { label: "Large Commercial", min: 1500000, max: 3000000 },  // Large commercial
+  { label: "Industrial", min: 3000000, max: 7500000 },        // Industrial / large-loss
+  { label: "Mega", min: 7500000, max: Infinity },             // Mega deals $7.5M+
 ];
 
 export function useDealSizeAnalysis(): {
@@ -124,33 +125,47 @@ export function useDealSizeAnalysis(): {
     };
   };
 
-  // Function to estimate deal mix based on targets
+  // Function to estimate deal mix based on targets - aligned with business buckets
   const getDealMixEstimate = (targetDeals: number, targetRevenue: number) => {
     const avgDealSize = targetRevenue / (targetDeals || 1);
 
-    // Weight the distribution based on target deal size with new granular buckets
-    let weights = { small: 0.20, medium: 0.30, large: 0.25, veryLarge: 0.15, enterprise: 0.07, mega: 0.03 };
+    // Weight distribution based on realistic deal size ranges for this business
+    // Most deals are Residential to Mid-Commercial range
+    let weights = { 
+      residential: 0.35,      // <$350K
+      residentialPlus: 0.25,  // $350K-$750K
+      midCommercial: 0.20,    // $750K-$1.5M
+      largeCommercial: 0.12,  // $1.5M-$3M
+      industrial: 0.05,       // $3M-$7.5M
+      mega: 0.03              // $7.5M+
+    };
 
-    if (avgDealSize < 25000) {
-      weights = { small: 0.50, medium: 0.30, large: 0.12, veryLarge: 0.05, enterprise: 0.02, mega: 0.01 };
-    } else if (avgDealSize < 75000) {
-      weights = { small: 0.20, medium: 0.45, large: 0.20, veryLarge: 0.10, enterprise: 0.04, mega: 0.01 };
-    } else if (avgDealSize < 150000) {
-      weights = { small: 0.10, medium: 0.25, large: 0.40, veryLarge: 0.15, enterprise: 0.07, mega: 0.03 };
-    } else if (avgDealSize < 300000) {
-      weights = { small: 0.05, medium: 0.15, large: 0.25, veryLarge: 0.35, enterprise: 0.15, mega: 0.05 };
-    } else if (avgDealSize < 500000) {
-      weights = { small: 0.03, medium: 0.10, large: 0.15, veryLarge: 0.25, enterprise: 0.35, mega: 0.12 };
+    if (avgDealSize < 350000) {
+      // Smaller avg = more residential deals
+      weights = { residential: 0.55, residentialPlus: 0.25, midCommercial: 0.12, largeCommercial: 0.05, industrial: 0.02, mega: 0.01 };
+    } else if (avgDealSize < 750000) {
+      // Mix of residential and residential+
+      weights = { residential: 0.30, residentialPlus: 0.40, midCommercial: 0.18, largeCommercial: 0.08, industrial: 0.03, mega: 0.01 };
+    } else if (avgDealSize < 1500000) {
+      // Targeting mid-commercial range
+      weights = { residential: 0.20, residentialPlus: 0.25, midCommercial: 0.35, largeCommercial: 0.12, industrial: 0.05, mega: 0.03 };
+    } else if (avgDealSize < 3000000) {
+      // Large commercial focus
+      weights = { residential: 0.10, residentialPlus: 0.15, midCommercial: 0.25, largeCommercial: 0.30, industrial: 0.15, mega: 0.05 };
+    } else if (avgDealSize < 7500000) {
+      // Industrial/large-loss focus
+      weights = { residential: 0.05, residentialPlus: 0.10, midCommercial: 0.15, largeCommercial: 0.25, industrial: 0.35, mega: 0.10 };
     } else {
-      weights = { small: 0.02, medium: 0.05, large: 0.10, veryLarge: 0.18, enterprise: 0.25, mega: 0.40 };
+      // Mega deal focus (very rare)
+      weights = { residential: 0.03, residentialPlus: 0.07, midCommercial: 0.10, largeCommercial: 0.20, industrial: 0.30, mega: 0.30 };
     }
 
     return {
-      small: Math.round(targetDeals * weights.small),
-      medium: Math.round(targetDeals * weights.medium),
-      large: Math.round(targetDeals * weights.large),
-      veryLarge: Math.round(targetDeals * weights.veryLarge),
-      enterprise: Math.round(targetDeals * weights.enterprise),
+      residential: Math.round(targetDeals * weights.residential),
+      residentialPlus: Math.round(targetDeals * weights.residentialPlus),
+      midCommercial: Math.round(targetDeals * weights.midCommercial),
+      largeCommercial: Math.round(targetDeals * weights.largeCommercial),
+      industrial: Math.round(targetDeals * weights.industrial),
       mega: Math.round(targetDeals * weights.mega),
       avgDealSize,
     };
