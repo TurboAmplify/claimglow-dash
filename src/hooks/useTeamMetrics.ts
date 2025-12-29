@@ -49,6 +49,24 @@ export function useTeamMetrics(selection: TeamMemberSelection, year: number) {
     enabled: effectiveIds.length > 0,
   });
 
+  // Fetch all goals for the selected members (fallback when no plans exist)
+  const { data: allGoals, isLoading: loadingGoals } = useQuery({
+    queryKey: ["team-goals-metrics", effectiveIds, year],
+    queryFn: async () => {
+      if (effectiveIds.length === 0) return [];
+      
+      const { data, error } = await supabase
+        .from("sales_goals")
+        .select("*")
+        .in("salesperson_id", effectiveIds)
+        .eq("year", year);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: effectiveIds.length > 0,
+  });
+
   // Fetch all commissions for the selected members
   const { data: allCommissions, isLoading: loadingCommissions } = useQuery({
     queryKey: ["team-commissions", effectiveIds, year],
@@ -70,11 +88,17 @@ export function useTeamMetrics(selection: TeamMemberSelection, year: number) {
   // Aggregate metrics
   const teamMetrics = useMemo<TeamMetrics>(() => {
     const plans = allPlans || [];
+    const goals = allGoals || [];
     const commissions = allCommissions || [];
     
-    // Aggregate plan targets
-    const totalTargetRevenue = plans.reduce((sum, p) => sum + Number(p.target_revenue), 0);
-    const totalTargetCommission = plans.reduce((sum, p) => sum + Number(p.target_commission), 0);
+    // Aggregate plan targets - fall back to goals if no plans exist
+    const totalTargetRevenue = plans.length > 0
+      ? plans.reduce((sum, p) => sum + Number(p.target_revenue), 0)
+      : goals.reduce((sum, g) => sum + Number(g.target_revenue || 0), 0);
+    
+    const totalTargetCommission = plans.length > 0
+      ? plans.reduce((sum, p) => sum + Number(p.target_commission), 0)
+      : totalTargetRevenue * 0.075 * 0.20; // Estimate based on default rates if no plans
     
     // Average fee/commission percentages (weighted by target revenue or simple avg)
     const avgFeePercent = plans.length > 0
@@ -118,11 +142,11 @@ export function useTeamMetrics(selection: TeamMemberSelection, year: number) {
         monthlyBreakdown,
       },
     };
-  }, [allPlans, allCommissions, effectiveIds]);
+  }, [allPlans, allGoals, allCommissions, effectiveIds]);
 
   return {
     metrics: teamMetrics,
-    isLoading: loadingPlans || loadingCommissions,
+    isLoading: loadingPlans || loadingGoals || loadingCommissions,
     effectiveIds,
   };
 }
