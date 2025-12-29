@@ -67,9 +67,8 @@ export function PlanCreator({
     updatePlanInput('targetCommission', calculatedCommission);
   };
 
-  // Check if there's a fee suggestion that differs significantly from current
-  const hasFeeInsight = dealInsights?.bucket && 
-    Math.abs(dealInsights.suggestedFeePercent - avgFeePercent) > 0.5;
+  // Check if there's a valid fee insight (always show when bucket exists)
+  const hasFeeInsight = dealInsights?.bucket && dealInsights.suggestedFeePercent > 0;
 
   return (
     <div className="glass-card p-6 animate-fade-in">
@@ -121,10 +120,14 @@ export function PlanCreator({
           <div className="relative">
             <Input
               id="targetDeals"
-              type="number"
-              min="1"
-              value={targetDeals}
-              onChange={(e) => updatePlanInput('targetDeals', parseInt(e.target.value) || 1)}
+              type="text"
+              inputMode="numeric"
+              value={targetDeals.toString()}
+              onChange={(e) => {
+                const cleaned = e.target.value.replace(/[^0-9]/g, '');
+                const numValue = cleaned === '' ? 1 : parseInt(cleaned, 10);
+                updatePlanInput('targetDeals', numValue);
+              }}
               className="text-lg font-semibold"
             />
           </div>
