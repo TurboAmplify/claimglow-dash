@@ -55,6 +55,16 @@ const themes: ThemeOption[] = [
       accent: 'bg-[hsl(220,15%,50%)]',
     },
   },
+  {
+    id: 'violet-dew',
+    name: 'Violet Dew',
+    description: 'Fresh purple & lavender',
+    preview: {
+      bg: 'bg-[hsl(270,60%,25%)]',
+      primary: 'bg-[hsl(270,70%,60%)]',
+      accent: 'bg-[hsl(280,80%,70%)]',
+    },
+  },
 ];
 
 export function ThemeSwitcher() {
