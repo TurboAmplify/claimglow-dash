@@ -14,13 +14,12 @@ export default function SalesDashboardPage() {
   const { data: availableYears } = useAvailableYears();
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   
-  const salespersonId = salespeople?.[0]?.id;
-  
+  // Fetch ALL commissions (no salesperson filter) for team-wide dashboard
   const { data: commissions, isLoading } = useSalesCommissions(
-    salespersonId,
+    undefined, // No filter - show all salespeople
     selectedYear || undefined
   );
-  const { data: yearSummaries } = useYearSummaries(salespersonId);
+  const { data: yearSummaries } = useYearSummaries(); // No filter - show all
 
   const formatCurrency = (value: number) => {
     if (value >= 1000000) {
@@ -120,7 +119,7 @@ export default function SalesDashboardPage() {
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Sales Dashboard</h1>
           <p className="text-muted-foreground">
-            {salespeople?.[0]?.name || 'Salesperson'} - Commission Tracking
+            Team Overview - {salespeople?.length || 0} Salespeople
           </p>
         </div>
         
