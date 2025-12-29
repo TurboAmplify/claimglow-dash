@@ -289,6 +289,7 @@ export default function SalesDashboardPage() {
                 <thead className="sticky top-0 z-10 bg-glass-bg">
                   <tr>
                     <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase text-left">Client</th>
+                    <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase text-left">Salesperson</th>
                     <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase text-left">Date</th>
                     <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase text-right">Initial Est.</th>
                     <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase text-right">Revised Est.</th>
@@ -299,20 +300,24 @@ export default function SalesDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {commissions.slice(0, 50).map((c) => (
-                    <tr key={c.id} className="border-b border-glass-border/20 hover:bg-secondary/20">
-                      <td className="px-4 py-3 font-medium text-foreground">{c.client_name}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{c.date_signed || '—'}</td>
-                      <td className="px-4 py-3 text-right font-mono">{formatCurrency(c.initial_estimate || 0)}</td>
-                      <td className="px-4 py-3 text-right font-mono">{formatCurrency(c.revised_estimate || 0)}</td>
-                      <td className={`px-4 py-3 text-right font-mono ${(c.percent_change || 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}`}>
-                        {(c.percent_change || 0) >= 0 ? '+' : ''}{(c.percent_change || 0).toFixed(1)}%
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono">{c.split_percentage || 100}%</td>
-                      <td className="px-4 py-3 text-right font-mono">{c.fee_percentage || 0}%</td>
-                      <td className="px-4 py-3 text-right font-mono text-primary">{formatCurrency(c.commissions_paid || 0)}</td>
-                    </tr>
-                  ))}
+                  {commissions.slice(0, 50).map((c) => {
+                    const salesperson = salespeople?.find(sp => sp.id === c.salesperson_id);
+                    return (
+                      <tr key={c.id} className="border-b border-glass-border/20 hover:bg-secondary/20">
+                        <td className="px-4 py-3 font-medium text-foreground">{c.client_name}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{salesperson?.name || '—'}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{c.date_signed || '—'}</td>
+                        <td className="px-4 py-3 text-right font-mono">{formatCurrency(c.initial_estimate || 0)}</td>
+                        <td className="px-4 py-3 text-right font-mono">{formatCurrency(c.revised_estimate || 0)}</td>
+                        <td className={`px-4 py-3 text-right font-mono ${(c.percent_change || 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}`}>
+                          {(c.percent_change || 0) >= 0 ? '+' : ''}{(c.percent_change || 0).toFixed(1)}%
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono">{c.split_percentage || 100}%</td>
+                        <td className="px-4 py-3 text-right font-mono">{c.fee_percentage || 0}%</td>
+                        <td className="px-4 py-3 text-right font-mono text-primary">{formatCurrency(c.commissions_paid || 0)}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
