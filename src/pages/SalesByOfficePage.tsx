@@ -2,19 +2,22 @@ import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { MultiSelectFilter } from "@/components/dashboard/MultiSelectFilter";
 import { EditSalesRecordDialog } from "@/components/dashboard/EditSalesRecordDialog";
 import { SalespersonCard, SalespersonStats } from "@/components/dashboard/SalespersonCard";
-import { useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions";
+import { useSalespeople, useSalesCommissions, useAvailableYears } from "@/hooks/useSalesCommissions";
 import { Loader2, Edit2, Building2, DollarSign, Users, FileText, Percent } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { SalesCommission } from "@/types/sales";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function SalesByOfficePage() {
   const [selectedOffices, setSelectedOffices] = useState<string[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [editRecord, setEditRecord] = useState<SalesCommission | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const { data: salespeople, isLoading: loadingSalespeople } = useSalespeople();
-  const { data: commissions, isLoading: loadingCommissions } = useSalesCommissions();
+  const { data: commissions, isLoading: loadingCommissions } = useSalesCommissions(undefined, selectedYear || undefined);
+  const { data: availableYears } = useAvailableYears();
 
   const offices = ["Houston", "Dallas"];
 
@@ -172,13 +175,34 @@ export default function SalesByOfficePage() {
 
       {/* Filters */}
       <div className="glass-card p-6 mb-8 animate-fade-in">
-        <MultiSelectFilter
-          label="Filter by Office"
-          options={offices}
-          selected={selectedOffices}
-          onChange={setSelectedOffices}
-          placeholder="Select offices..."
-        />
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="flex-1 min-w-[200px]">
+            <MultiSelectFilter
+              label="Filter by Office"
+              options={offices}
+              selected={selectedOffices}
+              onChange={setSelectedOffices}
+              placeholder="Select offices..."
+            />
+          </div>
+          <div className="w-40">
+            <label className="block text-sm font-medium text-muted-foreground mb-2">Year</label>
+            <Select
+              value={selectedYear?.toString() || "all"}
+              onValueChange={(v) => setSelectedYear(v === "all" ? null : parseInt(v))}
+            >
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="All Years" />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border border-border z-50">
+                <SelectItem value="all">All Years</SelectItem>
+                {availableYears?.map(year => (
+                  <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
       {/* Office Stats Cards */}
