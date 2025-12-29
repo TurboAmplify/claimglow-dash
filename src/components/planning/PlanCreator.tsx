@@ -1,16 +1,27 @@
-import { Target, DollarSign, Hash, Percent } from "lucide-react";
+import { Target, DollarSign, Hash } from "lucide-react";
 import { PlanInputs } from "@/hooks/usePlanScenarios";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+// Hardcoded commission percentages per salesperson
+const SALESPERSON_COMMISSION: Record<string, number> = {
+  "Matt Aldrich": 20,
+  "Jason Roetter": 25,
+  "Richard Goldsmith": 15, // Will change to 20% then 25% at TBD points
+};
 
 interface PlanCreatorProps {
   planInputs: PlanInputs;
   updatePlanInput: <K extends keyof PlanInputs>(key: K, value: PlanInputs[K]) => void;
   formatCurrency: (value: number) => string;
+  salespersonName?: string;
 }
 
-export function PlanCreator({ planInputs, updatePlanInput, formatCurrency }: PlanCreatorProps) {
-  const { targetRevenue, targetCommission, targetDeals, avgFeePercent, commissionPercent } = planInputs;
+export function PlanCreator({ planInputs, updatePlanInput, formatCurrency, salespersonName }: PlanCreatorProps) {
+  const { targetRevenue, targetCommission, targetDeals, avgFeePercent } = planInputs;
+  
+  // Get hardcoded commission for this salesperson
+  const commissionPercent = salespersonName ? (SALESPERSON_COMMISSION[salespersonName] ?? 20) : 20;
 
   // Calculate required volume from target commission
   const requiredVolume = avgFeePercent > 0 && commissionPercent > 0
@@ -34,10 +45,12 @@ export function PlanCreator({ planInputs, updatePlanInput, formatCurrency }: Pla
         </div>
       </div>
 
-      {/* Average Fee Target Note */}
+      {/* Average Fee & Commission Note */}
       <div className="mb-6 px-4 py-2 bg-muted/30 rounded-lg border border-border/50">
         <p className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">Average Target Fee Goal:</span> {avgFeePercent}%
+          <span className="mx-3">•</span>
+          <span className="font-medium text-foreground">Commission:</span> {commissionPercent}%
         </p>
       </div>
 
@@ -78,28 +91,6 @@ export function PlanCreator({ planInputs, updatePlanInput, formatCurrency }: Pla
             />
           </div>
           <p className="text-xs text-muted-foreground">Avg deal size: {formatCurrency(requiredVolume / (targetDeals || 1))}</p>
-        </div>
-
-        {/* Commission % */}
-        <div className="space-y-2">
-          <Label htmlFor="commissionPercent" className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Percent className="w-4 h-4" />
-            Commission %
-          </Label>
-          <div className="relative">
-            <Input
-              id="commissionPercent"
-              type="number"
-              step="1"
-              min="0"
-              max="100"
-              value={commissionPercent}
-              onChange={(e) => updatePlanInput('commissionPercent', parseFloat(e.target.value) || 0)}
-              className="pr-7 text-lg font-semibold"
-            />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
-          </div>
-          <p className="text-xs text-muted-foreground">Your split of company fee</p>
         </div>
 
         {/* Required Revenue (Calculated) */}

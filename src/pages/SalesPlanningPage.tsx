@@ -531,6 +531,7 @@ export default function SalesPlanningPage() {
               planInputs={planInputs}
               updatePlanInput={updatePlanInput}
               formatCurrency={formatCurrency}
+              salespersonName={selectedSalesperson?.name}
             />
           )}
           
