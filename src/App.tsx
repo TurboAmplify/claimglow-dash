@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import HomePage from "./pages/HomePage";
@@ -25,30 +26,32 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<AuthPage />} />
-          <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-          <Route path="/adjusters" element={<ProtectedRoute><AdjustersPage /></ProtectedRoute>} />
-          <Route path="/import" element={<ProtectedRoute><ImportDataPage /></ProtectedRoute>} />
-          <Route path="/import-commissions" element={<ProtectedRoute><ImportCommissionsPage /></ProtectedRoute>} />
-          <Route path="/offices" element={<ProtectedRoute><OfficesPage /></ProtectedRoute>} />
-          <Route path="/claims" element={<ProtectedRoute><ClaimsPage /></ProtectedRoute>} />
-          <Route path="/sales" element={<ProtectedRoute><SalesDashboardPage /></ProtectedRoute>} />
-          <Route path="/sales/by-person" element={<ProtectedRoute><SalesByPersonPage /></ProtectedRoute>} />
-          <Route path="/sales/person/:id" element={<ProtectedRoute><SalespersonDashboardPage /></ProtectedRoute>} />
-          <Route path="/sales/by-office" element={<ProtectedRoute><SalesByOfficePage /></ProtectedRoute>} />
-          <Route path="/sales/all" element={<ProtectedRoute><AllSalesPage /></ProtectedRoute>} />
-          <Route path="/planning" element={<ProtectedRoute><SalesPlanningPage /></ProtectedRoute>} />
-          <Route path="/planning/:id" element={<ProtectedRoute><IndividualPlanningPage /></ProtectedRoute>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/adjusters" element={<ProtectedRoute><AdjustersPage /></ProtectedRoute>} />
+            <Route path="/import" element={<ProtectedRoute><ImportDataPage /></ProtectedRoute>} />
+            <Route path="/import-commissions" element={<ProtectedRoute><ImportCommissionsPage /></ProtectedRoute>} />
+            <Route path="/offices" element={<ProtectedRoute><OfficesPage /></ProtectedRoute>} />
+            <Route path="/claims" element={<ProtectedRoute><ClaimsPage /></ProtectedRoute>} />
+            <Route path="/sales" element={<ProtectedRoute><SalesDashboardPage /></ProtectedRoute>} />
+            <Route path="/sales/by-person" element={<ProtectedRoute><SalesByPersonPage /></ProtectedRoute>} />
+            <Route path="/sales/person/:id" element={<ProtectedRoute><SalespersonDashboardPage /></ProtectedRoute>} />
+            <Route path="/sales/by-office" element={<ProtectedRoute><SalesByOfficePage /></ProtectedRoute>} />
+            <Route path="/sales/all" element={<ProtectedRoute><AllSalesPage /></ProtectedRoute>} />
+            <Route path="/planning" element={<ProtectedRoute><SalesPlanningPage /></ProtectedRoute>} />
+            <Route path="/planning/:id" element={<ProtectedRoute><IndividualPlanningPage /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
