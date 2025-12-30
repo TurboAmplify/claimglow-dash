@@ -57,7 +57,7 @@ export default function IndividualPlanningPage() {
     setSelectedScenarioId,
     selectedScenario,
     monthlyProjections,
-  } = usePlanScenarios();
+  } = usePlanScenarios({ salespersonName: salesperson?.name });
 
   const { plan, savePlan, isSaving, isLoading: loadingPlan } = useSalesPlan(id, currentYear);
   const { submitForApproval, isSubmitting } = usePlanApproval();
