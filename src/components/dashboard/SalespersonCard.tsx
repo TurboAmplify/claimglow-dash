@@ -100,8 +100,7 @@ export function SalespersonCard({ stats, onClick, delay = 0 }: SalespersonCardPr
           </div>
         </div>
         {/* Commission Yield Badge */}
-        <div className="px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1 bg-primary/15 text-primary border border-primary/30 whitespace-nowrap">
-          <Percent className="w-4 h-4 flex-shrink-0" />
+        <div className="px-3 py-1.5 rounded-full text-sm font-bold bg-primary/15 text-primary border border-primary/30 whitespace-nowrap">
           <span>{commissionYield.toFixed(1)}% yield</span>
         </div>
       </div>
