@@ -133,6 +133,23 @@ export default function SalesPlanningPage() {
     return scenarios.find(s => s.id === selectedScenarioId) || scenarios[1];
   }, [scenarios, selectedScenarioId]);
 
+  // Build team member plan data for the growth plan dialog
+  const teamMemberPlans = useMemo(() => {
+    if (!isTeamView || !salespeople || !teamMetrics.plans) return [];
+    
+    return teamMetrics.plans.map(plan => {
+      const member = salespeople.find(sp => sp.id === plan.salesperson_id);
+      return {
+        id: plan.salesperson_id,
+        name: member?.name || 'Unknown',
+        targetRevenue: Number(plan.target_revenue) || 0,
+        targetDeals: plan.target_deals ?? 40,
+        commissionPercent: Number(plan.commission_percent) || 20,
+        selectedScenario: plan.selected_scenario || 'balanced',
+      };
+    }).sort((a, b) => b.targetRevenue - a.targetRevenue); // Sort by revenue descending
+  }, [isTeamView, salespeople, teamMetrics.plans]);
+
   const monthlyProjections = useMemo(() => {
     if (!isTeamView) return baseMonthlyProjections;
     
@@ -776,7 +793,6 @@ export default function SalesPlanningPage() {
           </div>
         </TabsContent>
 
-        {/* Strategy Tab */}
         <TabsContent value="strategy" className="space-y-6">
           <StrategicFocusSection 
             selectedScenarioId={selectedScenarioId}
@@ -788,6 +804,7 @@ export default function SalesPlanningPage() {
             commissionPercent={planInputs.commissionPercent}
             isTeamView={isTeamView}
             teamMemberCount={teamMetrics.memberCount}
+            teamMemberPlans={teamMemberPlans}
           />
         </TabsContent>
 

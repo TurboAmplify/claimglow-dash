@@ -172,7 +172,9 @@ export function ScenarioTargetsSection({ selectedScenario, formatCurrency, planT
   const BASE_TARGETS = isDirector ? DIRECTOR_TARGETS : REP_TARGETS;
   const SCENARIO_ADJUSTMENTS = isDirector ? DIRECTOR_SCENARIO_ADJUSTMENTS : REP_SCENARIO_ADJUSTMENTS;
   
-  const adjustment = SCENARIO_ADJUSTMENTS[selectedScenario.id] || SCENARIO_ADJUSTMENTS.balanced;
+  // Map scenario IDs correctly - the scenario.id matches the adjustment keys
+  const scenarioId = selectedScenario.id;
+  const adjustment = SCENARIO_ADJUSTMENTS[scenarioId] || SCENARIO_ADJUSTMENTS.balanced;
   
   // Use plan values directly for the balanced scenario, otherwise use scenario values
   const isBalancedScenario = selectedScenario.id === "balanced";

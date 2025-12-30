@@ -16,7 +16,7 @@ import {
   Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DynamicGrowthPlanDialog } from "./DynamicGrowthPlanDialog";
+import { DynamicGrowthPlanDialog, TeamMemberPlanData } from "./DynamicGrowthPlanDialog";
 export interface StrategicFocusArea {
   id: number;
   title: string;
@@ -133,6 +133,7 @@ interface StrategicFocusSectionProps {
   commissionPercent?: number;
   isTeamView?: boolean;
   teamMemberCount?: number;
+  teamMemberPlans?: TeamMemberPlanData[];
 }
 
 export function StrategicFocusSection({ 
@@ -145,6 +146,7 @@ export function StrategicFocusSection({
   commissionPercent = 20,
   isTeamView = false,
   teamMemberCount = 1,
+  teamMemberPlans = [],
 }: StrategicFocusSectionProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
@@ -180,6 +182,7 @@ export function StrategicFocusSection({
             commissionPercent={commissionPercent}
             isTeamView={isTeamView}
             teamMemberCount={teamMemberCount}
+            teamMemberPlans={teamMemberPlans}
           />
         </div>
       </div>
