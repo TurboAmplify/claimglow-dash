@@ -89,6 +89,53 @@ export type Database = {
         }
         Relationships: []
       }
+      commission_checks: {
+        Row: {
+          check_amount: number
+          check_number: string | null
+          commission_earned: number
+          created_at: string
+          deposited_date: string
+          id: string
+          notes: string | null
+          received_date: string
+          sales_commission_id: string
+          updated_at: string
+        }
+        Insert: {
+          check_amount: number
+          check_number?: string | null
+          commission_earned?: number
+          created_at?: string
+          deposited_date: string
+          id?: string
+          notes?: string | null
+          received_date: string
+          sales_commission_id: string
+          updated_at?: string
+        }
+        Update: {
+          check_amount?: number
+          check_number?: string | null
+          commission_earned?: number
+          created_at?: string
+          deposited_date?: string
+          id?: string
+          notes?: string | null
+          received_date?: string
+          sales_commission_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_checks_sales_commission_id_fkey"
+            columns: ["sales_commission_id"]
+            isOneToOne: false
+            referencedRelation: "sales_commissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deal_pipeline: {
         Row: {
           client_name: string

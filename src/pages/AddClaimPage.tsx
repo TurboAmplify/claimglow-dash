@@ -17,6 +17,7 @@ import { DealCard } from "@/components/salesperson/DealCard";
 import type { SalesCommission } from "@/types/sales";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MultiSalespersonSplit, SalespersonSplit } from "@/components/salesperson/MultiSalespersonSplit";
+import { MonthlyCommissionSummary } from "@/components/salesperson/MonthlyCommissionSummary";
 
 const AddClaimPage = () => {
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
@@ -513,35 +514,48 @@ const AddClaimPage = () => {
           </div>
         </div>
 
-        {/* Summary Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
-          <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "50ms" }}>
-            <p className="text-[10px] text-muted-foreground leading-tight">Claims</p>
-            <p className="text-base font-bold text-foreground tabular-nums">{summaryStats.dealCount}</p>
+        {/* Monthly Commission Summary + Summary Stats */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
+              <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "50ms" }}>
+                <p className="text-[10px] text-muted-foreground leading-tight">Claims</p>
+                <p className="text-base font-bold text-foreground tabular-nums">{summaryStats.dealCount}</p>
+              </div>
+              <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "75ms" }}>
+                <p className="text-[10px] text-muted-foreground leading-tight">Total Volume</p>
+                <p className="text-base font-bold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalVolume)}</p>
+              </div>
+              <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "100ms" }}>
+                <p className="text-[10px] text-muted-foreground leading-tight">Collected</p>
+                <p className="text-base font-bold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCollected)}</p>
+              </div>
+              <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "125ms" }}>
+                <p className="text-[10px] text-muted-foreground leading-tight">Collection %</p>
+                <p className="text-base font-bold text-foreground tabular-nums">{summaryStats.collectionRate.toFixed(1)}%</p>
+              </div>
+              <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "150ms" }}>
+                <p className="text-[10px] text-muted-foreground leading-tight">Comm. Earned</p>
+                <p className="text-base font-bold text-primary tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCommissionEarned)}</p>
+              </div>
+              <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "175ms" }}>
+                <p className="text-[10px] text-muted-foreground leading-tight">Paid Out</p>
+                <p className="text-base font-bold text-green-600 tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCommissionPaid)}</p>
+              </div>
+              <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "200ms" }}>
+                <p className="text-[10px] text-muted-foreground leading-tight">Pending</p>
+                <p className="text-base font-bold text-amber-600 tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.pendingCommission)}</p>
+              </div>
+            </div>
           </div>
-          <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "75ms" }}>
-            <p className="text-[10px] text-muted-foreground leading-tight">Total Volume</p>
-            <p className="text-base font-bold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalVolume)}</p>
-          </div>
-          <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "100ms" }}>
-            <p className="text-[10px] text-muted-foreground leading-tight">Collected</p>
-            <p className="text-base font-bold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCollected)}</p>
-          </div>
-          <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "125ms" }}>
-            <p className="text-[10px] text-muted-foreground leading-tight">Collection %</p>
-            <p className="text-base font-bold text-foreground tabular-nums">{summaryStats.collectionRate.toFixed(1)}%</p>
-          </div>
-          <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "150ms" }}>
-            <p className="text-[10px] text-muted-foreground leading-tight">Comm. Earned</p>
-            <p className="text-base font-bold text-primary tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCommissionEarned)}</p>
-          </div>
-          <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "175ms" }}>
-            <p className="text-[10px] text-muted-foreground leading-tight">Paid Out</p>
-            <p className="text-base font-bold text-green-600 tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCommissionPaid)}</p>
-          </div>
-          <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "200ms" }}>
-            <p className="text-[10px] text-muted-foreground leading-tight">Pending</p>
-            <p className="text-base font-bold text-amber-600 tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.pendingCommission)}</p>
+          
+          {/* Monthly Commission Summary */}
+          <div className="animate-fade-in" style={{ animationDelay: "225ms" }}>
+            <MonthlyCommissionSummary 
+              year={yearFilter !== "all" ? parseInt(yearFilter) : new Date().getFullYear()}
+              salespersonId={salespersonFilter !== "all" ? salespersonFilter : undefined}
+            />
           </div>
         </div>
 
