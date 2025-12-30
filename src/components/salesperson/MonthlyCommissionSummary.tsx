@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarDays, TrendingUp, DollarSign } from "lucide-react";
+import { CalendarDays, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
 import { format, startOfYear, endOfYear, parseISO, getMonth, getYear } from "date-fns";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface MonthlyCommissionSummaryProps {
   year?: number;
@@ -25,6 +26,7 @@ const MONTHS = [
 ];
 
 export function MonthlyCommissionSummary({ year = new Date().getFullYear(), salespersonId }: MonthlyCommissionSummaryProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const { data: checks = [] } = useQuery({
     queryKey: ["commission_checks", year, salespersonId],
     queryFn: async () => {
@@ -113,79 +115,96 @@ export function MonthlyCommissionSummary({ year = new Date().getFullYear(), sale
   const currentMonth = new Date().getMonth();
 
   return (
-    <Card className="glass-card">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <CalendarDays className="w-4 h-4 text-primary" />
-          Monthly Commission ({year})
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {/* Summary Stats */}
-        <div className="grid grid-cols-3 gap-2 p-2 rounded-lg bg-secondary/30">
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground">YTD Checks</p>
-            <p className="font-bold text-sm whitespace-nowrap">{formatCurrency(totals.totalChecks)}</p>
-          </div>
-          <div className="text-center border-x border-border">
-            <p className="text-xs text-muted-foreground">YTD Commission</p>
-            <p className="font-bold text-sm text-primary whitespace-nowrap">{formatCurrency(totals.totalCommission)}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground">Total Checks</p>
-            <p className="font-bold text-sm">{totals.checkCount}</p>
-          </div>
-        </div>
+    <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+      <Card className="glass-card">
+        <CollapsibleTrigger asChild>
+          <CardHeader className="pb-2 cursor-pointer hover:bg-secondary/20 transition-colors rounded-t-lg">
+            <CardTitle className="text-sm font-medium flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="w-4 h-4 text-primary" />
+                Monthly Commission ({year})
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-primary font-bold">{formatCurrency(totals.totalCommission)}</span>
+                {isExpanded ? (
+                  <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                )}
+              </div>
+            </CardTitle>
+          </CardHeader>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent>
+          <CardContent className="space-y-3 pt-0">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-3 gap-2 p-2 rounded-lg bg-secondary/30">
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground">YTD Checks</p>
+                <p className="font-bold text-sm whitespace-nowrap">{formatCurrency(totals.totalChecks)}</p>
+              </div>
+              <div className="text-center border-x border-border">
+                <p className="text-xs text-muted-foreground">YTD Commission</p>
+                <p className="font-bold text-sm text-primary whitespace-nowrap">{formatCurrency(totals.totalCommission)}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground">Total Checks</p>
+                <p className="font-bold text-sm">{totals.checkCount}</p>
+              </div>
+            </div>
 
-        {/* Monthly Breakdown */}
-        <div className="space-y-1">
-          <p className="text-xs text-muted-foreground font-medium mb-2">Monthly Breakdown</p>
-          <div className="grid grid-cols-4 gap-1">
-            {monthlyData.map((month, index) => {
-              const hasData = month.totalCommission > 0;
-              const isCurrent = index === currentMonth;
-              const isPast = index < currentMonth;
-              
-              return (
-                <div
-                  key={month.month}
-                  className={`p-2 rounded text-center text-xs transition-colors ${
-                    isCurrent 
-                      ? 'bg-primary/20 border border-primary/30' 
-                      : hasData 
-                        ? 'bg-green-500/10 border border-green-500/20' 
-                        : isPast 
-                          ? 'bg-muted/50' 
-                          : 'bg-secondary/20'
-                  }`}
-                >
-                  <p className={`font-medium ${isCurrent ? 'text-primary' : 'text-muted-foreground'}`}>
-                    {month.month}
-                  </p>
-                  <p className={`font-bold ${hasData ? 'text-green-600' : 'text-muted-foreground/50'}`}>
-                    {hasData ? formatCurrency(month.totalCommission) : '-'}
-                  </p>
-                  {hasData && (
-                    <p className="text-muted-foreground text-[10px]">
-                      {month.checkCount} check{month.checkCount !== 1 ? 's' : ''}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+            {/* Monthly Breakdown */}
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground font-medium mb-2">Monthly Breakdown</p>
+              <div className="grid grid-cols-4 gap-1">
+                {monthlyData.map((month, index) => {
+                  const hasData = month.totalCommission > 0;
+                  const isCurrent = index === currentMonth;
+                  const isPast = index < currentMonth;
+                  
+                  return (
+                    <div
+                      key={month.month}
+                      className={`p-2 rounded text-center text-xs transition-colors ${
+                        isCurrent 
+                          ? 'bg-primary/20 border border-primary/30' 
+                          : hasData 
+                            ? 'bg-green-500/10 border border-green-500/20' 
+                            : isPast 
+                              ? 'bg-muted/50' 
+                              : 'bg-secondary/20'
+                      }`}
+                    >
+                      <p className={`font-medium ${isCurrent ? 'text-primary' : 'text-muted-foreground'}`}>
+                        {month.month}
+                      </p>
+                      <p className={`font-bold ${hasData ? 'text-green-600' : 'text-muted-foreground/50'}`}>
+                        {hasData ? formatCurrency(month.totalCommission) : '-'}
+                      </p>
+                      {hasData && (
+                        <p className="text-muted-foreground text-[10px]">
+                          {month.checkCount} check{month.checkCount !== 1 ? 's' : ''}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
-        {/* Trend indicator */}
-        {totals.totalCommission > 0 && (
-          <div className="flex items-center gap-2 pt-2 border-t border-border">
-            <TrendingUp className="w-3.5 h-3.5 text-green-600" />
-            <span className="text-xs text-muted-foreground">
-              Avg. monthly: <span className="font-medium text-foreground">{formatCurrency(totals.totalCommission / (currentMonth + 1))}</span>
-            </span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+            {/* Trend indicator */}
+            {totals.totalCommission > 0 && (
+              <div className="flex items-center gap-2 pt-2 border-t border-border">
+                <TrendingUp className="w-3.5 h-3.5 text-green-600" />
+                <span className="text-xs text-muted-foreground">
+                  Avg. monthly: <span className="font-medium text-foreground">{formatCurrency(totals.totalCommission / (currentMonth + 1))}</span>
+                </span>
+              </div>
+            )}
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
   );
 }
