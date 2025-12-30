@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { DensitySwitcher } from './DensitySwitcher';
@@ -16,6 +16,7 @@ export function SettingsPanel({ collapsed }: SettingsPanelProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
   const { isDirector } = useCurrentSalesperson();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -28,8 +29,29 @@ export function SettingsPanel({ collapsed }: SettingsPanelProps) {
     }
   }, [isOpen]);
 
+  // Handle click outside to close the panel
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    // Add listener with a slight delay to avoid immediate close on open click
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 10);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       {/* Settings Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -58,47 +80,38 @@ export function SettingsPanel({ collapsed }: SettingsPanelProps) {
 
       {/* Settings Dropdown */}
       {shouldRender && (
-        <>
-          {/* Backdrop - closes menu when clicking outside */}
-          <div 
-            className="fixed inset-0 z-40 bg-transparent cursor-default"
-            onClick={() => setIsOpen(false)}
-          />
-          
-          {/* Panel */}
-          <div className={cn(
-            "absolute z-50 bottom-full mb-2 left-0 right-0 min-w-[260px] glass-card p-4 transition-all duration-200 ease-out",
-            collapsed && "left-full ml-2 bottom-0 mb-0",
-            isAnimating 
-              ? "opacity-100 translate-y-0 scale-100" 
-              : "opacity-0 translate-y-2 scale-95"
-          )}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-foreground">Settings</h3>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-1 rounded-lg hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <ThemeSwitcher />
-              <DensitySwitcher />
-              
-              {isDirector && (
-                <>
-                  <Separator className="my-3" />
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground mb-2">Administration</p>
-                    <PeopleManagement />
-                  </div>
-                </>
-              )}
-            </div>
+        <div className={cn(
+          "absolute z-[100] bottom-full mb-2 left-0 right-0 min-w-[260px] glass-card p-4 transition-all duration-200 ease-out",
+          collapsed && "left-full ml-2 bottom-0 mb-0",
+          isAnimating 
+            ? "opacity-100 translate-y-0 scale-100" 
+            : "opacity-0 translate-y-2 scale-95"
+        )}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-foreground">Settings</h3>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="p-1 rounded-lg hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
-        </>
+          
+          <div className="space-y-4">
+            <ThemeSwitcher />
+            <DensitySwitcher />
+            
+            {isDirector && (
+              <>
+                <Separator className="my-3" />
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">Administration</p>
+                  <PeopleManagement />
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
