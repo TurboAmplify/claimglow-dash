@@ -32,6 +32,15 @@ const OPPORTUNITY_PROFILES = {
   },
 };
 
+export interface TeamMemberPlanData {
+  id: string;
+  name: string;
+  targetRevenue: number;
+  targetDeals: number;
+  commissionPercent: number;
+  selectedScenario: string;
+}
+
 interface DynamicGrowthPlanDialogProps {
   salespersonName: string;
   salespersonId?: string;
@@ -42,6 +51,7 @@ interface DynamicGrowthPlanDialogProps {
   commissionPercent: number;
   isTeamView?: boolean;
   teamMemberCount?: number;
+  teamMemberPlans?: TeamMemberPlanData[];
 }
 
 export function DynamicGrowthPlanDialog({
@@ -54,6 +64,7 @@ export function DynamicGrowthPlanDialog({
   commissionPercent,
   isTeamView = false,
   teamMemberCount = 1,
+  teamMemberPlans = [],
 }: DynamicGrowthPlanDialogProps) {
   const [open, setOpen] = useState(false);
 
@@ -182,6 +193,34 @@ export function DynamicGrowthPlanDialog({
       q3: { name: "Peak Season", focus: "Maximize summer storm season and high-activity periods" },
       q4: { name: "Year-End Push", focus: "Close strong and set up pipeline for next year" },
     };
+  };
+  
+  // Get member profile type for team view display
+  const getMemberProfileType = (memberName: string) => {
+    if (memberName.toLowerCase().includes('matt') || memberName.toLowerCase().includes('aldrich')) {
+      return 'Commercial & Industrial Focus';
+    }
+    return 'Residential Focus';
+  };
+  
+  // Get member scenario display name
+  const getMemberScenarioName = (memberName: string, scenarioId: string) => {
+    const isDirectorMember = memberName.toLowerCase().includes('matt') || memberName.toLowerCase().includes('aldrich');
+    if (isDirectorMember) {
+      switch (scenarioId) {
+        case 'conservative': return 'Conservative';
+        case 'commercial-heavy': return 'Commercial Heavy';
+        case 'balanced':
+        default: return 'Balanced';
+      }
+    } else {
+      switch (scenarioId) {
+        case 'conservative': return 'Volume';
+        case 'commercial-heavy': return 'Value';
+        case 'balanced':
+        default: return 'Volume Balanced';
+      }
+    }
   };
 
   const quarterlyThemes = getQuarterlyThemes();
@@ -313,9 +352,66 @@ export function DynamicGrowthPlanDialog({
 
             <hr className="my-6 border-border" />
 
+            {/* Team Member Overview - Only shown in team view */}
+            {isTeamView && teamMemberPlans.length > 0 && (
+              <>
+                <h2 className="text-xl font-semibold text-foreground mt-6 mb-3 border-b border-border pb-2">
+                  4. Team Member Contributions
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  Our team's collective target is achieved through the combined contributions of each member, with strategies tailored to their individual strengths and market focus.
+                </p>
+                
+                <div className="space-y-4 mb-6">
+                  {teamMemberPlans.map((member, index) => {
+                    const memberProfileType = getMemberProfileType(member.name);
+                    const memberScenarioName = getMemberScenarioName(member.name, member.selectedScenario);
+                    const memberQuarterlyRevenue = member.targetRevenue / 4;
+                    const memberQuarterlyDeals = Math.round(member.targetDeals / 4);
+                    const memberCommission = member.targetRevenue * (avgFeePercent / 100) * (member.commissionPercent / 100);
+                    const contributionPercent = targetRevenue > 0 ? Math.round((member.targetRevenue / targetRevenue) * 100) : 0;
+                    
+                    return (
+                      <div key={member.id} className="p-4 rounded-lg border border-border bg-secondary/20">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-lg font-semibold text-foreground">{member.name}</h3>
+                          <span className="text-xs px-2 py-1 rounded-full bg-primary/20 text-primary">
+                            {contributionPercent}% of Team Target
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          <strong className="text-foreground">{memberProfileType}</strong> • {memberScenarioName} Path
+                        </p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Target Revenue</p>
+                            <p className="font-semibold text-foreground">{formatCurrency(member.targetRevenue)}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Target Deals</p>
+                            <p className="font-semibold text-foreground">{member.targetDeals}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Quarterly Pace</p>
+                            <p className="font-semibold text-foreground">{memberQuarterlyDeals} deals / {formatCurrency(memberQuarterlyRevenue)}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Est. Commission</p>
+                            <p className="font-semibold text-foreground">{formatCurrency(memberCommission)}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                <hr className="my-6 border-border" />
+              </>
+            )}
+
             {/* Quarterly Themes */}
             <h2 className="text-xl font-semibold text-foreground mt-6 mb-3 border-b border-border pb-2">
-              4. Quarterly Themes
+              {isTeamView && teamMemberPlans.length > 0 ? '5' : '4'}. Quarterly Themes
             </h2>
 
             <h3 className="text-lg font-medium text-foreground mt-4 mb-2">Q1 — {quarterlyThemes.q1.name}</h3>
@@ -338,7 +434,7 @@ export function DynamicGrowthPlanDialog({
 
             {/* Core Targets Table */}
             <h2 className="text-xl font-semibold text-foreground mt-6 mb-3 border-b border-border pb-2">
-              5. Core Opportunity Targets
+              {isTeamView && teamMemberPlans.length > 0 ? '6' : '5'}. Core Opportunity Targets
             </h2>
             <div className="overflow-x-auto">
               <div className="grid grid-cols-5 gap-2 py-2 text-xs border-b border-border font-medium text-foreground">
@@ -382,7 +478,7 @@ export function DynamicGrowthPlanDialog({
 
             {/* Key Principles */}
             <h2 className="text-xl font-semibold text-foreground mt-6 mb-3 border-b border-border pb-2">
-              6. Key Principles
+              {isTeamView && teamMemberPlans.length > 0 ? '7' : '6'}. Key Principles
             </h2>
             <ul className="list-disc ml-4 space-y-2 text-muted-foreground">
               <li><strong className="text-foreground">Consistency</strong> — Every week, every month, every quarter — same disciplined actions.</li>
@@ -396,7 +492,7 @@ export function DynamicGrowthPlanDialog({
 
             {/* Final Perspective */}
             <h2 className="text-xl font-semibold text-foreground mt-6 mb-3 border-b border-border pb-2">
-              7. Final Perspective
+              {isTeamView && teamMemberPlans.length > 0 ? '8' : '7'}. Final Perspective
             </h2>
             <p className="text-muted-foreground mb-4">
               {isTeamView 
