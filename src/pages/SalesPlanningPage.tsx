@@ -13,6 +13,7 @@ import { ProgressTracker } from "@/components/planning/ProgressTracker";
 import { WeeklyDealsTracker } from "@/components/planning/WeeklyDealsTracker";
 import { DealPipeline } from "@/components/planning/DealPipeline";
 import { PlanAlertsIndicator } from "@/components/planning/PlanAlertsIndicator";
+import { GrowthPlanDialog } from "@/components/planning/GrowthPlanDialog";
 import { TeamMemberFilter, TeamMemberSelection } from "@/components/planning/TeamMemberFilter";
 
 import { WhatIfSandbox } from "@/components/planning/WhatIfSandbox";
@@ -315,16 +316,17 @@ export default function SalesPlanningPage() {
 
   return (
     <DashboardLayout>
-      {/* Plan Alerts Indicator for Directors - positioned at top right */}
-      {isDirector && directorId && (
-        <div className="flex justify-end mb-4">
+      {/* Plan Alerts & Growth Plan Icons - positioned at top right */}
+      <div className="flex justify-end gap-2 mb-4">
+        <GrowthPlanDialog />
+        {isDirector && directorId && (
           <PlanAlertsIndicator 
             directorId={directorId} 
             formatCurrency={formatCurrency}
             currentYear={currentYear}
           />
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Values Section at the top */}
       <div className="mb-6">
