@@ -235,11 +235,11 @@ const AddClaimPage = () => {
                 <TabsList className="grid w-full grid-cols-2 mb-4">
                   <TabsTrigger value="client" className="flex items-center gap-2 text-xs">
                     <User className="w-3.5 h-3.5" />
-                    Add/Update Client
+                    Add Client
                   </TabsTrigger>
                   <TabsTrigger value="deal" className="flex items-center gap-2 text-xs">
                     <FileText className="w-3.5 h-3.5" />
-                    Add/Update Deal
+                    Add Updated Deal
                   </TabsTrigger>
                 </TabsList>
 
