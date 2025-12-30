@@ -16,6 +16,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { DealCard } from "@/components/salesperson/DealCard";
 import type { SalesCommission } from "@/types/sales";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MultiSalespersonSplit, SalespersonSplit } from "@/components/salesperson/MultiSalespersonSplit";
 
 const AddClaimPage = () => {
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
@@ -23,12 +24,11 @@ const AddClaimPage = () => {
   const [clientName, setClientName] = useState("");
   const [adjuster, setAdjuster] = useState("");
   const [office, setOffice] = useState("");
-  const [salespersonId, setSalespersonId] = useState("");
+  const [salespersonSplits, setSalespersonSplits] = useState<SalespersonSplit[]>([]);
   const [dateSigned, setDateSigned] = useState<Date | undefined>(new Date());
   const [initialEstimate, setInitialEstimate] = useState("");
   const [feePercentage, setFeePercentage] = useState("7");
   const [commissionPercentage, setCommissionPercentage] = useState("8");
-  const [splitPercentage, setSplitPercentage] = useState("100");
   const [isSaving, setIsSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [yearFilter, setYearFilter] = useState<string>("all");
@@ -82,18 +82,18 @@ const AddClaimPage = () => {
     });
   }, [claims, searchTerm, yearFilter, statusFilter, salespersonFilter]);
 
-  // Live commission preview
+  // Live commission preview - shows total across all splits
   const projectedCommission = useMemo(() => {
     const estimate = parseFloat(initialEstimate) || 0;
     const fee = parseFloat(feePercentage) / 100 || 0;
     const commission = parseFloat(commissionPercentage) / 100 || 0;
-    const split = parseFloat(splitPercentage) / 100 || 0;
+    const totalSplit = salespersonSplits.reduce((sum, s) => sum + s.splitPercentage, 0) / 100 || 0;
     
     const feeEarned = estimate * fee;
-    const commissionEarned = feeEarned * commission * split;
+    const commissionEarned = feeEarned * commission * totalSplit;
     
-    return { feeEarned, commissionEarned };
-  }, [initialEstimate, feePercentage, commissionPercentage, splitPercentage]);
+    return { feeEarned, commissionEarned, totalSplit };
+  }, [initialEstimate, feePercentage, commissionPercentage, salespersonSplits]);
 
   const formatCurrency = (value: number) => {
     return `$${value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -136,10 +136,21 @@ const AddClaimPage = () => {
       return;
     }
 
-    if (!salespersonId) {
+    const validSplits = salespersonSplits.filter(s => s.salespersonId);
+    if (validSplits.length === 0) {
       toast({
         title: "Missing information",
-        description: "Please select a salesperson.",
+        description: "Please add at least one salesperson.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const totalSplit = validSplits.reduce((sum, s) => sum + s.splitPercentage, 0);
+    if (totalSplit !== 100) {
+      toast({
+        title: "Invalid splits",
+        description: "Split percentages must total 100%.",
         variant: "destructive",
       });
       return;
@@ -151,8 +162,9 @@ const AddClaimPage = () => {
       const estimate = parseFloat(initialEstimate) || 0;
       const currentYear = new Date().getFullYear();
 
-      const { error } = await supabase.from("sales_commissions").insert({
-        salesperson_id: salespersonId,
+      // Create a record for each salesperson with their split
+      const records = validSplits.map(split => ({
+        salesperson_id: split.salespersonId,
         client_name: clientName.trim(),
         adjuster: adjuster.trim() || null,
         office: office.trim() || null,
@@ -166,28 +178,30 @@ const AddClaimPage = () => {
         new_remainder: estimate,
         fee_percentage: parseFloat(feePercentage) || 7,
         commission_percentage: parseFloat(commissionPercentage) || 8,
-        split_percentage: parseFloat(splitPercentage) || 100,
+        split_percentage: split.splitPercentage,
         commissions_paid: 0,
         status: "open",
-      });
+      }));
+
+      const { error } = await supabase.from("sales_commissions").insert(records);
 
       if (error) throw error;
 
+      const splitCount = validSplits.length;
       toast({
         title: "Claim added",
-        description: `${clientName} has been added with projected commission of ${formatCurrency(projectedCommission.commissionEarned)}`,
+        description: `${clientName} has been added${splitCount > 1 ? ` with ${splitCount} split records` : ''} with projected commission of ${formatCurrency(projectedCommission.commissionEarned)}`,
       });
 
       // Reset form
       setClientName("");
       setAdjuster("");
       setOffice("");
-      setSalespersonId("");
+      setSalespersonSplits([]);
       setDateSigned(new Date());
       setInitialEstimate("");
       setFeePercentage("7");
       setCommissionPercentage("8");
-      setSplitPercentage("100");
       setIsAddFormOpen(false);
 
       queryClient.invalidateQueries({ queryKey: ["sales_commissions"] });
@@ -257,20 +271,12 @@ const AddClaimPage = () => {
                         className="h-9 text-sm"
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="salespersonTab" className="text-xs">Salesperson *</Label>
-                      <Select value={salespersonId} onValueChange={setSalespersonId}>
-                        <SelectTrigger className="h-9 text-sm">
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {salespeople.map((sp) => (
-                            <SelectItem key={sp.id} value={sp.id} className="text-sm">
-                              {sp.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <div className="space-y-1.5 md:col-span-2">
+                      <MultiSalespersonSplit
+                        salespeople={salespeople}
+                        splits={salespersonSplits}
+                        onSplitsChange={setSalespersonSplits}
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="adjusterTab" className="text-xs">Adjuster</Label>
@@ -317,20 +323,12 @@ const AddClaimPage = () => {
                           className="h-9 text-sm"
                         />
                       </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="salesperson" className="text-xs">Salesperson *</Label>
-                        <Select value={salespersonId} onValueChange={setSalespersonId}>
-                          <SelectTrigger className="h-9 text-sm">
-                            <SelectValue placeholder="Select" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {salespeople.map((sp) => (
-                              <SelectItem key={sp.id} value={sp.id} className="text-sm">
-                                {sp.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      <div className="space-y-1.5 lg:col-span-2">
+                        <MultiSalespersonSplit
+                          salespeople={salespeople}
+                          splits={salespersonSplits}
+                          onSplitsChange={setSalespersonSplits}
+                        />
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor="adjuster" className="text-xs">Adjuster</Label>
@@ -416,18 +414,6 @@ const AddClaimPage = () => {
                           className="h-9 text-sm"
                         />
                       </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor="splitPercentage" className="text-xs">Split %</Label>
-                        <Input
-                          id="splitPercentage"
-                          type="number"
-                          step="1"
-                          placeholder="100"
-                          value={splitPercentage}
-                          onChange={(e) => setSplitPercentage(e.target.value)}
-                          className="h-9 text-sm"
-                        />
-                      </div>
                     </div>
 
                     {/* Commission Preview */}
@@ -453,7 +439,7 @@ const AddClaimPage = () => {
                           <div className="min-w-0">
                             <span className="text-muted-foreground block">Eff. Rate</span>
                             <span className="font-medium whitespace-nowrap">
-                              {((parseFloat(feePercentage) / 100) * (parseFloat(commissionPercentage) / 100) * (parseFloat(splitPercentage) / 100) * 100).toFixed(3)}%
+                              {((parseFloat(feePercentage) / 100) * (parseFloat(commissionPercentage) / 100) * projectedCommission.totalSplit * 100).toFixed(3)}%
                             </span>
                           </div>
                         </div>
