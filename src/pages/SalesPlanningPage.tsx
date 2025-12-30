@@ -798,6 +798,7 @@ export default function SalesPlanningPage() {
             formatCurrency={formatCurrency}
             planTargetRevenue={isTeamView ? teamMetrics.totalTargetRevenue : planInputs.targetRevenue}
             planTargetDeals={isTeamView ? teamMetrics.totalTargetDeals : planInputs.targetDeals}
+            salespersonName={isTeamView ? "Entire Team" : selectedSalesperson?.name}
           />
         </TabsContent>
 
