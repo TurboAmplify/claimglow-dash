@@ -374,50 +374,39 @@ export default function SalesPlanningPage() {
 
 
       {/* Team Goals Summary - Show for team view */}
-      {isTeamView && teamGoals && teamGoals.length > 0 && (
+      {isTeamView && teamMetrics.memberCount > 0 && (
         <div className="mb-6 glass-card p-6 animate-fade-in">
-          {(() => {
-            // Filter goals to only show selected members
-            const filteredGoals = teamSelection.mode === "team" 
-              ? teamGoals 
-              : teamGoals.filter(g => teamSelection.selectedIds.includes(g.salesperson_id));
-            
-            if (filteredGoals.length === 0) return null;
-            
-            return (
-              <>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-primary/20">
-                    <Target className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground">Team 2026 Goals</h3>
-                    <p className="text-sm text-muted-foreground">{filteredGoals.length} team member{filteredGoals.length !== 1 ? 's' : ''} with goals set</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total Target Revenue</p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {formatCurrency(filteredGoals.reduce((sum, g) => sum + (Number(g.target_revenue) || 0), 0))}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-secondary/50">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total Target Deals</p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {filteredGoals.reduce((sum, g) => sum + (g.target_deals || 0), 0)}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-lg bg-secondary/50">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Avg Per Member</p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {formatCurrency(filteredGoals.reduce((sum, g) => sum + (Number(g.target_revenue) || 0), 0) / filteredGoals.length)}
-                    </p>
-                  </div>
-                </div>
-              </>
-            );
-          })()}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-primary/20">
+              <Target className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Team 2026 Plans & Goals</h3>
+              <p className="text-sm text-muted-foreground">
+                {teamMetrics.plans.length} plan{teamMetrics.plans.length !== 1 ? 's' : ''} saved, {teamMetrics.memberCount} member{teamMetrics.memberCount !== 1 ? 's' : ''} total
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total Target Revenue</p>
+              <p className="text-2xl font-bold text-foreground">
+                {formatCurrency(teamMetrics.totalTargetRevenue)}
+              </p>
+            </div>
+            <div className="p-4 rounded-lg bg-secondary/50">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total Target Commission</p>
+              <p className="text-2xl font-bold text-foreground">
+                {formatCurrency(teamMetrics.totalTargetCommission)}
+              </p>
+            </div>
+            <div className="p-4 rounded-lg bg-secondary/50">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Avg Per Member</p>
+              <p className="text-2xl font-bold text-foreground">
+                {formatCurrency(teamMetrics.totalTargetRevenue / teamMetrics.memberCount)}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
