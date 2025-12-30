@@ -8,6 +8,7 @@ export interface SalesPlan {
   year: number;
   target_revenue: number;
   target_commission: number;
+  target_deals: number;
   avg_fee_percent: number;
   commission_percent: number;
   selected_scenario: string;
@@ -25,6 +26,7 @@ export interface SavePlanInput {
   year: number;
   target_revenue: number;
   target_commission: number;
+  target_deals: number;
   avg_fee_percent: number;
   commission_percent: number;
   selected_scenario: string;
@@ -67,6 +69,7 @@ export function useSalesPlan(salespersonId: string | undefined, year: number) {
           .update({
             target_revenue: input.target_revenue,
             target_commission: input.target_commission,
+            target_deals: input.target_deals,
             avg_fee_percent: input.avg_fee_percent,
             commission_percent: input.commission_percent,
             selected_scenario: input.selected_scenario,
@@ -86,6 +89,7 @@ export function useSalesPlan(salespersonId: string | undefined, year: number) {
             year: input.year,
             target_revenue: input.target_revenue,
             target_commission: input.target_commission,
+            target_deals: input.target_deals,
             avg_fee_percent: input.avg_fee_percent,
             commission_percent: input.commission_percent,
             selected_scenario: input.selected_scenario,
