@@ -3,6 +3,9 @@ import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { DensitySwitcher } from './DensitySwitcher';
+import { PeopleManagement } from './PeopleManagement';
+import { useCurrentSalesperson } from '@/hooks/useCurrentSalesperson';
+import { Separator } from '@/components/ui/separator';
 
 interface SettingsPanelProps {
   collapsed?: boolean;
@@ -12,6 +15,7 @@ export function SettingsPanel({ collapsed }: SettingsPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
+  const { isDirector } = useCurrentSalesperson();
 
   useEffect(() => {
     if (isOpen) {
@@ -26,30 +30,30 @@ export function SettingsPanel({ collapsed }: SettingsPanelProps) {
 
   return (
     <div className="relative">
-      {/* Hamburger Menu Button */}
+      {/* Settings Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/30 transition-all duration-200",
-          collapsed && "justify-center px-3",
+          "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/30 transition-all duration-200",
+          collapsed && "justify-center px-2",
           isOpen && "bg-sidebar-accent/40 text-sidebar-foreground"
         )}
       >
-        <div className="relative w-5 h-5 flex flex-col justify-center items-center gap-1">
+        <div className="relative w-4 h-4 flex flex-col justify-center items-center gap-0.5">
           <span className={cn(
-            "block w-4 h-0.5 bg-current rounded-full transition-all duration-300",
-            isOpen && "rotate-45 translate-y-[3px]"
+            "block w-3 h-0.5 bg-current rounded-full transition-all duration-300",
+            isOpen && "rotate-45 translate-y-[2px]"
           )} />
           <span className={cn(
-            "block w-4 h-0.5 bg-current rounded-full transition-all duration-300",
+            "block w-3 h-0.5 bg-current rounded-full transition-all duration-300",
             isOpen && "opacity-0"
           )} />
           <span className={cn(
-            "block w-4 h-0.5 bg-current rounded-full transition-all duration-300",
-            isOpen && "-rotate-45 -translate-y-[3px]"
+            "block w-3 h-0.5 bg-current rounded-full transition-all duration-300",
+            isOpen && "-rotate-45 -translate-y-[2px]"
           )} />
         </div>
-        {!collapsed && <span className="font-medium text-sm">Menu</span>}
+        {!collapsed && <span className="font-medium text-xs">Settings</span>}
       </button>
 
       {/* Settings Dropdown */}
@@ -82,9 +86,19 @@ export function SettingsPanel({ collapsed }: SettingsPanelProps) {
               </button>
             </div>
             
-            <div className="space-y-5">
+            <div className="space-y-4">
               <ThemeSwitcher />
               <DensitySwitcher />
+              
+              {isDirector && (
+                <>
+                  <Separator className="my-3" />
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Administration</p>
+                    <PeopleManagement />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </>

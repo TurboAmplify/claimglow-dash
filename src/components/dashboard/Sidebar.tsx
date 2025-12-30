@@ -207,12 +207,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           <button
             onClick={handleSignOut}
             className={cn(
-              "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 transition-all duration-200",
-              collapsed && "justify-center px-3"
+              "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 transition-all duration-200",
+              collapsed && "justify-center px-2"
             )}
           >
-            <LogOut className="w-5 h-5 flex-shrink-0" />
-            {!collapsed && <span className="font-medium">Sign Out</span>}
+            <LogOut className="w-4 h-4 flex-shrink-0" />
+            {!collapsed && <span className="font-medium text-xs">Sign Out</span>}
           </button>
         )}
         
