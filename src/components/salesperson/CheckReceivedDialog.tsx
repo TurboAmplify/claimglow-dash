@@ -21,16 +21,20 @@ interface CheckReceivedDialogProps {
 }
 
 export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceivedDialogProps) {
-  const [checkDate, setCheckDate] = useState<Date | undefined>(new Date());
+  const [receivedDate, setReceivedDate] = useState<Date | undefined>(new Date());
+  const [depositedDate, setDepositedDate] = useState<Date | undefined>(new Date());
   const [checkAmount, setCheckAmount] = useState("");
+  const [checkNumber, setCheckNumber] = useState("");
   const [notes, setNotes] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
     if (record) {
-      setCheckDate(new Date());
+      setReceivedDate(new Date());
+      setDepositedDate(new Date());
       setCheckAmount("");
+      setCheckNumber("");
       setNotes("");
     }
   }, [record]);
@@ -40,6 +44,15 @@ export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceive
       toast({
         title: "Missing information",
         description: "Please enter the check amount.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!receivedDate || !depositedDate) {
+      toast({
+        title: "Missing information",
+        description: "Please select both received and deposited dates.",
         variant: "destructive",
       });
       return;
@@ -66,7 +79,23 @@ export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceive
       const currentCommissionsPaid = record.commissions_paid || 0;
       const newCommissionsPaid = currentCommissionsPaid + commissionFromCheck;
 
-      const { error } = await supabase
+      // Insert the check record with dates
+      const { error: checkError } = await supabase
+        .from("commission_checks")
+        .insert({
+          sales_commission_id: record.id,
+          check_amount: amount,
+          received_date: format(receivedDate, "yyyy-MM-dd"),
+          deposited_date: format(depositedDate, "yyyy-MM-dd"),
+          check_number: checkNumber.trim() || null,
+          notes: notes.trim() || null,
+          commission_earned: commissionFromCheck,
+        });
+
+      if (checkError) throw checkError;
+
+      // Update the sales commission record
+      const { error: updateError } = await supabase
         .from("sales_commissions")
         .update({
           insurance_checks_ytd: newTotal,
@@ -76,7 +105,7 @@ export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceive
         })
         .eq("id", record.id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
       toast({
         title: "Check recorded",
@@ -84,6 +113,7 @@ export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceive
       });
 
       queryClient.invalidateQueries({ queryKey: ["sales_commissions"] });
+      queryClient.invalidateQueries({ queryKey: ["commission_checks"] });
       onOpenChange(false);
     } catch (error) {
       console.error("Error recording check:", error);
@@ -130,32 +160,63 @@ export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceive
             </div>
           </div>
 
-          {/* Check Date */}
+          {/* Date Received */}
           <div className="space-y-2">
-            <Label>Check Date</Label>
+            <Label>Date Received</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
-                    !checkDate && "text-muted-foreground"
+                    !receivedDate && "text-muted-foreground"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {checkDate ? format(checkDate, "PPP") : "Select date"}
+                  {receivedDate ? format(receivedDate, "PPP") : "Select date"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={checkDate}
-                  onSelect={setCheckDate}
+                  selected={receivedDate}
+                  onSelect={setReceivedDate}
                   initialFocus
                   className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
             </Popover>
+          </div>
+
+          {/* Date Deposited */}
+          <div className="space-y-2">
+            <Label>Date Deposited</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !depositedDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {depositedDate ? format(depositedDate, "PPP") : "Select date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={depositedDate}
+                  onSelect={setDepositedDate}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            <p className="text-xs text-muted-foreground">
+              Commission will be attributed to this deposit month
+            </p>
           </div>
 
           {/* Check Amount */}
@@ -167,6 +228,17 @@ export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceive
               placeholder="Enter amount received"
               value={checkAmount}
               onChange={(e) => setCheckAmount(e.target.value)}
+            />
+          </div>
+
+          {/* Check Number */}
+          <div className="space-y-2">
+            <Label htmlFor="checkNumber">Check Number (optional)</Label>
+            <Input
+              id="checkNumber"
+              placeholder="Enter check number"
+              value={checkNumber}
+              onChange={(e) => setCheckNumber(e.target.value)}
             />
           </div>
 
@@ -208,6 +280,14 @@ export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceive
                     {formatCurrency(newTotalCommission)}
                   </span>
                 </div>
+                {depositedDate && (
+                  <div className="flex justify-between pt-1 border-t border-primary/20 mt-1">
+                    <span className="text-muted-foreground text-xs">Attributed to:</span>
+                    <span className="text-xs font-medium">
+                      {format(depositedDate, "MMMM yyyy")}
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })()}
@@ -217,7 +297,7 @@ export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceive
             <Label htmlFor="notes">Notes (optional)</Label>
             <Textarea
               id="notes"
-              placeholder="Check number, reference, etc."
+              placeholder="Additional notes..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
