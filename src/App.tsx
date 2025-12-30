@@ -21,6 +21,7 @@ import IndividualPlanningPage from "./pages/IndividualPlanningPage";
 import SalespersonDashboardPage from "./pages/SalespersonDashboardPage";
 import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
+import AddClaimPage from "./pages/AddClaimPage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/import-commissions" element={<ProtectedRoute><ImportCommissionsPage /></ProtectedRoute>} />
             <Route path="/offices" element={<ProtectedRoute><OfficesPage /></ProtectedRoute>} />
             <Route path="/claims" element={<ProtectedRoute><ClaimsPage /></ProtectedRoute>} />
+            <Route path="/add-claim" element={<ProtectedRoute><AddClaimPage /></ProtectedRoute>} />
             <Route path="/sales" element={<ProtectedRoute><SalesDashboardPage /></ProtectedRoute>} />
             <Route path="/sales/by-person" element={<ProtectedRoute><SalesByPersonPage /></ProtectedRoute>} />
             <Route path="/sales/person/:id" element={<ProtectedRoute><SalespersonDashboardPage /></ProtectedRoute>} />
