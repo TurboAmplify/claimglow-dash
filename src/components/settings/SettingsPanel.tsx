@@ -61,10 +61,7 @@ export function SettingsPanel({ collapsed }: SettingsPanelProps) {
         <>
           {/* Backdrop - closes menu when clicking outside */}
           <div 
-            className={cn(
-              "fixed inset-0 z-40 transition-opacity duration-200",
-              isAnimating ? "opacity-100" : "opacity-0"
-            )}
+            className="fixed inset-0 z-40 bg-transparent cursor-default"
             onClick={() => setIsOpen(false)}
           />
           
