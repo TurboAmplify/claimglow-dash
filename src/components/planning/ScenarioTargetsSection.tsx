@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 interface ScenarioTargetsSectionProps {
   selectedScenario: ScenarioPath;
   formatCurrency: (value: number) => string;
+  planTargetRevenue?: number;
+  planTargetDeals?: number;
 }
 
 // Base targets from Matt's 2026 plan - these get adjusted per scenario
@@ -104,12 +106,13 @@ function adjustRange(range: { min: number; max: number }, multiplier: number): {
   };
 }
 
-export function ScenarioTargetsSection({ selectedScenario, formatCurrency }: ScenarioTargetsSectionProps) {
+export function ScenarioTargetsSection({ selectedScenario, formatCurrency, planTargetRevenue, planTargetDeals }: ScenarioTargetsSectionProps) {
   const adjustment = SCENARIO_ADJUSTMENTS[selectedScenario.id] || SCENARIO_ADJUSTMENTS.balanced;
   
-  // Calculate scenario-based deal distribution using actual scenario values
-  const totalScenarioDeals = selectedScenario.dealCount;
-  const totalScenarioVolume = selectedScenario.totalVolume;
+  // Use plan values directly for the balanced scenario, otherwise use scenario values
+  const isBalancedScenario = selectedScenario.id === "balanced";
+  const totalScenarioDeals = isBalancedScenario && planTargetDeals ? planTargetDeals : selectedScenario.dealCount;
+  const totalScenarioVolume = isBalancedScenario && planTargetRevenue ? planTargetRevenue : selectedScenario.totalVolume;
   
   // Distribute deals across categories based on scenario adjustments
   // Base distribution: Residential 50%, Mid-Commercial 20%, Large Commercial 20%, Religious 10%
@@ -205,11 +208,9 @@ export function ScenarioTargetsSection({ selectedScenario, formatCurrency }: Sce
     },
   ];
 
-  // Calculate totals from the scenario's actual values
-  const totalAnnualDeals = Math.round(totalScenarioDeals * 0.9);
-  const totalAnnualDealsMax = Math.round(totalScenarioDeals * 1.1);
-  const totalContributionMin = Math.round(totalScenarioVolume * 0.9);
-  const totalContributionMax = Math.round(totalScenarioVolume * 1.1);
+  // Use exact values from the plan - no ranges
+  const totalAnnualDeals = totalScenarioDeals;
+  const totalContribution = totalScenarioVolume;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -274,13 +275,13 @@ export function ScenarioTargetsSection({ selectedScenario, formatCurrency }: Sce
               Scenario Contribution Target
             </p>
             <p className="text-2xl font-bold text-foreground tabular-nums whitespace-nowrap">
-              {formatCurrencyRange(totalContributionMin, totalContributionMax, formatCurrency)}
+              {formatCurrency(totalContribution)}
             </p>
           </div>
           <div className="text-right">
             <p className="text-xs text-muted-foreground">Expected Deals</p>
             <p className="text-lg font-semibold text-foreground tabular-nums">
-              {formatRange(totalAnnualDeals, totalAnnualDealsMax)}
+              {totalAnnualDeals}
             </p>
           </div>
           <div className="text-right">

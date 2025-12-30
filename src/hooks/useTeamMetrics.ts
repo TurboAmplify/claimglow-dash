@@ -8,6 +8,7 @@ import { TeamMemberSelection } from "@/components/planning/TeamMemberFilter";
 export interface TeamMetrics {
   totalTargetRevenue: number;
   totalTargetCommission: number;
+  totalTargetDeals: number;
   avgFeePercent: number;
   commissionPercent: number;
   memberCount: number;
@@ -99,6 +100,7 @@ export function useTeamMetrics(selection: TeamMemberSelection, year: number) {
     // This ensures members without plans still have their goals counted
     let totalTargetRevenue = 0;
     let totalTargetCommission = 0;
+    let totalTargetDeals = 0;
     let totalFeePercent = 0;
     let totalCommissionPercent = 0;
     let countWithRates = 0;
@@ -111,6 +113,7 @@ export function useTeamMetrics(selection: TeamMemberSelection, year: number) {
         // Use plan data
         totalTargetRevenue += Number(plan.target_revenue) || 0;
         totalTargetCommission += Number(plan.target_commission) || 0;
+        totalTargetDeals += Number(plan.target_deals) || 40;
         totalFeePercent += Number(plan.avg_fee_percent) || 7.5;
         totalCommissionPercent += Number(plan.commission_percent) || 20;
         countWithRates++;
@@ -120,6 +123,7 @@ export function useTeamMetrics(selection: TeamMemberSelection, year: number) {
         totalTargetRevenue += goalRevenue;
         // Estimate commission using default rates (7.5% fee, 20% commission)
         totalTargetCommission += goalRevenue * 0.075 * 0.20;
+        totalTargetDeals += Number(goal.target_deals) || 40;
         totalFeePercent += 7.5;
         totalCommissionPercent += 20;
         countWithRates++;
@@ -152,6 +156,7 @@ export function useTeamMetrics(selection: TeamMemberSelection, year: number) {
     return {
       totalTargetRevenue,
       totalTargetCommission,
+      totalTargetDeals,
       avgFeePercent,
       commissionPercent,
       memberCount: effectiveIds.length,

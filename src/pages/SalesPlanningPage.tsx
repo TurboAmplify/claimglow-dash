@@ -782,6 +782,8 @@ export default function SalesPlanningPage() {
           <ScenarioTargetsSection 
             selectedScenario={selectedScenario}
             formatCurrency={formatCurrency}
+            planTargetRevenue={isTeamView ? teamMetrics.totalTargetRevenue : planInputs.targetRevenue}
+            planTargetDeals={isTeamView ? teamMetrics.totalTargetDeals : planInputs.targetDeals}
           />
         </TabsContent>
 
