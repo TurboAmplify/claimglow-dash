@@ -28,7 +28,7 @@ const mainNavItems = [
 ];
 
 const claimsNavItems = [
-  { title: "Add Claim", url: "/add-claim", icon: PlusCircle },
+  { title: "Add/Update Claim", url: "/add-claim", icon: PlusCircle },
 ];
 
 const adjustingNavItems = [

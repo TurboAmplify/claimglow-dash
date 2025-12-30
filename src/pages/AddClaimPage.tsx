@@ -9,15 +9,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
-import { CalendarIcon, Save, Calculator, Search, Filter, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { CalendarIcon, Save, Calculator, Search, Filter, Plus, ChevronDown, ChevronUp, User, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DealCard } from "@/components/salesperson/DealCard";
 import type { SalesCommission } from "@/types/sales";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AddClaimPage = () => {
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("deal");
   const [clientName, setClientName] = useState("");
   const [adjuster, setAdjuster] = useState("");
   const [office, setOffice] = useState("");
@@ -205,11 +207,11 @@ const AddClaimPage = () => {
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Claims Management</h1>
-          <p className="text-muted-foreground">Add and manage client claims and deals</p>
+          <h1 className="text-xl font-bold text-foreground">Add/Update Claim</h1>
+          <p className="text-sm text-muted-foreground">Manage client information and deal details</p>
         </div>
 
-        {/* Add New Claim Collapsible */}
+        {/* Add New Client/Deal Collapsible */}
         <Collapsible open={isAddFormOpen} onOpenChange={setIsAddFormOpen}>
           <CollapsibleTrigger asChild>
             <Button 
@@ -218,7 +220,7 @@ const AddClaimPage = () => {
             >
               <span className="flex items-center gap-2">
                 <Plus className="w-4 h-4" />
-                Add New Claim
+                Add New Client / Deal
               </span>
               {isAddFormOpen ? (
                 <ChevronUp className="w-4 h-4" />
@@ -228,178 +230,246 @@ const AddClaimPage = () => {
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-2">
-            <form onSubmit={handleSubmit} className="glass-card p-6 space-y-6 animate-fade-in">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                {/* Client Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="clientName">Client Name *</Label>
-                  <Input
-                    id="clientName"
-                    placeholder="Enter client name"
-                    value={clientName}
-                    onChange={(e) => setClientName(e.target.value)}
-                    required
-                  />
-                </div>
+            <div className="glass-card p-4 animate-fade-in">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="client" className="flex items-center gap-2 text-xs">
+                    <User className="w-3.5 h-3.5" />
+                    Add/Update Client
+                  </TabsTrigger>
+                  <TabsTrigger value="deal" className="flex items-center gap-2 text-xs">
+                    <FileText className="w-3.5 h-3.5" />
+                    Add/Update Deal
+                  </TabsTrigger>
+                </TabsList>
 
-                {/* Salesperson */}
-                <div className="space-y-2">
-                  <Label htmlFor="salesperson">Salesperson *</Label>
-                  <Select value={salespersonId} onValueChange={setSalespersonId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select salesperson" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {salespeople.map((sp) => (
-                        <SelectItem key={sp.id} value={sp.id}>
-                          {sp.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Adjuster */}
-                <div className="space-y-2">
-                  <Label htmlFor="adjuster">Adjuster</Label>
-                  <Input
-                    id="adjuster"
-                    placeholder="Enter adjuster name"
-                    value={adjuster}
-                    onChange={(e) => setAdjuster(e.target.value)}
-                  />
-                </div>
-
-                {/* Office */}
-                <div className="space-y-2">
-                  <Label htmlFor="office">Office</Label>
-                  <Input
-                    id="office"
-                    placeholder="Enter office"
-                    value={office}
-                    onChange={(e) => setOffice(e.target.value)}
-                  />
-                </div>
-
-                {/* Date Signed */}
-                <div className="space-y-2">
-                  <Label>Date Signed</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !dateSigned && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateSigned ? format(dateSigned, "PPP") : "Select date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={dateSigned}
-                        onSelect={setDateSigned}
-                        initialFocus
-                        className="p-3 pointer-events-auto"
+                {/* Client Tab */}
+                <TabsContent value="client" className="space-y-4">
+                  <p className="text-xs text-muted-foreground">Enter client information. This creates a new entry with basic details.</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="clientNameTab" className="text-xs">Client Name *</Label>
+                      <Input
+                        id="clientNameTab"
+                        placeholder="Enter client name"
+                        value={clientName}
+                        onChange={(e) => setClientName(e.target.value)}
+                        className="h-9 text-sm"
                       />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Initial Estimate */}
-                <div className="space-y-2">
-                  <Label htmlFor="initialEstimate">Initial Estimate ($)</Label>
-                  <Input
-                    id="initialEstimate"
-                    type="number"
-                    placeholder="0"
-                    value={initialEstimate}
-                    onChange={(e) => setInitialEstimate(e.target.value)}
-                  />
-                </div>
-
-                {/* Fee Percentage */}
-                <div className="space-y-2">
-                  <Label htmlFor="feePercentage">Fee %</Label>
-                  <Input
-                    id="feePercentage"
-                    type="number"
-                    step="0.1"
-                    placeholder="7"
-                    value={feePercentage}
-                    onChange={(e) => setFeePercentage(e.target.value)}
-                  />
-                </div>
-
-                {/* Commission Percentage */}
-                <div className="space-y-2">
-                  <Label htmlFor="commissionPercentage">Commission %</Label>
-                  <Input
-                    id="commissionPercentage"
-                    type="number"
-                    step="0.1"
-                    placeholder="8"
-                    value={commissionPercentage}
-                    onChange={(e) => setCommissionPercentage(e.target.value)}
-                  />
-                </div>
-
-                {/* Split Percentage */}
-                <div className="space-y-2">
-                  <Label htmlFor="splitPercentage">Split %</Label>
-                  <Input
-                    id="splitPercentage"
-                    type="number"
-                    step="1"
-                    placeholder="100"
-                    value={splitPercentage}
-                    onChange={(e) => setSplitPercentage(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              {/* Commission Preview */}
-              {parseFloat(initialEstimate) > 0 && (
-                <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Calculator className="w-4 h-4 text-primary" />
-                    <span className="font-medium text-foreground">Projected Commission</span>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Estimated Value: </span>
-                      <span className="font-medium">{formatCurrency(parseFloat(initialEstimate) || 0)}</span>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground">Fee Earned: </span>
-                      <span className="font-medium">{formatCurrency(projectedCommission.feeEarned)}</span>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="salespersonTab" className="text-xs">Salesperson *</Label>
+                      <Select value={salespersonId} onValueChange={setSalespersonId}>
+                        <SelectTrigger className="h-9 text-sm">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {salespeople.map((sp) => (
+                            <SelectItem key={sp.id} value={sp.id} className="text-sm">
+                              {sp.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground">Commission: </span>
-                      <span className="font-bold text-primary">{formatCurrency(projectedCommission.commissionEarned)}</span>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="adjusterTab" className="text-xs">Adjuster</Label>
+                      <Input
+                        id="adjusterTab"
+                        placeholder="Adjuster name"
+                        value={adjuster}
+                        onChange={(e) => setAdjuster(e.target.value)}
+                        className="h-9 text-sm"
+                      />
                     </div>
-                    <div>
-                      <span className="text-muted-foreground">Effective Rate: </span>
-                      <span className="font-medium">
-                        {((parseFloat(feePercentage) / 100) * (parseFloat(commissionPercentage) / 100) * (parseFloat(splitPercentage) / 100) * 100).toFixed(3)}%
-                      </span>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="officeTab" className="text-xs">Office</Label>
+                      <Input
+                        id="officeTab"
+                        placeholder="Office"
+                        value={office}
+                        onChange={(e) => setOffice(e.target.value)}
+                        className="h-9 text-sm"
+                      />
                     </div>
                   </div>
-                </div>
-              )}
+                  <div className="flex justify-end pt-2">
+                    <Button type="button" onClick={handleSubmit} disabled={isSaving} size="sm">
+                      <Save className="w-3.5 h-3.5 mr-1.5" />
+                      {isSaving ? "Saving..." : "Save Client"}
+                    </Button>
+                  </div>
+                </TabsContent>
 
-              <div className="flex justify-end">
-                <Button type="submit" disabled={isSaving}>
-                  <Save className="w-4 h-4 mr-2" />
-                  {isSaving ? "Adding..." : "Add Claim"}
-                </Button>
-              </div>
-            </form>
+                {/* Deal Tab */}
+                <TabsContent value="deal" className="space-y-4">
+                  <p className="text-xs text-muted-foreground">Enter full deal information including estimates and commission details.</p>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="clientName" className="text-xs">Client Name *</Label>
+                        <Input
+                          id="clientName"
+                          placeholder="Client name"
+                          value={clientName}
+                          onChange={(e) => setClientName(e.target.value)}
+                          required
+                          className="h-9 text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="salesperson" className="text-xs">Salesperson *</Label>
+                        <Select value={salespersonId} onValueChange={setSalespersonId}>
+                          <SelectTrigger className="h-9 text-sm">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {salespeople.map((sp) => (
+                              <SelectItem key={sp.id} value={sp.id} className="text-sm">
+                                {sp.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="adjuster" className="text-xs">Adjuster</Label>
+                        <Input
+                          id="adjuster"
+                          placeholder="Adjuster"
+                          value={adjuster}
+                          onChange={(e) => setAdjuster(e.target.value)}
+                          className="h-9 text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="office" className="text-xs">Office</Label>
+                        <Input
+                          id="office"
+                          placeholder="Office"
+                          value={office}
+                          onChange={(e) => setOffice(e.target.value)}
+                          className="h-9 text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Date Signed</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal h-9 text-sm",
+                                !dateSigned && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
+                              {dateSigned ? format(dateSigned, "MMM d, yyyy") : "Select"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={dateSigned}
+                              onSelect={setDateSigned}
+                              initialFocus
+                              className="p-3 pointer-events-auto"
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="initialEstimate" className="text-xs">Initial Est. ($)</Label>
+                        <Input
+                          id="initialEstimate"
+                          type="number"
+                          placeholder="0"
+                          value={initialEstimate}
+                          onChange={(e) => setInitialEstimate(e.target.value)}
+                          className="h-9 text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="feePercentage" className="text-xs">Fee %</Label>
+                        <Input
+                          id="feePercentage"
+                          type="number"
+                          step="0.1"
+                          placeholder="7"
+                          value={feePercentage}
+                          onChange={(e) => setFeePercentage(e.target.value)}
+                          className="h-9 text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="commissionPercentage" className="text-xs">Commission %</Label>
+                        <Input
+                          id="commissionPercentage"
+                          type="number"
+                          step="0.1"
+                          placeholder="8"
+                          value={commissionPercentage}
+                          onChange={(e) => setCommissionPercentage(e.target.value)}
+                          className="h-9 text-sm"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="splitPercentage" className="text-xs">Split %</Label>
+                        <Input
+                          id="splitPercentage"
+                          type="number"
+                          step="1"
+                          placeholder="100"
+                          value={splitPercentage}
+                          onChange={(e) => setSplitPercentage(e.target.value)}
+                          className="h-9 text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Commission Preview */}
+                    {parseFloat(initialEstimate) > 0 && (
+                      <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Calculator className="w-3.5 h-3.5 text-primary" />
+                          <span className="font-medium text-sm text-foreground">Projected Commission</span>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                          <div className="min-w-0">
+                            <span className="text-muted-foreground block">Est. Value</span>
+                            <span className="font-medium whitespace-nowrap">{formatCurrency(parseFloat(initialEstimate) || 0)}</span>
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-muted-foreground block">Fee Earned</span>
+                            <span className="font-medium whitespace-nowrap">{formatCurrency(projectedCommission.feeEarned)}</span>
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-muted-foreground block">Commission</span>
+                            <span className="font-bold text-primary whitespace-nowrap">{formatCurrency(projectedCommission.commissionEarned)}</span>
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-muted-foreground block">Eff. Rate</span>
+                            <span className="font-medium whitespace-nowrap">
+                              {((parseFloat(feePercentage) / 100) * (parseFloat(commissionPercentage) / 100) * (parseFloat(splitPercentage) / 100) * 100).toFixed(3)}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex justify-end">
+                      <Button type="submit" disabled={isSaving} size="sm">
+                        <Save className="w-3.5 h-3.5 mr-1.5" />
+                        {isSaving ? "Adding..." : "Add Deal"}
+                      </Button>
+                    </div>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            </div>
           </CollapsibleContent>
         </Collapsible>
 
@@ -458,34 +528,34 @@ const AddClaimPage = () => {
         </div>
 
         {/* Summary Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-          <div className="glass-card p-3 text-center animate-fade-in" style={{ animationDelay: "50ms" }}>
-            <p className="text-xs text-muted-foreground">Claims</p>
-            <p className="text-xl font-bold text-foreground">{summaryStats.dealCount}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
+          <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "50ms" }}>
+            <p className="text-[10px] text-muted-foreground leading-tight">Claims</p>
+            <p className="text-base font-bold text-foreground tabular-nums">{summaryStats.dealCount}</p>
           </div>
-          <div className="glass-card p-3 text-center animate-fade-in" style={{ animationDelay: "75ms" }}>
-            <p className="text-xs text-muted-foreground">Total Volume</p>
-            <p className="text-xl font-bold text-foreground">{formatCurrency(summaryStats.totalVolume)}</p>
+          <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "75ms" }}>
+            <p className="text-[10px] text-muted-foreground leading-tight">Total Volume</p>
+            <p className="text-base font-bold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalVolume)}</p>
           </div>
-          <div className="glass-card p-3 text-center animate-fade-in" style={{ animationDelay: "100ms" }}>
-            <p className="text-xs text-muted-foreground">Collected</p>
-            <p className="text-xl font-bold text-foreground">{formatCurrency(summaryStats.totalCollected)}</p>
+          <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "100ms" }}>
+            <p className="text-[10px] text-muted-foreground leading-tight">Collected</p>
+            <p className="text-base font-bold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCollected)}</p>
           </div>
-          <div className="glass-card p-3 text-center animate-fade-in" style={{ animationDelay: "125ms" }}>
-            <p className="text-xs text-muted-foreground">Collection %</p>
-            <p className="text-xl font-bold text-foreground">{summaryStats.collectionRate.toFixed(1)}%</p>
+          <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "125ms" }}>
+            <p className="text-[10px] text-muted-foreground leading-tight">Collection %</p>
+            <p className="text-base font-bold text-foreground tabular-nums">{summaryStats.collectionRate.toFixed(1)}%</p>
           </div>
-          <div className="glass-card p-3 text-center animate-fade-in" style={{ animationDelay: "150ms" }}>
-            <p className="text-xs text-muted-foreground">Commission Earned</p>
-            <p className="text-xl font-bold text-primary">{formatCurrency(summaryStats.totalCommissionEarned)}</p>
+          <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "150ms" }}>
+            <p className="text-[10px] text-muted-foreground leading-tight">Comm. Earned</p>
+            <p className="text-base font-bold text-primary tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCommissionEarned)}</p>
           </div>
-          <div className="glass-card p-3 text-center animate-fade-in" style={{ animationDelay: "175ms" }}>
-            <p className="text-xs text-muted-foreground">Paid Out</p>
-            <p className="text-xl font-bold text-green-600">{formatCurrency(summaryStats.totalCommissionPaid)}</p>
+          <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "175ms" }}>
+            <p className="text-[10px] text-muted-foreground leading-tight">Paid Out</p>
+            <p className="text-base font-bold text-green-600 tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCommissionPaid)}</p>
           </div>
-          <div className="glass-card p-3 text-center animate-fade-in" style={{ animationDelay: "200ms" }}>
-            <p className="text-xs text-muted-foreground">Pending</p>
-            <p className="text-xl font-bold text-amber-600">{formatCurrency(summaryStats.pendingCommission)}</p>
+          <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "200ms" }}>
+            <p className="text-[10px] text-muted-foreground leading-tight">Pending</p>
+            <p className="text-base font-bold text-amber-600 tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.pendingCommission)}</p>
           </div>
         </div>
 
