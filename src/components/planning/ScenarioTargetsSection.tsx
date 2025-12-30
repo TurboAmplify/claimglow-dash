@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 interface ScenarioTargetsSectionProps {
   selectedScenario: ScenarioPath;
   formatCurrency: (value: number) => string;
+  teamScale?: number; // Scale factor for team view (e.g., 1.38 for 3 members)
 }
 
 // Base targets from Matt's 2026 plan - these get adjusted per scenario
@@ -104,37 +105,37 @@ function adjustRange(range: { min: number; max: number }, multiplier: number): {
   };
 }
 
-export function ScenarioTargetsSection({ selectedScenario, formatCurrency }: ScenarioTargetsSectionProps) {
+export function ScenarioTargetsSection({ selectedScenario, formatCurrency, teamScale = 1 }: ScenarioTargetsSectionProps) {
   const adjustment = SCENARIO_ADJUSTMENTS[selectedScenario.id] || SCENARIO_ADJUSTMENTS.balanced;
   
-  // Calculate adjusted targets
+  // Calculate adjusted targets - apply both scenario adjustment and team scale
   const targets = [
     {
       ...BASE_TARGETS.residential,
-      quarterly: adjustRange(BASE_TARGETS.residential.baseQuarterly, adjustment.residential),
-      annual: adjustRange(BASE_TARGETS.residential.baseAnnual, adjustment.residential),
-      contribution: adjustRange(BASE_TARGETS.residential.baseContribution, adjustment.residential),
+      quarterly: adjustRange(BASE_TARGETS.residential.baseQuarterly, adjustment.residential * teamScale),
+      annual: adjustRange(BASE_TARGETS.residential.baseAnnual, adjustment.residential * teamScale),
+      contribution: adjustRange(BASE_TARGETS.residential.baseContribution, adjustment.residential * teamScale),
       emphasis: adjustment.residential > 1 ? "high" : adjustment.residential < 1 ? "low" : "normal",
     },
     {
       ...BASE_TARGETS.midCommercial,
-      quarterly: adjustRange(BASE_TARGETS.midCommercial.baseQuarterly, adjustment.midCommercial),
-      annual: adjustRange(BASE_TARGETS.midCommercial.baseAnnual, adjustment.midCommercial),
-      contribution: adjustRange(BASE_TARGETS.midCommercial.baseContribution, adjustment.midCommercial),
+      quarterly: adjustRange(BASE_TARGETS.midCommercial.baseQuarterly, adjustment.midCommercial * teamScale),
+      annual: adjustRange(BASE_TARGETS.midCommercial.baseAnnual, adjustment.midCommercial * teamScale),
+      contribution: adjustRange(BASE_TARGETS.midCommercial.baseContribution, adjustment.midCommercial * teamScale),
       emphasis: adjustment.midCommercial > 1 ? "high" : adjustment.midCommercial < 1 ? "low" : "normal",
     },
     {
       ...BASE_TARGETS.largeCommercial,
-      quarterly: adjustRange(BASE_TARGETS.largeCommercial.baseQuarterly, adjustment.largeCommercial),
-      annual: adjustRange(BASE_TARGETS.largeCommercial.baseAnnual, adjustment.largeCommercial),
-      contribution: adjustRange(BASE_TARGETS.largeCommercial.baseContribution, adjustment.largeCommercial),
+      quarterly: adjustRange(BASE_TARGETS.largeCommercial.baseQuarterly, adjustment.largeCommercial * teamScale),
+      annual: adjustRange(BASE_TARGETS.largeCommercial.baseAnnual, adjustment.largeCommercial * teamScale),
+      contribution: adjustRange(BASE_TARGETS.largeCommercial.baseContribution, adjustment.largeCommercial * teamScale),
       emphasis: adjustment.largeCommercial > 1 ? "high" : adjustment.largeCommercial < 1 ? "low" : "normal",
     },
     {
       ...BASE_TARGETS.religious,
-      quarterly: adjustRange(BASE_TARGETS.religious.baseQuarterly, adjustment.religious),
-      annual: adjustRange(BASE_TARGETS.religious.baseAnnual, adjustment.religious),
-      contribution: adjustRange(BASE_TARGETS.religious.baseContribution, adjustment.religious),
+      quarterly: adjustRange(BASE_TARGETS.religious.baseQuarterly, adjustment.religious * teamScale),
+      annual: adjustRange(BASE_TARGETS.religious.baseAnnual, adjustment.religious * teamScale),
+      contribution: adjustRange(BASE_TARGETS.religious.baseContribution, adjustment.religious * teamScale),
       emphasis: adjustment.religious > 1 ? "high" : adjustment.religious < 1 ? "low" : "normal",
     },
   ];

@@ -781,6 +781,7 @@ export default function SalesPlanningPage() {
           <ScenarioTargetsSection 
             selectedScenario={selectedScenario}
             formatCurrency={formatCurrency}
+            teamScale={isTeamView ? effectiveTargetRevenue / (planInputs.targetRevenue || 1) : 1}
           />
         </TabsContent>
 
