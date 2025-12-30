@@ -439,22 +439,28 @@ export default function SalesPlanningPage() {
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total Target Revenue</p>
-              <p className="text-2xl font-bold text-foreground">
+              <p className="text-2xl font-bold text-foreground whitespace-nowrap tabular-nums">
                 {formatCurrency(teamMetrics.totalTargetRevenue)}
               </p>
             </div>
             <div className="p-4 rounded-lg bg-secondary/50">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total Target Deals</p>
+              <p className="text-2xl font-bold text-foreground tabular-nums">
+                {teamMetrics.totalTargetDeals}
+              </p>
+            </div>
+            <div className="p-4 rounded-lg bg-secondary/50">
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Total Target Commission</p>
-              <p className="text-2xl font-bold text-foreground">
+              <p className="text-2xl font-bold text-foreground whitespace-nowrap tabular-nums">
                 {formatCurrency(teamMetrics.totalTargetCommission)}
               </p>
             </div>
             <div className="p-4 rounded-lg bg-secondary/50">
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Avg Per Member</p>
-              <p className="text-2xl font-bold text-foreground">
+              <p className="text-2xl font-bold text-foreground whitespace-nowrap tabular-nums">
                 {formatCurrency(teamMetrics.totalTargetRevenue / teamMetrics.memberCount)}
               </p>
             </div>
