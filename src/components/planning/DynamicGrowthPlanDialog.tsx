@@ -125,9 +125,78 @@ export function DynamicGrowthPlanDialog({
     return `$${value}`;
   };
 
+  // Analyze team member path distribution for team view
+  const getTeamPathAnalysis = () => {
+    if (!isTeamView || teamMemberPlans.length === 0) return null;
+    
+    const pathCounts: Record<string, number> = {};
+    const pathMembers: Record<string, string[]> = {};
+    
+    teamMemberPlans.forEach(member => {
+      const scenario = member.selectedScenario || 'balanced';
+      pathCounts[scenario] = (pathCounts[scenario] || 0) + 1;
+      if (!pathMembers[scenario]) pathMembers[scenario] = [];
+      pathMembers[scenario].push(member.name);
+    });
+    
+    return { pathCounts, pathMembers };
+  };
+  
+  const teamPathAnalysis = getTeamPathAnalysis();
+  
+  // Get combined team approach description
+  const getTeamApproachDescription = () => {
+    if (!teamPathAnalysis) return null;
+    
+    const { pathCounts, pathMembers } = teamPathAnalysis;
+    const paths = Object.keys(pathCounts);
+    
+    if (paths.length === 1) {
+      // All members on same path
+      const path = paths[0];
+      const pathName = path === 'conservative' ? 'Conservative/Volume' : 
+                       path === 'commercial-heavy' ? 'Commercial Heavy/Value' : 'Balanced';
+      return {
+        summary: `All ${teamMemberPlans.length} team members are aligned on the ${pathName} approach`,
+        description: `The team has unified around a single strategic direction, enabling coordinated execution and shared priorities across all opportunity types.`
+      };
+    }
+    
+    // Multiple paths - describe the blend
+    const pathDescriptions = paths.map(path => {
+      const members = pathMembers[path];
+      const isDirectorPath = members.some(name => 
+        name.toLowerCase().includes('matt') || name.toLowerCase().includes('aldrich')
+      );
+      
+      let pathName: string;
+      if (path === 'conservative') {
+        pathName = isDirectorPath ? 'Conservative' : 'Volume';
+      } else if (path === 'commercial-heavy') {
+        pathName = isDirectorPath ? 'Commercial Heavy' : 'Value';
+      } else {
+        pathName = isDirectorPath ? 'Balanced' : 'Volume Balanced';
+      }
+      
+      return { path, pathName, members, count: pathCounts[path] };
+    });
+    
+    const summaryParts = pathDescriptions.map(p => `${p.members.join(' & ')} (${p.pathName})`);
+    
+    return {
+      summary: `Blended approach: ${summaryParts.join(', ')}`,
+      description: `Our team combines complementary strategies to maximize coverage and opportunity capture. This diversified approach balances risk while allowing each member to leverage their strengths and market focus.`
+    };
+  };
+  
+  const teamApproach = getTeamApproachDescription();
+
   // Get scenario-specific focus based on role
   const getScenarioFocus = () => {
-    if (isCommercialHeavy || isTeamView) {
+    if (isTeamView && teamApproach) {
+      return teamApproach.description;
+    }
+    if (isCommercialHeavy) {
       switch (selectedScenarioId) {
         case "conservative":
           return "steady deal flow with consistent weekly rhythm";
@@ -153,7 +222,10 @@ export function DynamicGrowthPlanDialog({
 
   // Get scenario display name based on role
   const getScenarioDisplayName = () => {
-    if (isCommercialHeavy || isTeamView) {
+    if (isTeamView && teamApproach) {
+      return teamApproach.summary;
+    }
+    if (isCommercialHeavy) {
       switch (selectedScenarioId) {
         case "conservative":
           return "Conservative";
@@ -266,9 +338,20 @@ export function DynamicGrowthPlanDialog({
                 : `My intention for 2026 is to approach the year with organization, clarity, and a structured path for growth. This plan outlines the types of opportunities I aim to pursue, the relationships I want to strengthen, and the activities that help me stay consistent.`
               }
             </p>
-            <p className="text-muted-foreground mb-4">
-              <strong className="text-foreground">Selected Approach:</strong> This plan follows the <strong className="text-foreground">{getScenarioDisplayName()}</strong> path, focusing on {getScenarioFocus()}.
-            </p>
+            {isTeamView && teamApproach ? (
+              <div className="mb-4">
+                <p className="text-muted-foreground mb-2">
+                  <strong className="text-foreground">Team Approach:</strong> {getScenarioDisplayName()}
+                </p>
+                <p className="text-muted-foreground">
+                  {getScenarioFocus()}
+                </p>
+              </div>
+            ) : (
+              <p className="text-muted-foreground mb-4">
+                <strong className="text-foreground">Selected Approach:</strong> This plan follows the <strong className="text-foreground">{getScenarioDisplayName()}</strong> path, focusing on {getScenarioFocus()}.
+              </p>
+            )}
 
             {/* Opportunity Areas */}
             <h2 className="text-xl font-semibold text-foreground mt-6 mb-3 border-b border-border pb-2">
