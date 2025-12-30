@@ -128,9 +128,10 @@ export function PlanCreator({
                 const cleaned = e.target.value.replace(/[^0-9]/g, '');
                 const numValue = cleaned === '' ? 1 : parseInt(cleaned, 10);
                 updatePlanInput('targetDeals', numValue);
-                // Recalculate commission based on new deal count (keeping avg deal size stable means adjusting revenue)
-                // OR keep revenue stable and just update the deal count (current behavior)
-                // The user sees the avg deal size change, which is the expected behavior
+                
+                // When deal count changes, keep revenue stable (avg deal size changes automatically)
+                // The commission stays tied to revenue, so it remains stable
+                // This is the expected bidirectional behavior
               }}
               className="text-lg font-semibold"
             />
