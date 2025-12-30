@@ -104,7 +104,7 @@ export default function SalesPlanningPage() {
     setSelectedScenarioId,
     selectedScenario: baseSelectedScenario,
     monthlyProjections: baseMonthlyProjections,
-  } = usePlanScenarios();
+  } = usePlanScenarios({ salespersonName: selectedSalesperson?.name });
 
   // When in team view, derive scenarios from team metrics instead of individual planInputs
   const effectiveTargetRevenue = isTeamView ? teamMetrics.totalTargetRevenue : planInputs.targetRevenue;
