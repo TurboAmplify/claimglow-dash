@@ -331,10 +331,10 @@ export function ScenarioTargetsSection({ selectedScenario, formatCurrency, planT
                 <Icon className={cn("w-5 h-5", target.iconColor)} />
                 <h4 className="font-semibold text-foreground">{target.title}</h4>
               </div>
-              <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-                <div className="p-2 rounded bg-background/50">
+              <div className="grid grid-cols-3 gap-1.5 mb-3 text-center">
+                <div className="p-2 rounded bg-background/50 min-w-0">
                   <p className="text-xs text-muted-foreground">Typical Value</p>
-                  <p className="text-sm font-semibold text-foreground whitespace-nowrap">
+                  <p className="text-xs sm:text-sm font-semibold text-foreground truncate">
                     {formatCurrencyRange(target.typicalValue.min, target.typicalValue.max, formatCurrency)}
                   </p>
                 </div>
