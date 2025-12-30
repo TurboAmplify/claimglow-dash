@@ -31,13 +31,7 @@ export function PlanCreator({
   
   // Get hardcoded commission for this salesperson
   const commissionPercent = salespersonName ? (SALESPERSON_COMMISSION[salespersonName] ?? 20) : 20;
-
-  // Calculate required volume from target commission
-  const requiredVolume = avgFeePercent > 0 && commissionPercent > 0
-    ? targetCommission / (avgFeePercent / 100) / (commissionPercent / 100)
-    : 0;
-
-  const avgDealSize = requiredVolume / (targetDeals || 1);
+  const avgDealSize = targetRevenue / (targetDeals || 1);
 
   // Get deal analysis directly in component so it reacts to calculated values
   const { analysis: dealAnalysis } = useDealSizeAnalysis();
@@ -52,16 +46,23 @@ export function PlanCreator({
   // Calculate deal mix based on current targets
   const dealMix = useMemo(() => {
     if (!dealAnalysis) return null;
-    return dealAnalysis.getDealMixEstimate(targetDeals, requiredVolume);
-  }, [dealAnalysis, targetDeals, requiredVolume]);
+    return dealAnalysis.getDealMixEstimate(targetDeals, targetRevenue);
+  }, [dealAnalysis, targetDeals, targetRevenue]);
 
   const handleCommissionChange = (value: string) => {
     const numValue = parseFloat(value.replace(/[^0-9.]/g, '')) || 0;
     updatePlanInput('targetCommission', numValue);
+    // Also update targetRevenue to stay in sync: Revenue = Commission / Fee% / Commission%
+    const calculatedRevenue = avgFeePercent > 0 && commissionPercent > 0
+      ? numValue / (avgFeePercent / 100) / (commissionPercent / 100)
+      : 0;
+    updatePlanInput('targetRevenue', calculatedRevenue);
   };
 
   const handleRevenueChange = (value: string) => {
     const numValue = parseFloat(value.replace(/[^0-9.]/g, '')) || 0;
+    // Update targetRevenue directly
+    updatePlanInput('targetRevenue', numValue);
     // Calculate commission from revenue: Commission = Revenue × Fee% × Commission%
     const calculatedCommission = numValue * (avgFeePercent / 100) * (commissionPercent / 100);
     updatePlanInput('targetCommission', calculatedCommission);
@@ -155,7 +156,7 @@ export function PlanCreator({
             <Input
               id="requiredRevenue"
               type="text"
-              value={Math.round(requiredVolume).toLocaleString()}
+              value={Math.round(targetRevenue).toLocaleString()}
               onChange={(e) => handleRevenueChange(e.target.value)}
               className="pl-7 text-lg font-semibold border-primary/50 focus:border-primary"
             />
@@ -244,7 +245,7 @@ export function PlanCreator({
                     onClick={() => {
                       const newFee = Math.round(dealInsights.suggestedFeePercent * 100) / 100;
                       // Recalculate commission based on current revenue and new fee
-                      const newCommission = requiredVolume * (newFee / 100) * (commissionPercent / 100);
+                      const newCommission = targetRevenue * (newFee / 100) * (commissionPercent / 100);
                       updatePlanInput('avgFeePercent', newFee);
                       updatePlanInput('targetCommission', Math.round(newCommission));
                     }}
@@ -318,7 +319,7 @@ export function PlanCreator({
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Calculation: </span>
             <span className="font-mono text-foreground">
-              {formatCurrency(targetCommission)} ÷ {avgFeePercent}% ÷ {commissionPercent}% = {formatCurrency(requiredVolume)}
+              {formatCurrency(targetCommission)} ÷ {avgFeePercent}% ÷ {commissionPercent}% = {formatCurrency(targetRevenue)}
             </span>
           </div>
         </div>
