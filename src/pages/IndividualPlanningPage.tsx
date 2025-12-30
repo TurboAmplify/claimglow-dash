@@ -353,7 +353,17 @@ export default function IndividualPlanningPage() {
 
         {/* Strategy Tab */}
         <TabsContent value="strategy" className="space-y-6">
-          <StrategicFocusSection selectedScenarioId={selectedScenarioId} />
+          <StrategicFocusSection 
+            selectedScenarioId={selectedScenarioId}
+            salespersonName={salesperson?.name || "Salesperson"}
+            salespersonId={id}
+            targetRevenue={planInputs.targetRevenue}
+            targetDeals={planInputs.targetDeals}
+            avgFeePercent={planInputs.avgFeePercent}
+            commissionPercent={planInputs.commissionPercent}
+            isTeamView={false}
+            teamMemberCount={1}
+          />
         </TabsContent>
 
         {/* Your Plan Tab */}

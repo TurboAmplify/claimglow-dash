@@ -13,7 +13,6 @@ import { ProgressTracker } from "@/components/planning/ProgressTracker";
 import { WeeklyDealsTracker } from "@/components/planning/WeeklyDealsTracker";
 import { DealPipeline } from "@/components/planning/DealPipeline";
 import { PlanAlertsIndicator } from "@/components/planning/PlanAlertsIndicator";
-import { GrowthPlanDialog } from "@/components/planning/GrowthPlanDialog";
 import { TeamMemberFilter, TeamMemberSelection } from "@/components/planning/TeamMemberFilter";
 
 import { WhatIfSandbox } from "@/components/planning/WhatIfSandbox";
@@ -359,9 +358,8 @@ export default function SalesPlanningPage() {
 
   return (
     <DashboardLayout>
-      {/* Plan Alerts & Growth Plan Icons - positioned at top right */}
+      {/* Plan Alerts Icon - positioned at top right */}
       <div className="flex justify-end gap-2 mb-4">
-        <GrowthPlanDialog />
         {isDirector && directorId && (
           <PlanAlertsIndicator 
             directorId={directorId} 
@@ -780,7 +778,17 @@ export default function SalesPlanningPage() {
 
         {/* Strategy Tab */}
         <TabsContent value="strategy" className="space-y-6">
-          <StrategicFocusSection selectedScenarioId={selectedScenarioId} />
+          <StrategicFocusSection 
+            selectedScenarioId={selectedScenarioId}
+            salespersonName={salespersonName}
+            salespersonId={salespersonId}
+            targetRevenue={effectiveTargetRevenue}
+            targetDeals={isTeamView ? teamMetrics.totalTargetDeals : planInputs.targetDeals}
+            avgFeePercent={planInputs.avgFeePercent}
+            commissionPercent={planInputs.commissionPercent}
+            isTeamView={isTeamView}
+            teamMemberCount={teamMetrics.memberCount}
+          />
         </TabsContent>
 
         {/* Targets Tab */}
