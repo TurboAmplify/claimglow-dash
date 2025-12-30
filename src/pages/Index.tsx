@@ -10,6 +10,7 @@ import {
   useDashboardStats 
 } from "@/hooks/useClaims";
 import { useSalesCommissions } from "@/hooks/useSalesCommissions";
+import { useAdjusters } from "@/hooks/useAdjusters";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, Users, Building2, TrendingUp, Loader2 } from "lucide-react";
@@ -19,7 +20,11 @@ import { FilterDropdown } from "@/components/dashboard/FilterDropdown";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { data: claims, isLoading, error } = useClaims();
+  const { data: claims, isLoading: claimsLoading, error } = useClaims();
+  const { data: adjustersData, isLoading: adjustersLoading } = useAdjusters();
+  
+  const isLoading = claimsLoading || adjustersLoading;
+  const totalAdjustersCount = adjustersData?.length || 0;
   
   // Fetch salespeople for filter
   const { data: salespeople } = useQuery({
@@ -175,7 +180,7 @@ const Index = () => {
         />
         <KPICard
           title="Adjusters"
-          value={stats.totalAdjusters}
+          value={totalAdjustersCount}
           subtitle="Team members"
           icon={Users}
           glowColor="accent"
