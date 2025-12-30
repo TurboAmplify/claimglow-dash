@@ -189,7 +189,7 @@ export default function SalesPlanningPage() {
       setPlanInputs({
         targetRevenue: Number(plan.target_revenue),
         targetCommission: Number(plan.target_commission),
-        targetDeals: 40, // Default value since not stored in plan yet
+        targetDeals: plan.target_deals ?? 40,
         avgFeePercent: Number(plan.avg_fee_percent),
         commissionPercent: Number(plan.commission_percent),
       });
@@ -261,6 +261,7 @@ export default function SalesPlanningPage() {
       year: currentYear,
       target_revenue: planInputs.targetRevenue,
       target_commission: planInputs.targetCommission,
+      target_deals: planInputs.targetDeals,
       avg_fee_percent: planInputs.avgFeePercent,
       commission_percent: planInputs.commissionPercent,
       selected_scenario: selectedScenarioId,

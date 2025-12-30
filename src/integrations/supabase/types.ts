@@ -355,6 +355,7 @@ export type Database = {
           selected_scenario: string
           submitted_at: string | null
           target_commission: number
+          target_deals: number
           target_revenue: number
           updated_at: string
           year: number
@@ -372,6 +373,7 @@ export type Database = {
           selected_scenario?: string
           submitted_at?: string | null
           target_commission?: number
+          target_deals?: number
           target_revenue?: number
           updated_at?: string
           year: number
@@ -389,6 +391,7 @@ export type Database = {
           selected_scenario?: string
           submitted_at?: string | null
           target_commission?: number
+          target_deals?: number
           target_revenue?: number
           updated_at?: string
           year?: number
