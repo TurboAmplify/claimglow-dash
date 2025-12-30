@@ -100,12 +100,54 @@ export default function SalesPlanningPage() {
     planInputs,
     updatePlanInput,
     setPlanInputs,
-    scenarios,
+    scenarios: baseScenarios,
     selectedScenarioId,
     setSelectedScenarioId,
-    selectedScenario,
-    monthlyProjections,
+    selectedScenario: baseSelectedScenario,
+    monthlyProjections: baseMonthlyProjections,
   } = usePlanScenarios();
+
+  // When in team view, derive scenarios from team metrics instead of individual planInputs
+  const effectiveTargetRevenue = isTeamView ? teamMetrics.totalTargetRevenue : planInputs.targetRevenue;
+  const effectiveTargetCommission = isTeamView ? teamMetrics.totalTargetCommission : planInputs.targetCommission;
+  
+  // Scale scenarios for team view
+  const scenarios = useMemo(() => {
+    if (!isTeamView) return baseScenarios;
+    
+    const scale = effectiveTargetRevenue / (planInputs.targetRevenue || 1);
+    return baseScenarios.map(scenario => ({
+      ...scenario,
+      totalVolume: effectiveTargetRevenue,
+      avgDealSize: effectiveTargetRevenue / scenario.dealCount,
+      projectedCommission: effectiveTargetRevenue * (planInputs.avgFeePercent / 100) * (planInputs.commissionPercent / 100),
+      quarterlyBreakdown: {
+        q1: { deals: scenario.quarterlyBreakdown.q1.deals, volume: scenario.quarterlyBreakdown.q1.volume * scale },
+        q2: { deals: scenario.quarterlyBreakdown.q2.deals, volume: scenario.quarterlyBreakdown.q2.volume * scale },
+        q3: { deals: scenario.quarterlyBreakdown.q3.deals, volume: scenario.quarterlyBreakdown.q3.volume * scale },
+        q4: { deals: scenario.quarterlyBreakdown.q4.deals, volume: scenario.quarterlyBreakdown.q4.volume * scale },
+      },
+    }));
+  }, [isTeamView, baseScenarios, effectiveTargetRevenue, planInputs.targetRevenue, planInputs.avgFeePercent, planInputs.commissionPercent]);
+
+  const selectedScenario = useMemo(() => {
+    return scenarios.find(s => s.id === selectedScenarioId) || scenarios[1];
+  }, [scenarios, selectedScenarioId]);
+
+  const monthlyProjections = useMemo(() => {
+    if (!isTeamView) return baseMonthlyProjections;
+    
+    const scale = effectiveTargetRevenue / (planInputs.targetRevenue || 1);
+    return baseMonthlyProjections.map(dataPoint => {
+      const scaled: Record<string, number | string> = { month: dataPoint.month };
+      Object.keys(dataPoint).forEach(key => {
+        if (key !== 'month') {
+          scaled[key] = (dataPoint[key] as number) * scale;
+        }
+      });
+      return scaled;
+    });
+  }, [isTeamView, baseMonthlyProjections, effectiveTargetRevenue, planInputs.targetRevenue]);
 
   // Hypothetical deals for What-If Sandbox
   const {
@@ -547,7 +589,7 @@ export default function SalesPlanningPage() {
           <div className="glass-card p-6 animate-fade-in">
             <div className="flex items-center gap-3 mb-4">
               <Layers className="w-5 h-5 text-primary" />
-              <h3 className="text-lg font-semibold text-foreground">Paths to {formatCurrency(planInputs.targetRevenue)}</h3>
+              <h3 className="text-lg font-semibold text-foreground">Paths to {formatCurrency(effectiveTargetRevenue)}</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {scenarios.map((scenario) => (
@@ -581,7 +623,7 @@ export default function SalesPlanningPage() {
           <ScenarioComparisonChart
             scenarios={scenarios}
             monthlyProjections={monthlyProjections}
-            targetRevenue={planInputs.targetRevenue}
+            targetRevenue={effectiveTargetRevenue}
             formatCurrency={formatCurrency}
             selectedScenarioId={selectedScenarioId}
           />
@@ -655,7 +697,7 @@ export default function SalesPlanningPage() {
         {/* Choose Your Path Tab */}
         <TabsContent value="scenarios" className="space-y-6">
           <div className="glass-card p-6 animate-fade-in">
-            <h3 className="text-lg font-semibold text-foreground mb-2">Choose Your Path to {formatCurrency(planInputs.targetRevenue)}</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Choose Your Path to {formatCurrency(effectiveTargetRevenue)}</h3>
             <p className="text-muted-foreground mb-6">
               Select the approach that best matches your market opportunity and personal style. Each path reaches the same destination through different means.
             </p>
