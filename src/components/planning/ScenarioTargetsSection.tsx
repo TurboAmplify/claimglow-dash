@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 interface ScenarioTargetsSectionProps {
   selectedScenario: ScenarioPath;
   formatCurrency: (value: number) => string;
-  teamScale?: number; // Scale factor for team view (e.g., 1.38 for 3 members)
 }
 
 // Base targets from Matt's 2026 plan - these get adjusted per scenario
@@ -105,46 +104,112 @@ function adjustRange(range: { min: number; max: number }, multiplier: number): {
   };
 }
 
-export function ScenarioTargetsSection({ selectedScenario, formatCurrency, teamScale = 1 }: ScenarioTargetsSectionProps) {
+export function ScenarioTargetsSection({ selectedScenario, formatCurrency }: ScenarioTargetsSectionProps) {
   const adjustment = SCENARIO_ADJUSTMENTS[selectedScenario.id] || SCENARIO_ADJUSTMENTS.balanced;
   
-  // Calculate adjusted targets - apply both scenario adjustment and team scale
+  // Calculate scenario-based deal distribution using actual scenario values
+  const totalScenarioDeals = selectedScenario.dealCount;
+  const totalScenarioVolume = selectedScenario.totalVolume;
+  
+  // Distribute deals across categories based on scenario adjustments
+  // Base distribution: Residential 50%, Mid-Commercial 20%, Large Commercial 20%, Religious 10%
+  const baseDistribution = {
+    residential: 0.50,
+    midCommercial: 0.20,
+    largeCommercial: 0.20,
+    religious: 0.10,
+  };
+  
+  // Apply scenario adjustments to distribution
+  const adjustedDistribution = {
+    residential: baseDistribution.residential * adjustment.residential,
+    midCommercial: baseDistribution.midCommercial * adjustment.midCommercial,
+    largeCommercial: baseDistribution.largeCommercial * adjustment.largeCommercial,
+    religious: baseDistribution.religious * adjustment.religious,
+  };
+  
+  // Normalize to ensure they add up to 1
+  const totalWeight = Object.values(adjustedDistribution).reduce((a, b) => a + b, 0);
+  const normalizedDistribution = {
+    residential: adjustedDistribution.residential / totalWeight,
+    midCommercial: adjustedDistribution.midCommercial / totalWeight,
+    largeCommercial: adjustedDistribution.largeCommercial / totalWeight,
+    religious: adjustedDistribution.religious / totalWeight,
+  };
+  
+  // Calculate adjusted targets based on scenario's actual deals and volume
   const targets = [
     {
       ...BASE_TARGETS.residential,
-      quarterly: adjustRange(BASE_TARGETS.residential.baseQuarterly, adjustment.residential * teamScale),
-      annual: adjustRange(BASE_TARGETS.residential.baseAnnual, adjustment.residential * teamScale),
-      contribution: adjustRange(BASE_TARGETS.residential.baseContribution, adjustment.residential * teamScale),
+      quarterly: { 
+        min: Math.round(totalScenarioDeals * normalizedDistribution.residential / 4 * 0.8), 
+        max: Math.round(totalScenarioDeals * normalizedDistribution.residential / 4 * 1.2) 
+      },
+      annual: { 
+        min: Math.round(totalScenarioDeals * normalizedDistribution.residential * 0.8), 
+        max: Math.round(totalScenarioDeals * normalizedDistribution.residential * 1.2) 
+      },
+      contribution: { 
+        min: Math.round(totalScenarioVolume * normalizedDistribution.residential * 0.8), 
+        max: Math.round(totalScenarioVolume * normalizedDistribution.residential * 1.2) 
+      },
       emphasis: adjustment.residential > 1 ? "high" : adjustment.residential < 1 ? "low" : "normal",
     },
     {
       ...BASE_TARGETS.midCommercial,
-      quarterly: adjustRange(BASE_TARGETS.midCommercial.baseQuarterly, adjustment.midCommercial * teamScale),
-      annual: adjustRange(BASE_TARGETS.midCommercial.baseAnnual, adjustment.midCommercial * teamScale),
-      contribution: adjustRange(BASE_TARGETS.midCommercial.baseContribution, adjustment.midCommercial * teamScale),
+      quarterly: { 
+        min: Math.round(totalScenarioDeals * normalizedDistribution.midCommercial / 4 * 0.8), 
+        max: Math.round(totalScenarioDeals * normalizedDistribution.midCommercial / 4 * 1.2) 
+      },
+      annual: { 
+        min: Math.round(totalScenarioDeals * normalizedDistribution.midCommercial * 0.8), 
+        max: Math.round(totalScenarioDeals * normalizedDistribution.midCommercial * 1.2) 
+      },
+      contribution: { 
+        min: Math.round(totalScenarioVolume * normalizedDistribution.midCommercial * 0.8), 
+        max: Math.round(totalScenarioVolume * normalizedDistribution.midCommercial * 1.2) 
+      },
       emphasis: adjustment.midCommercial > 1 ? "high" : adjustment.midCommercial < 1 ? "low" : "normal",
     },
     {
       ...BASE_TARGETS.largeCommercial,
-      quarterly: adjustRange(BASE_TARGETS.largeCommercial.baseQuarterly, adjustment.largeCommercial * teamScale),
-      annual: adjustRange(BASE_TARGETS.largeCommercial.baseAnnual, adjustment.largeCommercial * teamScale),
-      contribution: adjustRange(BASE_TARGETS.largeCommercial.baseContribution, adjustment.largeCommercial * teamScale),
+      quarterly: { 
+        min: Math.round(totalScenarioDeals * normalizedDistribution.largeCommercial / 4 * 0.8), 
+        max: Math.round(totalScenarioDeals * normalizedDistribution.largeCommercial / 4 * 1.2) 
+      },
+      annual: { 
+        min: Math.round(totalScenarioDeals * normalizedDistribution.largeCommercial * 0.8), 
+        max: Math.round(totalScenarioDeals * normalizedDistribution.largeCommercial * 1.2) 
+      },
+      contribution: { 
+        min: Math.round(totalScenarioVolume * normalizedDistribution.largeCommercial * 0.8), 
+        max: Math.round(totalScenarioVolume * normalizedDistribution.largeCommercial * 1.2) 
+      },
       emphasis: adjustment.largeCommercial > 1 ? "high" : adjustment.largeCommercial < 1 ? "low" : "normal",
     },
     {
       ...BASE_TARGETS.religious,
-      quarterly: adjustRange(BASE_TARGETS.religious.baseQuarterly, adjustment.religious * teamScale),
-      annual: adjustRange(BASE_TARGETS.religious.baseAnnual, adjustment.religious * teamScale),
-      contribution: adjustRange(BASE_TARGETS.religious.baseContribution, adjustment.religious * teamScale),
+      quarterly: { 
+        min: Math.round(totalScenarioDeals * normalizedDistribution.religious / 4 * 0.8), 
+        max: Math.round(totalScenarioDeals * normalizedDistribution.religious / 4 * 1.2) 
+      },
+      annual: { 
+        min: Math.round(totalScenarioDeals * normalizedDistribution.religious * 0.8), 
+        max: Math.round(totalScenarioDeals * normalizedDistribution.religious * 1.2) 
+      },
+      contribution: { 
+        min: Math.round(totalScenarioVolume * normalizedDistribution.religious * 0.8), 
+        max: Math.round(totalScenarioVolume * normalizedDistribution.religious * 1.2) 
+      },
       emphasis: adjustment.religious > 1 ? "high" : adjustment.religious < 1 ? "low" : "normal",
     },
   ];
 
-  // Calculate totals
-  const totalAnnualDeals = targets.reduce((sum, t) => sum + t.annual.min, 0);
-  const totalAnnualDealsMax = targets.reduce((sum, t) => sum + t.annual.max, 0);
-  const totalContributionMin = targets.reduce((sum, t) => sum + t.contribution.min, 0);
-  const totalContributionMax = targets.reduce((sum, t) => sum + t.contribution.max, 0);
+  // Calculate totals from the scenario's actual values
+  const totalAnnualDeals = Math.round(totalScenarioDeals * 0.9);
+  const totalAnnualDealsMax = Math.round(totalScenarioDeals * 1.1);
+  const totalContributionMin = Math.round(totalScenarioVolume * 0.9);
+  const totalContributionMax = Math.round(totalScenarioVolume * 1.1);
 
   return (
     <div className="space-y-6 animate-fade-in">
