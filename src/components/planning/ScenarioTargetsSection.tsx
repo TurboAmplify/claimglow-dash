@@ -245,7 +245,7 @@ export function ScenarioTargetsSection({ selectedScenario, formatCurrency, planT
           )}
         >
           {selectedScenario.riskLevel === "low" && "Conservative"}
-          {selectedScenario.riskLevel === "medium" && "Balanced Risk"}
+          {selectedScenario.riskLevel === "medium" && "Balanced Path"}
           {selectedScenario.riskLevel === "high" && "Higher Risk/Reward"}
         </Badge>
       </div>
@@ -331,22 +331,22 @@ export function ScenarioTargetsSection({ selectedScenario, formatCurrency, planT
                 <Icon className={cn("w-5 h-5", target.iconColor)} />
                 <h4 className="font-semibold text-foreground">{target.title}</h4>
               </div>
-              <div className="grid grid-cols-3 gap-1.5 mb-3 text-center">
-                <div className="p-2 rounded bg-background/50 min-w-0">
-                  <p className="text-xs text-muted-foreground">Typical Value</p>
-                  <p className="text-xs sm:text-sm font-semibold text-foreground truncate">
+              <div className="grid grid-cols-3 gap-1.5 mb-3">
+                <div className="p-2 rounded bg-background/50 flex flex-col justify-between min-h-[4.5rem]">
+                  <p className="text-xs text-muted-foreground text-center">Typical Value</p>
+                  <p className="text-xs sm:text-sm font-semibold text-foreground text-center leading-tight">
                     {formatCurrencyRange(target.typicalValue.min, target.typicalValue.max, formatCurrency)}
                   </p>
                 </div>
-                <div className="p-2 rounded bg-background/50">
-                  <p className="text-xs text-muted-foreground">Quarterly</p>
-                  <p className="text-sm font-semibold text-foreground">
+                <div className="p-2 rounded bg-background/50 flex flex-col justify-between min-h-[4.5rem]">
+                  <p className="text-xs text-muted-foreground text-center">Quarterly</p>
+                  <p className="text-sm font-semibold text-foreground text-center">
                     {formatRange(target.quarterly.min, target.quarterly.max)}
                   </p>
                 </div>
-                <div className="p-2 rounded bg-background/50">
-                  <p className="text-xs text-muted-foreground">Annual</p>
-                  <p className="text-sm font-semibold text-foreground">
+                <div className="p-2 rounded bg-background/50 flex flex-col justify-between min-h-[4.5rem]">
+                  <p className="text-xs text-muted-foreground text-center">Annual</p>
+                  <p className="text-sm font-semibold text-foreground text-center">
                     {formatRange(target.annual.min, target.annual.max)}
                   </p>
                 </div>
