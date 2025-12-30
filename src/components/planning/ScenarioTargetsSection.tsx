@@ -8,17 +8,15 @@ interface ScenarioTargetsSectionProps {
   formatCurrency: (value: number) => string;
   planTargetRevenue?: number;
   planTargetDeals?: number;
+  salespersonName?: string;
 }
 
-// Base targets from Matt's 2026 plan - these get adjusted per scenario
-const BASE_TARGETS = {
+// Base targets - different profiles for director vs reps
+const DIRECTOR_TARGETS = {
   residential: {
     title: "Residential",
     icon: Home,
     typicalValue: { min: 350000, max: 500000 },
-    baseQuarterly: { min: 6, max: 9 },
-    baseAnnual: { min: 24, max: 36 },
-    baseContribution: { min: 10000000, max: 15000000 },
     notes: "High-value total-loss or heavy-smoke homes; summer storms; high-income ZIP codes.",
     color: "bg-blue-500/10 border-blue-500/30",
     iconColor: "text-blue-600",
@@ -27,9 +25,6 @@ const BASE_TARGETS = {
     title: "Mid-Size Commercial",
     icon: Building2,
     typicalValue: { min: 1000000, max: 1500000 },
-    baseQuarterly: { min: 3, max: 3 },
-    baseAnnual: { min: 12, max: 12 },
-    baseContribution: { min: 2000000, max: 4000000 },
     notes: "Schools, offices, restaurants, retail, multi-tenant properties.",
     color: "bg-green-500/10 border-green-500/30",
     iconColor: "text-green-600",
@@ -38,9 +33,6 @@ const BASE_TARGETS = {
     title: "Large Commercial/Industrial",
     icon: Factory,
     typicalValue: { min: 750000, max: 10000000 },
-    baseQuarterly: { min: 2, max: 3 },
-    baseAnnual: { min: 8, max: 12 },
-    baseContribution: { min: 20000000, max: 30000000 },
     notes: "Manufacturing, warehouses, automotive, distribution, regional chains.",
     color: "bg-amber-500/10 border-amber-500/30",
     iconColor: "text-amber-600",
@@ -49,17 +41,49 @@ const BASE_TARGETS = {
     title: "Religious Organizations",
     icon: Church,
     typicalValue: { min: 1000000, max: 5000000 },
-    baseQuarterly: { min: 2, max: 5 },
-    baseAnnual: { min: 8, max: 20 },
-    baseContribution: { min: 5000000, max: 15000000 },
     notes: "Large churches, temples, synagogues, mosques, ministries, retreat centers.",
     color: "bg-purple-500/10 border-purple-500/30",
     iconColor: "text-purple-600",
   },
 };
 
-// Scenario multipliers - how each scenario adjusts the base targets
-const SCENARIO_ADJUSTMENTS: Record<string, {
+const REP_TARGETS = {
+  residential: {
+    title: "Residential",
+    icon: Home,
+    typicalValue: { min: 200000, max: 400000 },
+    notes: "Core focus area; consistent lead flow from referrals and prospecting.",
+    color: "bg-blue-500/10 border-blue-500/30",
+    iconColor: "text-blue-600",
+  },
+  midCommercial: {
+    title: "Mid-Size Commercial",
+    icon: Building2,
+    typicalValue: { min: 500000, max: 1000000 },
+    notes: "Local businesses, small offices, retail spaces, restaurants.",
+    color: "bg-green-500/10 border-green-500/30",
+    iconColor: "text-green-600",
+  },
+  largeCommercial: {
+    title: "Large Commercial/Industrial",
+    icon: Factory,
+    typicalValue: { min: 500000, max: 2000000 },
+    notes: "Opportunistic pursuit when relationships align.",
+    color: "bg-amber-500/10 border-amber-500/30",
+    iconColor: "text-amber-600",
+  },
+  religious: {
+    title: "Religious Organizations",
+    icon: Church,
+    typicalValue: { min: 500000, max: 1000000 },
+    notes: "Community churches, smaller religious facilities.",
+    color: "bg-purple-500/10 border-purple-500/30",
+    iconColor: "text-purple-600",
+  },
+};
+
+// Scenario multipliers for director (commercial heavy)
+const DIRECTOR_SCENARIO_ADJUSTMENTS: Record<string, {
   residential: number;
   midCommercial: number;
   largeCommercial: number;
@@ -67,25 +91,56 @@ const SCENARIO_ADJUSTMENTS: Record<string, {
   description: string;
 }> = {
   conservative: {
-    residential: 1.2,      // More residential focus
-    midCommercial: 0.8,    // Less mid-size
-    largeCommercial: 0.5,  // Significantly less large deals
-    religious: 0.6,        // Less religious focus
+    residential: 1.2,
+    midCommercial: 0.8,
+    largeCommercial: 0.5,
+    religious: 0.6,
     description: "Higher residential volume offsets reduced large-loss exposure",
   },
   balanced: {
-    residential: 1.0,      // Baseline
-    midCommercial: 1.0,    // Baseline
-    largeCommercial: 1.0,  // Baseline
-    religious: 1.0,        // Baseline
+    residential: 1.0,
+    midCommercial: 1.0,
+    largeCommercial: 1.0,
+    religious: 1.0,
     description: "Balanced mix across all opportunity categories",
   },
   "commercial-heavy": {
-    residential: 0.6,      // Less residential
-    midCommercial: 1.2,    // More mid-size
-    largeCommercial: 1.5,  // Significantly more large deals
-    religious: 1.3,        // More religious (campus-style)
+    residential: 0.6,
+    midCommercial: 1.2,
+    largeCommercial: 1.5,
+    religious: 1.3,
     description: "Focus on fewer, higher-value opportunities",
+  },
+};
+
+// Scenario multipliers for reps (residential heavy)
+const REP_SCENARIO_ADJUSTMENTS: Record<string, {
+  residential: number;
+  midCommercial: number;
+  largeCommercial: number;
+  religious: number;
+  description: string;
+}> = {
+  conservative: {
+    residential: 1.3,      // Volume approach - more residential
+    midCommercial: 0.5,
+    largeCommercial: 0.2,
+    religious: 0.3,
+    description: "High-activity approach with consistent residential volume",
+  },
+  balanced: {
+    residential: 1.1,      // Still residential heavy
+    midCommercial: 0.8,
+    largeCommercial: 0.4,
+    religious: 0.4,
+    description: "Steady residential growth with selective commercial pursuit",
+  },
+  "commercial-heavy": {
+    residential: 0.9,      // Value approach - slightly less residential
+    midCommercial: 1.2,
+    largeCommercial: 0.6,
+    religious: 0.5,
+    description: "Quality over quantity, focusing on higher-value opportunities",
   },
 };
 
@@ -106,7 +161,17 @@ function adjustRange(range: { min: number; max: number }, multiplier: number): {
   };
 }
 
-export function ScenarioTargetsSection({ selectedScenario, formatCurrency, planTargetRevenue, planTargetDeals }: ScenarioTargetsSectionProps) {
+export function ScenarioTargetsSection({ selectedScenario, formatCurrency, planTargetRevenue, planTargetDeals, salespersonName }: ScenarioTargetsSectionProps) {
+  // Determine if this is a director or rep view
+  const isDirector = salespersonName?.toLowerCase().includes('matt') || 
+                     salespersonName?.toLowerCase().includes('aldrich') ||
+                     salespersonName?.toLowerCase().includes('team') ||
+                     salespersonName?.toLowerCase().includes('entire') ||
+                     !salespersonName;
+  
+  const BASE_TARGETS = isDirector ? DIRECTOR_TARGETS : REP_TARGETS;
+  const SCENARIO_ADJUSTMENTS = isDirector ? DIRECTOR_SCENARIO_ADJUSTMENTS : REP_SCENARIO_ADJUSTMENTS;
+  
   const adjustment = SCENARIO_ADJUSTMENTS[selectedScenario.id] || SCENARIO_ADJUSTMENTS.balanced;
   
   // Use plan values directly for the balanced scenario, otherwise use scenario values
@@ -114,14 +179,20 @@ export function ScenarioTargetsSection({ selectedScenario, formatCurrency, planT
   const totalScenarioDeals = isBalancedScenario && planTargetDeals ? planTargetDeals : selectedScenario.dealCount;
   const totalScenarioVolume = isBalancedScenario && planTargetRevenue ? planTargetRevenue : selectedScenario.totalVolume;
   
-  // Distribute deals across categories based on scenario adjustments
-  // Base distribution: Residential 50%, Mid-Commercial 20%, Large Commercial 20%, Religious 10%
-  const baseDistribution = {
-    residential: 0.50,
-    midCommercial: 0.20,
-    largeCommercial: 0.20,
-    religious: 0.10,
-  };
+  // Different base distributions for director vs reps
+  const baseDistribution = isDirector 
+    ? {
+        residential: 0.30,
+        midCommercial: 0.20,
+        largeCommercial: 0.35,
+        religious: 0.15,
+      }
+    : {
+        residential: 0.55,
+        midCommercial: 0.25,
+        largeCommercial: 0.12,
+        religious: 0.08,
+      };
   
   // Apply scenario adjustments to distribution
   const adjustedDistribution = {

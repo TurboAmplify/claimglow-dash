@@ -114,16 +114,55 @@ export function DynamicGrowthPlanDialog({
     return `$${value}`;
   };
 
-  // Get scenario-specific focus
+  // Get scenario-specific focus based on role
   const getScenarioFocus = () => {
-    switch (selectedScenarioId) {
-      case "conservative":
-        return "steady deal flow with consistent weekly rhythm";
-      case "commercial-heavy":
-        return "fewer, larger commercial opportunities";
-      case "balanced":
-      default:
-        return "balanced mix across all opportunity types";
+    if (isCommercialHeavy || isTeamView) {
+      switch (selectedScenarioId) {
+        case "conservative":
+          return "steady deal flow with consistent weekly rhythm";
+        case "commercial-heavy":
+          return "fewer, larger commercial opportunities";
+        case "balanced":
+        default:
+          return "balanced mix across all opportunity types";
+      }
+    } else {
+      // Rep-specific scenario focus
+      switch (selectedScenarioId) {
+        case "conservative":
+          return "high-activity approach with consistent residential volume";
+        case "commercial-heavy":
+          return "quality over quantity, focusing on higher-value opportunities";
+        case "balanced":
+        default:
+          return "steady residential growth with selective commercial pursuit";
+      }
+    }
+  };
+
+  // Get scenario display name based on role
+  const getScenarioDisplayName = () => {
+    if (isCommercialHeavy || isTeamView) {
+      switch (selectedScenarioId) {
+        case "conservative":
+          return "Conservative";
+        case "commercial-heavy":
+          return "Commercial & Industrial Heavy";
+        case "balanced":
+        default:
+          return "Balanced";
+      }
+    } else {
+      // Rep-specific scenario names
+      switch (selectedScenarioId) {
+        case "conservative":
+          return "Volume";
+        case "commercial-heavy":
+          return "Value";
+        case "balanced":
+        default:
+          return "Volume Balanced";
+      }
     }
   };
 
@@ -189,7 +228,7 @@ export function DynamicGrowthPlanDialog({
               }
             </p>
             <p className="text-muted-foreground mb-4">
-              <strong className="text-foreground">Selected Approach:</strong> This plan follows the <strong className="text-foreground">{selectedScenarioId === 'commercial-heavy' ? 'Commercial & Industrial Heavy' : selectedScenarioId === 'conservative' ? 'Conservative' : 'Balanced'}</strong> path, focusing on {getScenarioFocus()}.
+              <strong className="text-foreground">Selected Approach:</strong> This plan follows the <strong className="text-foreground">{getScenarioDisplayName()}</strong> path, focusing on {getScenarioFocus()}.
             </p>
 
             {/* Opportunity Areas */}
