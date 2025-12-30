@@ -1,4 +1,4 @@
-import { Home, Building2, Factory, Church, Target, TrendingUp, AlertTriangle } from "lucide-react";
+import { Home, Building2, Factory, Church, Target, TrendingUp, AlertTriangle, Compass } from "lucide-react";
 import { ScenarioPath } from "@/hooks/usePlanScenarios";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -147,7 +147,44 @@ export function ScenarioTargetsSection({ selectedScenario, formatCurrency, teamS
   const totalContributionMax = targets.reduce((sum, t) => sum + t.contribution.max, 0);
 
   return (
-    <div className="glass-card p-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
+      {/* Active Scenario Banner */}
+      <div 
+        className="p-4 rounded-xl border-2 flex items-center gap-4"
+        style={{ 
+          borderColor: selectedScenario.color,
+          background: `linear-gradient(135deg, ${selectedScenario.color}15, ${selectedScenario.color}05)`
+        }}
+      >
+        <div 
+          className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+          style={{ backgroundColor: selectedScenario.color }}
+        >
+          <Compass className="w-6 h-6 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+            Currently Viewing Targets For
+          </p>
+          <h2 className="text-xl font-bold text-foreground truncate">
+            {selectedScenario.name} Path
+          </h2>
+        </div>
+        <Badge 
+          className={cn(
+            "shrink-0",
+            selectedScenario.riskLevel === "low" && "bg-emerald-500/20 text-emerald-600 border-emerald-500/30",
+            selectedScenario.riskLevel === "medium" && "bg-primary/20 text-primary border-primary/30",
+            selectedScenario.riskLevel === "high" && "bg-amber-500/20 text-amber-600 border-amber-500/30"
+          )}
+        >
+          {selectedScenario.riskLevel === "low" && "Conservative"}
+          {selectedScenario.riskLevel === "medium" && "Balanced Risk"}
+          {selectedScenario.riskLevel === "high" && "Higher Risk/Reward"}
+        </Badge>
+      </div>
+
+      <div className="glass-card p-6">
       {/* Scenario Header */}
       <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -162,18 +199,6 @@ export function ScenarioTargetsSection({ selectedScenario, formatCurrency, teamS
             <p className="text-sm text-muted-foreground">{adjustment.description}</p>
           </div>
         </div>
-        <Badge 
-          variant="outline" 
-          className={cn(
-            selectedScenario.riskLevel === "low" && "border-emerald-500 text-emerald-600",
-            selectedScenario.riskLevel === "medium" && "border-primary text-primary",
-            selectedScenario.riskLevel === "high" && "border-amber-500 text-amber-600"
-          )}
-        >
-          {selectedScenario.riskLevel === "low" && "Conservative"}
-          {selectedScenario.riskLevel === "medium" && "Balanced Risk"}
-          {selectedScenario.riskLevel === "high" && "Higher Risk/Reward"}
-        </Badge>
       </div>
 
       {/* Annual Target Banner */}
@@ -299,6 +324,7 @@ export function ScenarioTargetsSection({ selectedScenario, formatCurrency, teamS
         <p className="text-sm text-muted-foreground italic">
           {selectedScenario.closingNote}
         </p>
+      </div>
       </div>
     </div>
   );
