@@ -16,7 +16,7 @@ import {
   Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
+import { DynamicGrowthPlanDialog } from "./DynamicGrowthPlanDialog";
 export interface StrategicFocusArea {
   id: number;
   title: string;
@@ -125,9 +125,27 @@ export const GUIDING_PRINCIPLE = "Fewer files. Bigger outcomes. Cleaner executio
 
 interface StrategicFocusSectionProps {
   selectedScenarioId?: string;
+  salespersonName?: string;
+  salespersonId?: string;
+  targetRevenue?: number;
+  targetDeals?: number;
+  avgFeePercent?: number;
+  commissionPercent?: number;
+  isTeamView?: boolean;
+  teamMemberCount?: number;
 }
 
-export function StrategicFocusSection({ selectedScenarioId }: StrategicFocusSectionProps) {
+export function StrategicFocusSection({ 
+  selectedScenarioId,
+  salespersonName = "Salesperson",
+  salespersonId,
+  targetRevenue = 10000000,
+  targetDeals = 40,
+  avgFeePercent = 7.5,
+  commissionPercent = 20,
+  isTeamView = false,
+  teamMemberCount = 1,
+}: StrategicFocusSectionProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const toggleExpand = (id: number) => {
@@ -141,6 +159,31 @@ export function StrategicFocusSection({ selectedScenarioId }: StrategicFocusSect
 
   return (
     <div className="space-y-6">
+      {/* Growth Plan Dialog Button */}
+      <div className="glass-card p-6 animate-fade-in">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-1">
+              {isTeamView ? "Team" : salespersonName} 2026 Growth Plan
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              View the complete strategic plan with opportunity targets and quarterly themes
+            </p>
+          </div>
+          <DynamicGrowthPlanDialog
+            salespersonName={salespersonName}
+            salespersonId={salespersonId}
+            targetRevenue={targetRevenue}
+            targetDeals={targetDeals}
+            selectedScenarioId={selectedScenarioId || "balanced"}
+            avgFeePercent={avgFeePercent}
+            commissionPercent={commissionPercent}
+            isTeamView={isTeamView}
+            teamMemberCount={teamMemberCount}
+          />
+        </div>
+      </div>
+
       {/* Guiding Principle Banner */}
       <div className="glass-card p-6 animate-fade-in">
         <div className="text-center">
