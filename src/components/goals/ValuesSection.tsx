@@ -200,10 +200,11 @@ export function ValuesSection() {
         "glass-card overflow-hidden transition-all duration-300 ease-out animate-fade-in",
         isExpanded ? "p-6" : "p-4"
       )}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
     >
-      <div className="flex items-center justify-between cursor-pointer">
+      <div 
+        className="flex items-center justify-between cursor-pointer"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/20">
             <Heart className="w-5 h-5 text-primary" />
@@ -212,7 +213,7 @@ export function ValuesSection() {
             <h2 className="text-lg font-semibold text-foreground">Purpose & Values</h2>
             {!isExpanded && (
               <p className="text-sm text-muted-foreground">
-                Hover to explore guiding principles
+                Click to explore guiding principles
               </p>
             )}
           </div>

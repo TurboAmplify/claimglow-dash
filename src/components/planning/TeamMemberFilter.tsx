@@ -32,7 +32,10 @@ export function TeamMemberFilter({ selection, onSelectionChange, className }: Te
   const allIds = salespeople?.map(sp => sp.id) || [];
   const allSelected = allIds.length > 0 && allIds.every(id => selection.selectedIds.includes(id));
 
-  const handleToggle = (id: string) => {
+  const handleToggle = (id: string, e?: React.MouseEvent) => {
+    // Prevent popover from closing
+    e?.stopPropagation();
+    
     const newSelection = selection.selectedIds.includes(id)
       ? selection.selectedIds.filter(i => i !== id)
       : [...selection.selectedIds, id];
@@ -46,7 +49,10 @@ export function TeamMemberFilter({ selection, onSelectionChange, className }: Te
     onSelectionChange({ mode, selectedIds: newSelection });
   };
 
-  const handleSelectAll = () => {
+  const handleSelectAll = (e?: React.MouseEvent) => {
+    // Prevent popover from closing
+    e?.stopPropagation();
+    
     if (allSelected) {
       // Deselect all - keep first one selected
       onSelectionChange({ 
@@ -118,16 +124,14 @@ export function TeamMemberFilter({ selection, onSelectionChange, className }: Te
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-72 p-0 bg-popover border-border" align="start">
-          {/* Select All option */}
           <div className="p-3 border-b border-border">
             <div
               className="flex items-center space-x-3 p-2 rounded-md hover:bg-secondary/50 cursor-pointer"
-              onClick={handleSelectAll}
+              onClick={(e) => handleSelectAll(e)}
             >
               <Checkbox
                 id="select-all"
                 checked={allSelected}
-                onCheckedChange={handleSelectAll}
               />
               <Label htmlFor="select-all" className="flex items-center gap-2 cursor-pointer flex-1 font-medium">
                 <Users className="w-4 h-4 text-primary" />
@@ -142,12 +146,11 @@ export function TeamMemberFilter({ selection, onSelectionChange, className }: Te
               <div
                 key={sp.id}
                 className="flex items-center space-x-3 p-2 rounded-md hover:bg-secondary/50 cursor-pointer"
-                onClick={() => handleToggle(sp.id)}
+                onClick={(e) => handleToggle(sp.id, e)}
               >
                 <Checkbox
                   id={`member-${sp.id}`}
                   checked={selection.selectedIds.includes(sp.id)}
-                  onCheckedChange={() => handleToggle(sp.id)}
                 />
                 <Label htmlFor={`member-${sp.id}`} className="flex items-center gap-2 cursor-pointer flex-1">
                   <User className="w-4 h-4" />
