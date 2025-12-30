@@ -165,6 +165,13 @@ export default function SalesPlanningPage() {
   }
   const [activeTab, setActiveTab] = useState('strategy');
 
+  // Redirect from scenarios tab when switching to team view
+  useEffect(() => {
+    if (isTeamView && activeTab === 'scenarios') {
+      setActiveTab('plan');
+    }
+  }, [isTeamView, activeTab]);
+
   // Calculate actual commissions data for progress tracking
   const actualCommissions = useMemo(() => {
     if (!commissions) {
@@ -430,15 +437,23 @@ export default function SalesPlanningPage() {
             <div className="flex items-center gap-3">
               <Target className="w-5 h-5 text-primary" />
               <div>
-                <p className="text-sm text-muted-foreground">Target Revenue</p>
-                <p className="text-2xl font-bold text-foreground">{formatCurrency(planInputs.targetRevenue)}</p>
+                <p className="text-sm text-muted-foreground">
+                  {isTeamView ? "Total Target Revenue" : "Target Revenue"}
+                </p>
+                <p className="text-2xl font-bold text-foreground">
+                  {formatCurrency(isTeamView ? teamMetrics.totalTargetRevenue : planInputs.targetRevenue)}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <TrendingUp className="w-5 h-5 text-emerald-500" />
               <div>
-                <p className="text-sm text-muted-foreground">Projected Commission</p>
-                <p className="text-2xl font-bold text-emerald-500">{formatCurrency(selectedScenario.projectedCommission)}</p>
+                <p className="text-sm text-muted-foreground">
+                  {isTeamView ? "Total Target Commission" : "Projected Commission"}
+                </p>
+                <p className="text-2xl font-bold text-emerald-500">
+                  {formatCurrency(isTeamView ? teamMetrics.totalTargetCommission : selectedScenario.projectedCommission)}
+                </p>
               </div>
             </div>
           </div>
@@ -454,12 +469,14 @@ export default function SalesPlanningPage() {
             </TabsTrigger>
             <TabsTrigger value="plan" className="data-[state=active]:bg-primary/20">
               <TrendingUp className="w-4 h-4 mr-2" />
-              Your Plan
+              {isTeamView ? "The Plan" : "Your Plan"}
             </TabsTrigger>
-            <TabsTrigger value="scenarios" className="data-[state=active]:bg-primary/20">
-              <Layers className="w-4 h-4 mr-2" />
-              Choose Your Path
-            </TabsTrigger>
+            {!isTeamView && (
+              <TabsTrigger value="scenarios" className="data-[state=active]:bg-primary/20">
+                <Layers className="w-4 h-4 mr-2" />
+                Choose Your Path
+              </TabsTrigger>
+            )}
             <TabsTrigger value="targets" className="data-[state=active]:bg-primary/20">
               <Target className="w-4 h-4 mr-2" />
               Targets
