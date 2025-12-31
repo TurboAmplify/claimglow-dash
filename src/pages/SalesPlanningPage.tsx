@@ -134,21 +134,51 @@ export default function SalesPlanningPage() {
   }, [scenarios, selectedScenarioId]);
 
   // Build team member plan data for the growth plan dialog
+  // Include ALL team members, using saved plan data if available or defaults if not
   const teamMemberPlans = useMemo(() => {
-    if (!isTeamView || !salespeople || !teamMetrics.plans) return [];
+    if (!isTeamView || !salespeople) return [];
     
-    return teamMetrics.plans.map(plan => {
-      const member = salespeople.find(sp => sp.id === plan.salesperson_id);
-      return {
-        id: plan.salesperson_id,
-        name: member?.name || 'Unknown',
-        targetRevenue: Number(plan.target_revenue) || 0,
-        targetDeals: plan.target_deals ?? 40,
-        commissionPercent: Number(plan.commission_percent) || 20,
-        selectedScenario: plan.selected_scenario || 'balanced',
-      };
-    }).sort((a, b) => b.targetRevenue - a.targetRevenue); // Sort by revenue descending
-  }, [isTeamView, salespeople, teamMetrics.plans]);
+    // Get the effective team member IDs based on selection
+    const effectiveIds = teamSelection.mode === "team" 
+      ? salespeople.map(sp => sp.id) 
+      : teamSelection.selectedIds;
+    
+    // Create a map of plans by salesperson_id for quick lookup
+    const plansByPerson = new Map(
+      (teamMetrics.plans || []).map(p => [p.salesperson_id, p])
+    );
+    
+    // Build plan data for ALL selected members
+    return effectiveIds.map(id => {
+      const member = salespeople.find(sp => sp.id === id);
+      const plan = plansByPerson.get(id);
+      
+      if (plan) {
+        // Use saved plan data
+        return {
+          id: plan.salesperson_id,
+          name: member?.name || 'Unknown',
+          targetRevenue: Number(plan.target_revenue) || 0,
+          targetDeals: plan.target_deals ?? 40,
+          commissionPercent: Number(plan.commission_percent) || 20,
+          selectedScenario: plan.selected_scenario || 'balanced',
+        };
+      } else {
+        // Use defaults for members without saved plans
+        const isDirectorMember = member?.name?.toLowerCase().includes('matt') || 
+                                  member?.name?.toLowerCase().includes('aldrich');
+        return {
+          id,
+          name: member?.name || 'Unknown',
+          targetRevenue: 0, // No saved plan
+          targetDeals: 40,
+          commissionPercent: isDirectorMember ? 20 : 25,
+          selectedScenario: 'balanced',
+        };
+      }
+    }).filter(p => p.name !== 'Unknown') // Filter out unknown members
+      .sort((a, b) => b.targetRevenue - a.targetRevenue); // Sort by revenue descending
+  }, [isTeamView, salespeople, teamSelection, teamMetrics.plans]);
 
   const monthlyProjections = useMemo(() => {
     if (!isTeamView) return baseMonthlyProjections;
