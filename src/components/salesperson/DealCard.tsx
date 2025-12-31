@@ -3,11 +3,13 @@ import { SalesCommission } from "@/types/sales";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, Edit2, TrendingUp, TrendingDown, Calendar } from "lucide-react";
+import { DollarSign, Edit2, TrendingUp, TrendingDown, Calendar, Pencil } from "lucide-react";
 import { EditSalesRecordDialog } from "@/components/dashboard/EditSalesRecordDialog";
 import { CheckReceivedDialog } from "./CheckReceivedDialog";
 import { UpdateEstimateDialog } from "./UpdateEstimateDialog";
+import { EditCheckDialog } from "./EditCheckDialog";
 import { format } from "date-fns";
+import { useCommissionChecks, CommissionCheck } from "@/hooks/useCommissionChecks";
 
 interface DealCardProps {
   commission: SalesCommission;
@@ -18,6 +20,11 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [checkDialogOpen, setCheckDialogOpen] = useState(false);
   const [estimateDialogOpen, setEstimateDialogOpen] = useState(false);
+  const [editCheckDialogOpen, setEditCheckDialogOpen] = useState(false);
+  const [selectedCheck, setSelectedCheck] = useState<CommissionCheck | null>(null);
+
+  // Fetch checks for this commission
+  const { data: checks = [] } = useCommissionChecks(commission.id);
 
   // Calculate all commission values
   const calculations = useMemo(() => {
@@ -48,6 +55,11 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
       ? ((revisedEstimate - initialEstimate) / initialEstimate) * 100 
       : 0;
 
+    // Determine if there's a revised estimate different from initial
+    const hasRevisedEstimate = commission.revised_estimate !== null && 
+      commission.revised_estimate !== undefined && 
+      commission.revised_estimate !== commission.initial_estimate;
+
     return {
       revisedEstimate,
       initialEstimate,
@@ -62,6 +74,7 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
       commissionPaid,
       commissionOwed,
       percentChange,
+      hasRevisedEstimate,
       feePercent: commission.fee_percentage || 0,
       commissionPercent: commission.commission_percentage || 0,
       splitPercent: commission.split_percentage || 100,
@@ -79,6 +92,25 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
     } catch {
       return dateStr;
     }
+  };
+
+  const handleEditCheck = (check: CommissionCheck) => {
+    setSelectedCheck(check);
+    setEditCheckDialogOpen(true);
+  };
+
+  // Determine color for Sales Estimate based on change
+  const getSalesEstimateColor = () => {
+    if (!calculations.hasRevisedEstimate) {
+      return "text-foreground"; // No change, default color
+    }
+    if (calculations.percentChange > 0) {
+      return "text-green-600"; // Increased
+    }
+    if (calculations.percentChange < 0) {
+      return "text-red-600"; // Decreased
+    }
+    return "text-foreground";
   };
 
   return (
@@ -151,7 +183,7 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
           <div className="space-y-2">
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Sales Estimate</p>
-              <span className="text-sm text-muted-foreground line-through">
+              <span className={`text-sm font-medium ${getSalesEstimateColor()}`}>
                 {formatCurrency(calculations.initialEstimate)}
               </span>
             </div>
@@ -191,6 +223,46 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
                 <span>Remainder: {formatCurrency(calculations.remainder)}</span>
               </div>
             </div>
+            
+            {/* Check history with received/deposited dates */}
+            {checks.length > 0 && (
+              <div className="mt-2 pt-2 border-t border-border/50 space-y-2">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Check History</p>
+                {checks.map((check) => (
+                  <div 
+                    key={check.id} 
+                    className="text-xs bg-secondary/30 rounded-lg p-2 space-y-1 group relative"
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-foreground">{formatCurrency(check.check_amount)}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditCheck(check)}
+                        className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Edit Check"
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Received:</span>
+                      <span>{formatDate(check.received_date)}</span>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Deposited:</span>
+                      <span>{formatDate(check.deposited_date)}</span>
+                    </div>
+                    {check.check_number && (
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Check #:</span>
+                        <span>{check.check_number}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Commission Section */}
@@ -245,6 +317,13 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
         open={estimateDialogOpen}
         onOpenChange={setEstimateDialogOpen}
         record={commission}
+      />
+
+      <EditCheckDialog
+        open={editCheckDialogOpen}
+        onOpenChange={setEditCheckDialogOpen}
+        check={selectedCheck}
+        commission={commission}
       />
     </>
   );
