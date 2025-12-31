@@ -14,7 +14,7 @@ const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accen
 export default function SalesDashboardPage() {
   const { data: salespeople } = useSalespeople();
   const { data: availableYears } = useAvailableYears();
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number | null>(2020);
   const [selectedSalespersonIds, setSelectedSalespersonIds] = useState<string[]>([]);
   
   // Fetch ALL commissions then filter client-side for multi-select
