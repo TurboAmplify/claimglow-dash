@@ -381,7 +381,7 @@ const AddClaimPage = () => {
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       <div className="space-y-1.5">
-                        <Label htmlFor="initialEstimate" className="text-xs">Initial Est. ($)</Label>
+                        <Label htmlFor="initialEstimate" className="text-xs">Sales Estimate ($)</Label>
                         <Input
                           id="initialEstimate"
                           type="number"

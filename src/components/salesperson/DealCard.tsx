@@ -149,26 +149,31 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Estimate Section */}
           <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Estimate</p>
-            <div className="flex items-baseline gap-2">
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Sales Estimate</p>
               <span className="text-sm text-muted-foreground line-through">
                 {formatCurrency(calculations.initialEstimate)}
               </span>
-              <span className="text-lg font-semibold text-foreground">
-                {formatCurrency(calculations.revisedEstimate)}
-              </span>
-              {calculations.percentChange !== 0 && (
-                <span className={`text-sm flex items-center gap-0.5 ${
-                  calculations.percentChange > 0 ? "text-green-600" : "text-red-600"
-                }`}>
-                  {calculations.percentChange > 0 ? (
-                    <TrendingUp className="w-3 h-3" />
-                  ) : (
-                    <TrendingDown className="w-3 h-3" />
-                  )}
-                  {Math.abs(calculations.percentChange).toFixed(1)}%
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Adjuster's Revised Est.</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-lg font-semibold text-foreground">
+                  {formatCurrency(calculations.revisedEstimate)}
                 </span>
-              )}
+                {calculations.percentChange !== 0 && (
+                  <span className={`text-sm flex items-center gap-0.5 ${
+                    calculations.percentChange > 0 ? "text-green-600" : "text-red-600"
+                  }`}>
+                    {calculations.percentChange > 0 ? (
+                      <TrendingUp className="w-3 h-3" />
+                    ) : (
+                      <TrendingDown className="w-3 h-3" />
+                    )}
+                    {Math.abs(calculations.percentChange).toFixed(1)}%
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

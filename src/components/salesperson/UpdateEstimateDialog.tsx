@@ -111,15 +111,15 @@ export function UpdateEstimateDialog({ open, onOpenChange, record }: UpdateEstim
         <div className="space-y-4 py-4">
           {/* Client Info */}
           <div className="p-3 rounded-lg bg-secondary/30">
-            <p className="text-sm text-muted-foreground">Client</p>
-            <p className="font-medium text-foreground">{record.client_name}</p>
+            <p className="text-xs text-muted-foreground">Client</p>
+            <p className="font-semibold text-lg text-foreground">{record.client_name}</p>
             <div className="flex gap-4 mt-2 text-sm">
               <div>
-                <span className="text-muted-foreground">Initial: </span>
+                <span className="text-muted-foreground">Sales Estimate: </span>
                 <span className="font-medium">{formatCurrency(record.initial_estimate || 0)}</span>
               </div>
               <div>
-                <span className="text-muted-foreground">Current: </span>
+                <span className="text-muted-foreground">Adjuster's Revised: </span>
                 <span className="font-medium">{formatCurrency(record.revised_estimate || 0)}</span>
               </div>
             </div>
