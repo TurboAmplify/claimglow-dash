@@ -191,7 +191,6 @@ export default function SalespersonDashboardPage() {
             <h1 className="text-3xl font-bold text-foreground">{salesperson.name}</h1>
             <p className="text-muted-foreground">
               {salesperson.role === "sales_director" ? "Sales Director" : "Sales Representative"}
-              {salesperson.email && ` • ${salesperson.email}`}
             </p>
           </div>
         </div>
