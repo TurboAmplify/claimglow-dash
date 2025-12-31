@@ -334,7 +334,7 @@ export function DynamicGrowthPlanDialog({
             </h2>
             <p className="text-muted-foreground mb-4">
               {isTeamView 
-                ? `This document outlines the combined 2026 growth strategy for our ${teamMemberCount}-member sales team. The team's collective target of ${formatCurrency(targetRevenue)} reflects our commitment to structured growth with clear opportunity distribution across all team members.`
+                ? `This document outlines the combined 2026 growth strategy for our ${teamMemberPlans.length}-member sales team. The team's collective target of ${formatCurrency(targetRevenue)} reflects our commitment to structured growth with clear opportunity distribution across all team members.`
                 : `My intention for 2026 is to approach the year with organization, clarity, and a structured path for growth. This plan outlines the types of opportunities I aim to pursue, the relationships I want to strengthen, and the activities that help me stay consistent.`
               }
             </p>
