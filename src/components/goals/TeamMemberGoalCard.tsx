@@ -71,7 +71,6 @@ export function TeamMemberGoalCard({
             </div>
             <div>
               <CardTitle className="text-lg">{member.name}</CardTitle>
-              <p className="text-sm text-muted-foreground">{member.email || 'No email'}</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
