@@ -146,8 +146,8 @@ export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceive
         <div className="space-y-4 py-4">
           {/* Client Info */}
           <div className="p-3 rounded-lg bg-secondary/30">
-            <p className="text-sm text-muted-foreground">Client</p>
-            <p className="font-medium text-foreground">{record.client_name}</p>
+            <p className="text-xs text-muted-foreground">Client</p>
+            <p className="font-semibold text-lg text-foreground">{record.client_name}</p>
             <div className="flex gap-4 mt-2 text-sm">
               <div>
                 <span className="text-muted-foreground">Current Checks: </span>
