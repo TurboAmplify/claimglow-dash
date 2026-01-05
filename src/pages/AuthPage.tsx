@@ -29,11 +29,16 @@ export default function AuthPage() {
 
   // Handle role-based redirect after login
   useEffect(() => {
-    if (user && salesperson && !loadingSalesperson) {
-      if (isDirector) {
-        navigate('/planning');
+    if (user && !loadingSalesperson) {
+      if (salesperson) {
+        if (isDirector) {
+          navigate('/planning');
+        } else {
+          navigate(`/sales/person/${salesperson.id}`);
+        }
       } else {
-        navigate(`/sales/person/${salesperson.id}`);
+        // User authenticated but no matching salesperson record - redirect to home
+        navigate('/');
       }
     }
   }, [user, salesperson, loadingSalesperson, isDirector, navigate]);
