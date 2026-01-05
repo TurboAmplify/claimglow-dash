@@ -16,12 +16,13 @@ const authSchema = z.object({
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   
-  const { signIn, signUp, user, loading } = useAuth();
+  const { signIn, signUp, resetPassword, user, loading } = useAuth();
   const { salesperson, isLoading: loadingSalesperson, isDirector } = useCurrentSalesperson();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -51,16 +52,24 @@ export default function AuthPage() {
     return null;
   }
 
-  const validateForm = () => {
-    const result = authSchema.safeParse({ email, password });
-    if (!result.success) {
-      const fieldErrors: { email?: string; password?: string } = {};
-      result.error.errors.forEach((err) => {
-        if (err.path[0] === 'email') fieldErrors.email = err.message;
-        if (err.path[0] === 'password') fieldErrors.password = err.message;
-      });
-      setErrors(fieldErrors);
-      return false;
+  const validateForm = (requirePassword = true) => {
+    if (requirePassword) {
+      const result = authSchema.safeParse({ email, password });
+      if (!result.success) {
+        const fieldErrors: { email?: string; password?: string } = {};
+        result.error.errors.forEach((err) => {
+          if (err.path[0] === 'email') fieldErrors.email = err.message;
+          if (err.path[0] === 'password') fieldErrors.password = err.message;
+        });
+        setErrors(fieldErrors);
+        return false;
+      }
+    } else {
+      const emailResult = z.string().trim().email({ message: "Please enter a valid email address" }).safeParse(email);
+      if (!emailResult.success) {
+        setErrors({ email: emailResult.error.errors[0]?.message });
+        return false;
+      }
     }
     setErrors({});
     return true;
@@ -68,6 +77,31 @@ export default function AuthPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isForgotPassword) {
+      if (!validateForm(false)) return;
+      
+      setIsSubmitting(true);
+      try {
+        const { error } = await resetPassword(email);
+        if (error) {
+          toast({
+            title: "Reset failed",
+            description: error.message,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Check your email",
+            description: "We've sent you a password reset link.",
+          });
+          setIsForgotPassword(false);
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
     
     if (!validateForm()) return;
     
@@ -144,7 +178,11 @@ export default function AuthPage() {
             <div className="text-center">
               <h1 className="text-2xl font-bold text-foreground">DealMetrics</h1>
               <p className="text-muted-foreground mt-1">
-                {isLogin ? 'Sign in to your account' : 'Create a new account'}
+                {isForgotPassword 
+                  ? 'Reset your password' 
+                  : isLogin 
+                    ? 'Sign in to your account' 
+                    : 'Create a new account'}
               </p>
             </div>
           </div>
@@ -170,24 +208,37 @@ export default function AuthPage() {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-secondary/50 border-border/50 focus:border-primary"
-                  disabled={isSubmitting}
-                />
+            {!isForgotPassword && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-foreground">Password</Label>
+                  {isLogin && (
+                    <button
+                      type="button"
+                      onClick={() => setIsForgotPassword(true)}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 bg-secondary/50 border-border/50 focus:border-primary"
+                    disabled={isSubmitting}
+                  />
+                </div>
+                {errors.password && (
+                  <p className="text-sm text-destructive">{errors.password}</p>
+                )}
               </div>
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password}</p>
-              )}
-            </div>
+            )}
 
             <Button
               type="submit"
@@ -199,13 +250,24 @@ export default function AuthPage() {
               ) : (
                 <ArrowRight className="w-4 h-4 mr-2" />
               )}
-              {isLogin ? 'Sign In' : 'Sign Up'}
+              {isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Sign Up'}
             </Button>
           </form>
 
           {/* Toggle */}
           <div className="text-center text-sm text-muted-foreground">
-            {isLogin ? (
+            {isForgotPassword ? (
+              <p>
+                Remember your password?{' '}
+                <button
+                  type="button"
+                  onClick={() => setIsForgotPassword(false)}
+                  className="text-primary hover:underline font-medium"
+                >
+                  Back to sign in
+                </button>
+              </p>
+            ) : isLogin ? (
               <p>
                 Don't have an account?{' '}
                 <button
