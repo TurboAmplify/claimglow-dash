@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      adjuster_ratings: {
+        Row: {
+          adjuster: string
+          created_at: string
+          id: string
+          notes: string | null
+          rating: number
+          sales_commission_id: string
+          salesperson_id: string
+          updated_at: string
+        }
+        Insert: {
+          adjuster: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          rating: number
+          sales_commission_id: string
+          salesperson_id: string
+          updated_at?: string
+        }
+        Update: {
+          adjuster?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          rating?: number
+          sales_commission_id?: string
+          salesperson_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adjuster_ratings_sales_commission_id_fkey"
+            columns: ["sales_commission_id"]
+            isOneToOne: false
+            referencedRelation: "sales_commissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       adjusters: {
         Row: {
           created_at: string

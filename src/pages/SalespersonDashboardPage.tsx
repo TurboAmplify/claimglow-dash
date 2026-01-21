@@ -6,6 +6,7 @@ import { PlanSubmissionSection } from "@/components/salesperson/PlanSubmissionSe
 import { ProgressTracker } from "@/components/planning/ProgressTracker";
 import { WeeklyDealsTracker } from "@/components/planning/WeeklyDealsTracker";
 import { DealPipeline } from "@/components/planning/DealPipeline";
+import { RatingPromptBanner } from "@/components/salesperson/RatingPromptBanner";
 import { useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions";
 import { useSalesGoals } from "@/hooks/useSalesGoals";
 import { useSalesPlan } from "@/hooks/useSalesPlan";
@@ -209,6 +210,9 @@ export default function SalespersonDashboardPage() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
+          {/* Rating prompt for claims 6+ months old */}
+          {id && <RatingPromptBanner salespersonId={id} />}
+          
           <SalespersonOverview 
             stats={stats} 
             goal={currentGoal}

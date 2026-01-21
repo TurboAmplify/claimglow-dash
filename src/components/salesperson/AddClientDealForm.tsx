@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { CalendarIcon, Save, Calculator } from "lucide-react";
 import { format } from "date-fns";
@@ -14,6 +15,12 @@ import { cn } from "@/lib/utils";
 interface AddClientDealFormProps {
   salespersonId: string;
   onSuccess?: () => void;
+}
+
+interface Adjuster {
+  id: string;
+  name: string;
+  office: string;
 }
 
 export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFormProps) {
@@ -27,6 +34,29 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
   const [splitPercentage, setSplitPercentage] = useState("100");
   const [isSaving, setIsSaving] = useState(false);
   const queryClient = useQueryClient();
+
+  // Fetch adjusters for the dropdown
+  const { data: adjusters = [] } = useQuery<Adjuster[]>({
+    queryKey: ["adjusters"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("adjusters")
+        .select("*")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Auto-fill office when adjuster is selected
+  const handleAdjusterChange = (value: string) => {
+    setAdjuster(value);
+    const selectedAdjuster = adjusters.find(a => a.name === value);
+    if (selectedAdjuster) {
+      setOffice(selectedAdjuster.office);
+    }
+  };
 
   // Live commission preview
   const projectedCommission = useMemo(() => {
@@ -132,12 +162,18 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
         {/* Adjuster */}
         <div className="space-y-2">
           <Label htmlFor="adjuster">Adjuster</Label>
-          <Input
-            id="adjuster"
-            placeholder="Enter adjuster name"
-            value={adjuster}
-            onChange={(e) => setAdjuster(e.target.value)}
-          />
+          <Select value={adjuster} onValueChange={handleAdjusterChange}>
+            <SelectTrigger className="bg-secondary/50 border-glass-border/30">
+              <SelectValue placeholder="Select adjuster" />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border-glass-border/30">
+              {adjusters.map((adj) => (
+                <SelectItem key={adj.id} value={adj.name}>
+                  {adj.name} ({adj.office})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Office */}
