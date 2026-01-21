@@ -19,6 +19,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MultiSalespersonSplit, SalespersonSplit } from "@/components/salesperson/MultiSalespersonSplit";
 import { MonthlyCommissionSummary } from "@/components/salesperson/MonthlyCommissionSummary";
 
+interface Adjuster {
+  id: string;
+  name: string;
+  office: string;
+}
+
 const AddClaimPage = () => {
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("deal");
@@ -50,6 +56,29 @@ const AddClaimPage = () => {
       return data;
     },
   });
+
+  // Fetch adjusters for the dropdown
+  const { data: adjusters = [] } = useQuery({
+    queryKey: ["adjusters"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("adjusters")
+        .select("*")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Auto-fill office when adjuster is selected
+  const handleAdjusterChange = (value: string) => {
+    setAdjuster(value);
+    const selectedAdjuster = (adjusters as Adjuster[]).find(a => a.name === value);
+    if (selectedAdjuster) {
+      setOffice(selectedAdjuster.office);
+    }
+  };
 
   // Fetch all claims/deals
   const { data: claims = [] } = useQuery({
@@ -280,14 +309,19 @@ const AddClaimPage = () => {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="adjusterTab" className="text-xs">Adjuster</Label>
-                      <Input
-                        id="adjusterTab"
-                        placeholder="Adjuster name"
-                        value={adjuster}
-                        onChange={(e) => setAdjuster(e.target.value)}
-                        className="h-9 text-sm"
-                      />
+                      <Label className="text-xs">Adjuster</Label>
+                      <Select value={adjuster} onValueChange={handleAdjusterChange}>
+                        <SelectTrigger className="h-9 text-sm">
+                          <SelectValue placeholder="Select adjuster" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(adjusters as Adjuster[]).map((adj) => (
+                            <SelectItem key={adj.id} value={adj.name} className="text-sm">
+                              {adj.name} ({adj.office})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="officeTab" className="text-xs">Office</Label>
@@ -332,14 +366,19 @@ const AddClaimPage = () => {
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label htmlFor="adjuster" className="text-xs">Adjuster</Label>
-                        <Input
-                          id="adjuster"
-                          placeholder="Adjuster"
-                          value={adjuster}
-                          onChange={(e) => setAdjuster(e.target.value)}
-                          className="h-9 text-sm"
-                        />
+                        <Label className="text-xs">Adjuster</Label>
+                        <Select value={adjuster} onValueChange={handleAdjusterChange}>
+                          <SelectTrigger className="h-9 text-sm">
+                            <SelectValue placeholder="Select adjuster" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(adjusters as Adjuster[]).map((adj) => (
+                              <SelectItem key={adj.id} value={adj.name} className="text-sm">
+                                {adj.name} ({adj.office})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor="office" className="text-xs">Office</Label>

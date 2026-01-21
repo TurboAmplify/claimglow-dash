@@ -1,7 +1,8 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useYearSummaries, useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions";
 import { useMemo, useState, useEffect } from "react";
-import { Loader2, Target, TrendingUp, BarChart3, Calendar, Map as MapIcon, Layers, Compass, Save, Activity, Users, ShieldAlert, Send, FlaskConical, Home, Building2, Factory, Church } from "lucide-react";
+import { Loader2, Target, TrendingUp, BarChart3, Calendar, Map as MapIcon, Layers, Compass, Save, Activity, Users, ShieldAlert, Send, FlaskConical, Home, Building2, Factory, Church, Star } from "lucide-react";
+import { AdjusterRatingsView } from "@/components/dashboard/AdjusterRatingsView";
 import { usePlanApproval } from "@/hooks/usePlanApproval";
 import { ValuesSection } from "@/components/goals/ValuesSection";
 import { PlanCreator } from "@/components/planning/PlanCreator";
@@ -999,6 +1000,13 @@ export default function SalesPlanningPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Adjuster Ratings Section - Directors only */}
+      {isDirector && (
+        <div className="mt-8 animate-fade-in">
+          <AdjusterRatingsView />
+        </div>
+      )}
     </DashboardLayout>
   );
 }
