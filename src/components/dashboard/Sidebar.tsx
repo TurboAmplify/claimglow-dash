@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
+import { useViewAs } from "@/contexts/ViewAsContext";
 import { SettingsPanel } from "@/components/settings/SettingsPanel";
 import { GlobalAlertsIndicator } from "./GlobalAlertsIndicator";
 
@@ -39,12 +40,12 @@ const adjustingNavItems = [
   { title: "All Claims", url: "/claims", icon: FileText },
 ];
 
-const salesNavItems = [
+// Base sales nav items (Import Data shown only for directors)
+const baseSalesNavItems = [
   { title: "Sales Dashboard", url: "/sales", icon: DollarSign },
   { title: "By Sales Person", url: "/sales/by-person", icon: Users },
   { title: "By Office", url: "/sales/by-office", icon: Building2 },
   { title: "All Sales", url: "/sales/all", icon: FileText },
-  { title: "Import Data", url: "/import-commissions", icon: Upload },
 ];
 
 interface SidebarProps {
@@ -56,13 +57,29 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { salesperson, isDirector } = useCurrentSalesperson();
+  const { salesperson, isDirector: actuallyDirector } = useCurrentSalesperson();
+  const { effectiveSalesperson, isViewingAsOther, isDirector: viewAsDirectorCheck } = useViewAs();
 
-  // Dynamic planning nav items based on role - always show Sales Planning for directors
+  // When viewing as someone else, use their role. Otherwise use actual role.
+  const effectiveIsDirector = isViewingAsOther 
+    ? effectiveSalesperson?.role === "sales_director"
+    : actuallyDirector;
+  
+  const effectivePerson = isViewingAsOther ? effectiveSalesperson : salesperson;
+
+  // Sales nav items - show Import Data only for actual directors (not when viewing as someone)
+  const salesNavItems = [
+    ...baseSalesNavItems,
+    ...(actuallyDirector && !isViewingAsOther ? [{ title: "Import Data", url: "/import-commissions", icon: Upload }] : []),
+  ];
+
+  // Dynamic planning nav items based on effective role
   const planningNavItems = [
-    { title: "Sales Planning", url: "/planning", icon: Map },
-    ...(salesperson && !isDirector 
-      ? [{ title: "My Plan", url: `/planning/${salesperson.id}`, icon: Target }]
+    // Show Sales Planning only if actually director OR if viewing as director
+    ...(actuallyDirector || effectiveIsDirector ? [{ title: "Sales Planning", url: "/planning", icon: Map }] : []),
+    // Show My Plan for the effective person if they're not a director
+    ...(effectivePerson && !effectiveIsDirector 
+      ? [{ title: "My Plan", url: `/planning/${effectivePerson.id}`, icon: Target }]
       : []
     ),
   ];
