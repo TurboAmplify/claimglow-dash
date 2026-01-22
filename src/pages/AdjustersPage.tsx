@@ -3,7 +3,7 @@ import { MultiSelectFilter } from "@/components/dashboard/MultiSelectFilter";
 import { EditAdjusterDialog } from "@/components/dashboard/EditAdjusterDialog";
 import { AdjusterCard } from "@/components/dashboard/AdjusterCard";
 import { useAdjusters, Adjuster } from "@/hooks/useAdjusters";
-import { useClaims, useAdjusterSummaries } from "@/hooks/useClaims";
+import { useAdjusterCommissionSummaries } from "@/hooks/useAdjusterCommissionSummaries";
 import { AdjusterSummary } from "@/types/claims";
 import { Loader2, Edit2 } from "lucide-react";
 import { useState, useMemo } from "react";
@@ -22,18 +22,19 @@ export default function AdjustersPage() {
   const [editingAdjuster, setEditingAdjuster] = useState<Adjuster | null>(null);
 
   const { data: adjusters, isLoading: adjustersLoading, error: adjustersError } = useAdjusters();
-  const { data: claims, isLoading: claimsLoading } = useClaims();
-  const adjusterSummaries = useAdjusterSummaries(claims);
+  const { data: commissionSummaries, isLoading: summariesLoading } = useAdjusterCommissionSummaries();
 
-  const isLoading = adjustersLoading || claimsLoading;
+  const isLoading = adjustersLoading || summariesLoading;
 
-  // Merge adjusters table with claims summaries
+  // Merge adjusters table with commission summaries
   const mergedAdjusters = useMemo((): MergedAdjuster[] => {
     if (!adjusters) return [];
+    
+    const summaries = commissionSummaries || [];
 
     return adjusters.map((adjuster) => {
       // Find matching summary by name (case-insensitive, trim whitespace)
-      const existingSummary = adjusterSummaries.find(
+      const existingSummary = summaries.find(
         (s) => s.adjuster.toLowerCase().trim() === adjuster.name.toLowerCase().trim()
       );
 
@@ -55,7 +56,7 @@ export default function AdjustersPage() {
 
       return { adjuster, summary };
     });
-  }, [adjusters, adjusterSummaries]);
+  }, [adjusters, commissionSummaries]);
 
   const offices = useMemo(() => {
     if (!adjusters) return [];
