@@ -1,64 +1,87 @@
 import { useState, useRef, useEffect } from "react";
-import { Bell, Star, Users, ChevronRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Bell, Star, Users, X, Clock, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useClaimsNeedingRating, useTeamClaimsNeedingRating, useAdjusterRatings } from "@/hooks/useAdjusterRatings";
+import { Badge } from "@/components/ui/badge";
 import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
+import { useClaimAlerts, useTeamClaimAlerts, useAdjusterRatings, type ClaimMilestone } from "@/hooks/useAdjusterRatings";
 import { AdjusterRatingDialog } from "@/components/salesperson/AdjusterRatingDialog";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
+function getMilestoneConfig(milestone: ClaimMilestone) {
+  switch (milestone) {
+    case '2_weeks':
+      return { label: '2-Week', color: 'text-amber-500', bg: 'bg-amber-500/10', icon: Clock };
+    case '3_months':
+      return { label: '3-Month', color: 'text-blue-500', bg: 'bg-blue-500/10', icon: Clock };
+    case '6_months':
+      return { label: '6-Month', color: 'text-purple-500', bg: 'bg-purple-500/10', icon: Clock };
+    case 'completed':
+      return { label: 'Completed', color: 'text-green-500', bg: 'bg-green-500/10', icon: CheckCircle };
+    default:
+      return { label: 'Review', color: 'text-primary', bg: 'bg-primary/10', icon: Star };
+  }
+}
+
 export function GlobalAlertsIndicator() {
+  const { salesperson, isDirector } = useCurrentSalesperson();
+  const { data: personalAlerts = [], refetch: refetchPersonal } = useClaimAlerts(salesperson?.id);
+  const { data: teamAlerts = [] } = useTeamClaimAlerts();
+  const { createRating, isCreating } = useAdjusterRatings(salesperson?.id);
+  
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState<{
     id: string;
     clientName: string;
     adjuster: string;
+    milestone: ClaimMilestone;
   } | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   
-  const { salesperson, isDirector } = useCurrentSalesperson();
-  const salespersonId = salesperson?.id;
-  
-  // Individual alerts for the current user
-  const { data: personalClaims = [], refetch: refetchPersonal } = useClaimsNeedingRating(salespersonId);
-  
-  // Team alerts for directors
-  const { data: teamAlerts = [] } = useTeamClaimsNeedingRating();
-  
-  const { createRating, isCreating } = useAdjusterRatings(salespersonId);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Calculate totals
-  const personalAlertCount = personalClaims.length;
-  const teamAlertCount = isDirector 
-    ? teamAlerts.filter(t => t.salesperson_id !== salespersonId).reduce((sum, t) => sum + t.claims.length, 0)
+  // Group personal alerts by milestone
+  const alertsByMilestone = personalAlerts.reduce((acc, alert) => {
+    if (!acc[alert.milestone]) acc[alert.milestone] = [];
+    acc[alert.milestone].push(alert);
+    return acc;
+  }, {} as Record<ClaimMilestone, typeof personalAlerts>);
+
+  // Calculate total team alerts (excluding current user)
+  const teamAlertsCount = isDirector 
+    ? teamAlerts
+        .filter(t => t.salesperson_id !== salesperson?.id)
+        .reduce((sum, t) => sum + t.alerts.length, 0)
     : 0;
-  const totalAlerts = personalAlertCount + (isDirector ? teamAlertCount : 0);
 
-  // Handle click outside
+  const totalAlerts = personalAlerts.length + (isDirector ? teamAlertsCount : 0);
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsExpanded(false);
       }
-    };
-
-    if (isExpanded) {
-      document.addEventListener("mousedown", handleClickOutside);
     }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isExpanded]);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-  const handleRatingSubmit = (data: { rating: number; notes: string }) => {
-    if (!selectedClaim || !salespersonId) return;
+  const handleRatingSubmit = (data: { 
+    rating_communication: number; 
+    rating_settlement: number; 
+    rating_overall: number; 
+    notes: string;
+    claim_milestone: string;
+  }) => {
+    if (!selectedClaim || !salesperson?.id) return;
     
     createRating({
       sales_commission_id: selectedClaim.id,
-      salesperson_id: salespersonId,
+      salesperson_id: salesperson.id,
       adjuster: selectedClaim.adjuster,
-      rating: data.rating,
+      rating_communication: data.rating_communication,
+      rating_settlement: data.rating_settlement,
+      rating_overall: data.rating_overall,
+      claim_milestone: data.claim_milestone,
       notes: data.notes || undefined,
     }, {
       onSuccess: () => {
@@ -70,135 +93,138 @@ export function GlobalAlertsIndicator() {
 
   if (totalAlerts === 0) {
     return (
-      <div className="relative p-2">
+      <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-xl">
         <Bell className="h-5 w-5 text-muted-foreground" />
-      </div>
+      </Button>
     );
   }
 
   return (
     <>
-      <div ref={containerRef} className="relative">
-        <button
+      <div ref={dropdownRef} className="relative">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative h-9 w-9 rounded-xl hover:bg-primary/10"
           onClick={() => setIsExpanded(!isExpanded)}
-          className={cn(
-            "relative p-2 rounded-lg transition-all duration-200",
-            "hover:bg-sidebar-accent/50",
-            isExpanded && "bg-sidebar-accent/50"
-          )}
         >
-          <Bell className={cn(
-            "h-5 w-5 transition-colors",
-            totalAlerts > 0 ? "text-accent-foreground" : "text-muted-foreground"
-          )} />
-          {totalAlerts > 0 && (
-            <Badge 
-              className="absolute -top-1 -right-1 h-5 min-w-[20px] flex items-center justify-center px-1.5 text-xs font-bold bg-accent text-accent-foreground border-0"
-            >
-              {totalAlerts > 99 ? "99+" : totalAlerts}
-            </Badge>
-          )}
-        </button>
+          <Bell className="h-5 w-5 text-foreground" />
+          <Badge 
+            className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center p-0 text-[10px] bg-destructive text-destructive-foreground border-0"
+          >
+            {totalAlerts}
+          </Badge>
+        </Button>
 
         {isExpanded && (
-          <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 glass-sidebar rounded-xl border border-sidebar-border/30 shadow-xl z-50 animate-fade-in overflow-hidden">
-            <div className="p-3 border-b border-sidebar-border/30">
-              <h3 className="font-semibold text-foreground flex items-center gap-2">
-                <Bell className="h-4 w-4 text-accent-foreground" />
-                Alerts
-                <Badge variant="secondary" className="ml-auto">
+          <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-background border border-glass-border/30 rounded-xl shadow-xl z-50 animate-fade-in overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between p-3 border-b border-glass-border/20 bg-secondary/30">
+              <div className="flex items-center gap-2">
+                <Bell className="h-4 w-4 text-primary" />
+                <span className="font-medium text-sm">Alerts</span>
+                <Badge variant="secondary" className="text-xs">
                   {totalAlerts}
                 </Badge>
-              </h3>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6 rounded-lg"
+                onClick={() => setIsExpanded(false)}
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
             </div>
 
-            <div className="max-h-[400px] overflow-y-auto">
-              {/* Personal Rating Alerts */}
-              {personalAlertCount > 0 && (
-                <div className="p-3 border-b border-sidebar-border/20">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Star className="h-4 w-4 text-accent-foreground" />
-                    <span className="text-sm font-medium text-foreground">Rating Needed</span>
-                    <Badge variant="outline" className="ml-auto text-xs">
-                      {personalAlertCount}
-                    </Badge>
+            <div className="max-h-[60vh] overflow-y-auto">
+              {/* Personal Rating Alerts by Milestone */}
+              {personalAlerts.length > 0 && (
+                <div className="p-3 space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    <Star className="h-3.5 w-3.5" />
+                    Rating Needed
                   </div>
-                  <div className="space-y-2">
-                    {personalClaims.slice(0, 5).map((claim) => (
-                      <div
-                        key={claim.id}
-                        className="flex items-center justify-between p-2.5 rounded-lg bg-background/50 hover:bg-background/80 transition-colors"
-                      >
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium truncate">{claim.client_name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {claim.adjuster} · {claim.date_signed ? format(new Date(claim.date_signed), "MMM yyyy") : "N/A"}
-                          </p>
+                  
+                  {(['2_weeks', '3_months', '6_months', 'completed'] as ClaimMilestone[]).map(milestone => {
+                    const alerts = alertsByMilestone[milestone];
+                    if (!alerts?.length) return null;
+                    
+                    const config = getMilestoneConfig(milestone);
+                    const MilestoneIcon = config.icon;
+                    
+                    return (
+                      <div key={milestone} className="space-y-2">
+                        <div className={cn("flex items-center gap-1.5 text-xs font-medium", config.color)}>
+                          <MilestoneIcon className="h-3 w-3" />
+                          {config.label} Reviews ({alerts.length})
                         </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setSelectedClaim({
-                            id: claim.id,
-                            clientName: claim.client_name,
-                            adjuster: claim.adjuster!,
-                          })}
-                          className="h-7 px-2 text-accent-foreground hover:bg-accent/20"
-                        >
-                          <Star className="h-3.5 w-3.5 mr-1" />
-                          Rate
-                        </Button>
+                        {alerts.slice(0, 3).map(alert => (
+                          <div 
+                            key={`${alert.id}-${milestone}`}
+                            className="flex items-center justify-between p-2 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors"
+                          >
+                            <div className="space-y-0.5 min-w-0 flex-1">
+                              <p className="text-sm font-medium truncate">{alert.client_name}</p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {alert.adjuster} · {alert.date_signed ? format(new Date(alert.date_signed), "MMM d, yyyy") : "N/A"}
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className={cn("h-7 rounded-lg ml-2 shrink-0", config.bg, config.color, "hover:opacity-80")}
+                              onClick={() => setSelectedClaim({
+                                id: alert.id,
+                                clientName: alert.client_name,
+                                adjuster: alert.adjuster!,
+                                milestone: alert.milestone,
+                              })}
+                            >
+                              <Star className="w-3 h-3 mr-1" />
+                              Rate
+                            </Button>
+                          </div>
+                        ))}
+                        {alerts.length > 3 && (
+                          <p className="text-xs text-muted-foreground text-center">
+                            +{alerts.length - 3} more {config.label.toLowerCase()} reviews
+                          </p>
+                        )}
                       </div>
-                    ))}
-                    {personalAlertCount > 5 && (
-                      <p className="text-xs text-muted-foreground text-center pt-1">
-                        +{personalAlertCount - 5} more claims to rate
-                      </p>
-                    )}
-                  </div>
+                    );
+                  })}
                 </div>
               )}
 
-              {/* Team Alerts (Directors Only) */}
-              {isDirector && teamAlertCount > 0 && (
-                <div className="p-3">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Users className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium text-foreground">Team Alerts</span>
-                    <Badge variant="outline" className="ml-auto text-xs">
-                      {teamAlertCount}
-                    </Badge>
+              {/* Director Team Alerts */}
+              {isDirector && teamAlertsCount > 0 && (
+                <div className="p-3 border-t border-glass-border/20">
+                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                    <Users className="h-3.5 w-3.5" />
+                    Team Alerts
                   </div>
                   <div className="space-y-2">
                     {teamAlerts
-                      .filter(t => t.salesperson_id !== salespersonId)
-                      .map((team) => (
-                        <div
+                      .filter(t => t.salesperson_id !== salesperson?.id)
+                      .slice(0, 5)
+                      .map(team => (
+                        <div 
                           key={team.salesperson_id}
-                          className="flex items-center justify-between p-2.5 rounded-lg bg-background/50"
+                          className="flex items-center justify-between p-2 rounded-lg bg-secondary/50"
                         >
-                          <div className="flex items-center gap-2">
-                            <div className="h-7 w-7 rounded-full bg-primary/20 flex items-center justify-center">
-                              <span className="text-xs font-medium text-primary">
-                                {team.salesperson_name.split(' ').map(n => n[0]).join('')}
-                              </span>
-                            </div>
-                            <span className="text-sm font-medium">{team.salesperson_name}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5 text-muted-foreground">
-                            <Badge variant="secondary" className="text-xs">
-                              {team.claims.length} pending
-                            </Badge>
-                            <ChevronRight className="h-4 w-4" />
-                          </div>
+                          <span className="text-sm font-medium">{team.salesperson_name}</span>
+                          <Badge variant="outline" className="text-xs">
+                            {team.alerts.length} pending
+                          </Badge>
                         </div>
                       ))}
                   </div>
                 </div>
               )}
 
-              {/* Empty state fallback */}
-              {personalAlertCount === 0 && (!isDirector || teamAlertCount === 0) && (
+              {/* Empty state */}
+              {personalAlerts.length === 0 && teamAlertsCount === 0 && (
                 <div className="p-6 text-center text-muted-foreground">
                   <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">No alerts at this time</p>
@@ -209,14 +235,15 @@ export function GlobalAlertsIndicator() {
         )}
       </div>
 
-      {selectedClaim && salespersonId && (
+      {selectedClaim && (
         <AdjusterRatingDialog
           open={!!selectedClaim}
           onOpenChange={(open) => !open && setSelectedClaim(null)}
           adjuster={selectedClaim.adjuster}
           clientName={selectedClaim.clientName}
           claimId={selectedClaim.id}
-          salespersonId={salespersonId}
+          salespersonId={salesperson?.id || ""}
+          milestone={selectedClaim.milestone}
           onSubmit={handleRatingSubmit}
           isSubmitting={isCreating}
         />
