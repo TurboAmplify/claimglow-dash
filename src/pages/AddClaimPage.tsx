@@ -193,6 +193,7 @@ const AddClaimPage = () => {
       const currentYear = new Date().getFullYear();
 
       // Create a record for each salesperson with their split
+      // Note: percent_change is a generated column, so we don't include it
       const records = validSplits.map(split => ({
         salesperson_id: split.salespersonId,
         client_name: clientName.trim(),
@@ -202,7 +203,6 @@ const AddClaimPage = () => {
         year: currentYear,
         initial_estimate: estimate,
         revised_estimate: estimate,
-        percent_change: 0,
         insurance_checks_ytd: 0,
         old_remainder: estimate,
         new_remainder: estimate,
