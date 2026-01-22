@@ -113,29 +113,44 @@ export default function ImportCommissionsPage() {
       
       if (deleteError) throw deleteError;
 
+      // Collect unique adjusters from the data for syncing
+      const adjustersMap = new Map<string, { name: string; office: string }>();
+      
       // Insert all data in batches
       const batchSize = 50;
       let insertedCount = 0;
 
       for (const yearSheet of data) {
-        const rows = yearSheet.rows.map(row => ({
-          salesperson_id: targetSalesperson.id,
-          client_name: row.clientName,
-          adjuster: row.adjuster || null,
-          office: row.office || null,
-          date_signed: row.dateSigned,
-          year: row.year,
-          initial_estimate: row.initialEstimate,
-          revised_estimate: row.revisedEstimate,
-          insurance_checks_ytd: row.insuranceChecks,
-          old_remainder: row.oldRemainder,
-          new_remainder: row.newRemainder,
-          split_percentage: row.splitPercentage,
-          fee_percentage: row.feePercentage,
-          commission_percentage: row.commissionPercentage,
-          commissions_paid: row.commissionsPaid,
-          status: 'imported',
-        }));
+        const rows = yearSheet.rows.map(row => {
+          // Track adjusters for later sync
+          if (row.adjuster && row.adjuster.trim()) {
+            const adjusterName = row.adjuster.trim();
+            const office = row.office?.toLowerCase() === 'h' ? 'Houston' : 
+                          row.office?.toLowerCase() === 'd' ? 'Dallas' :
+                          row.office || 'Unknown';
+            // Use most recent office assignment
+            adjustersMap.set(adjusterName.toLowerCase(), { name: adjusterName, office });
+          }
+          
+          return {
+            salesperson_id: targetSalesperson.id,
+            client_name: row.clientName,
+            adjuster: row.adjuster || null,
+            office: row.office || null,
+            date_signed: row.dateSigned,
+            year: row.year,
+            initial_estimate: row.initialEstimate,
+            revised_estimate: row.revisedEstimate,
+            insurance_checks_ytd: row.insuranceChecks,
+            old_remainder: row.oldRemainder,
+            new_remainder: row.newRemainder,
+            split_percentage: row.splitPercentage,
+            fee_percentage: row.feePercentage,
+            commission_percentage: row.commissionPercentage,
+            commissions_paid: row.commissionsPaid,
+            status: 'imported',
+          };
+        });
 
         for (let i = 0; i < rows.length; i += batchSize) {
           const batch = rows.slice(i, i + batchSize);
@@ -148,10 +163,35 @@ export default function ImportCommissionsPage() {
         }
       }
 
+      // Sync adjusters to the adjusters table (upsert)
+      const adjustersToSync = Array.from(adjustersMap.values());
+      if (adjustersToSync.length > 0) {
+        for (const adjuster of adjustersToSync) {
+          // Check if adjuster already exists
+          const { data: existing } = await supabase
+            .from('adjusters')
+            .select('id')
+            .ilike('name', adjuster.name)
+            .maybeSingle();
+          
+          if (!existing) {
+            // Insert new adjuster
+            await supabase
+              .from('adjusters')
+              .insert({
+                name: adjuster.name,
+                office: adjuster.office,
+                is_active: true,
+              });
+          }
+        }
+        console.log(`Synced ${adjustersToSync.length} adjusters to registry`);
+      }
+
       setImported(true);
       toast({
         title: "Import Successful",
-        description: `${insertedCount} commission records imported for ${targetSalesperson.name}.`,
+        description: `${insertedCount} commission records imported for ${targetSalesperson.name}. ${adjustersToSync.length} adjusters synced.`,
       });
       
       setTimeout(() => navigate('/sales'), 2000);
