@@ -129,7 +129,7 @@ export function GlobalAlertsIndicator() {
         </Button>
 
         {isExpanded && (
-          <div className="fixed left-4 right-4 top-14 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 bg-background border border-glass-border/30 rounded-xl shadow-xl z-[100] animate-fade-in overflow-hidden">
+          <div className="fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 max-h-[80vh] bg-background border border-glass-border/30 rounded-xl shadow-xl z-[100] animate-fade-in overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between p-3 border-b border-glass-border/20 bg-secondary/30">
               <div className="flex items-center gap-2">
