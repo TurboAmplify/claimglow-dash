@@ -3,13 +3,26 @@ import { SalesCommission } from "@/types/sales";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, Edit2, TrendingUp, TrendingDown, Calendar, Pencil } from "lucide-react";
+import { DollarSign, Edit2, TrendingUp, TrendingDown, Calendar, Pencil, Trash2 } from "lucide-react";
 import { EditSalesRecordDialog } from "@/components/dashboard/EditSalesRecordDialog";
 import { CheckReceivedDialog } from "./CheckReceivedDialog";
 import { UpdateEstimateDialog } from "./UpdateEstimateDialog";
 import { EditCheckDialog } from "./EditCheckDialog";
 import { format } from "date-fns";
 import { useCommissionChecks, CommissionCheck } from "@/hooks/useCommissionChecks";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface DealCardProps {
   commission: SalesCommission;
@@ -21,10 +34,51 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
   const [checkDialogOpen, setCheckDialogOpen] = useState(false);
   const [estimateDialogOpen, setEstimateDialogOpen] = useState(false);
   const [editCheckDialogOpen, setEditCheckDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedCheck, setSelectedCheck] = useState<CommissionCheck | null>(null);
+  const queryClient = useQueryClient();
 
   // Fetch checks for this commission
   const { data: checks = [] } = useCommissionChecks(commission.id);
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      // First delete related commission checks
+      const { error: checksError } = await supabase
+        .from("commission_checks")
+        .delete()
+        .eq("sales_commission_id", commission.id);
+
+      if (checksError) throw checksError;
+
+      // Then delete the commission record
+      const { error } = await supabase
+        .from("sales_commissions")
+        .delete()
+        .eq("id", commission.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Claim deleted",
+        description: `${commission.client_name} has been removed.`,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["sales_commissions"] });
+    } catch (error) {
+      console.error("Error deleting claim:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the claim. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+    }
+  };
 
   // Calculate all commission values
   const calculations = useMemo(() => {
@@ -173,6 +227,15 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
               title="Edit Details"
             >
               <Edit2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setDeleteDialogOpen(true)}
+              className="h-8 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+              title="Delete Claim"
+            >
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -325,6 +388,28 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
         check={selectedCheck}
         commission={commission}
       />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Claim</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <span className="font-semibold">{commission.client_name}</span>? 
+              This will permanently remove the claim and all associated check records. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
