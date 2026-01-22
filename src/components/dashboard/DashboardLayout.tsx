@@ -3,6 +3,7 @@ import { ReactNode, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
+import { GlobalAlertsIndicator } from "./GlobalAlertsIndicator";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -29,16 +30,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
           <span className="font-semibold text-foreground">DealMetrics</span>
         </div>
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 rounded-lg hover:bg-sidebar-accent/50 transition-colors"
-        >
-          {mobileMenuOpen ? (
-            <X className="w-5 h-5 text-foreground" />
-          ) : (
-            <Menu className="w-5 h-5 text-foreground" />
-          )}
-        </button>
+        <div className="flex items-center gap-1">
+          <GlobalAlertsIndicator />
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-lg hover:bg-sidebar-accent/50 transition-colors"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-5 h-5 text-foreground" />
+            ) : (
+              <Menu className="w-5 h-5 text-foreground" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Sidebar Overlay */}
