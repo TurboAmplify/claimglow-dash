@@ -3,7 +3,7 @@ import { MultiSelectFilter } from "@/components/dashboard/MultiSelectFilter";
 import { EditAdjusterDialog } from "@/components/dashboard/EditAdjusterDialog";
 import { AdjusterCard } from "@/components/dashboard/AdjusterCard";
 import { useAdjusters, Adjuster } from "@/hooks/useAdjusters";
-import { useAdjusterCommissionSummaries } from "@/hooks/useAdjusterCommissionSummaries";
+import { useAdjusterCommissionSummaries, useCommissionYears } from "@/hooks/useAdjusterCommissionSummaries";
 import { AdjusterSummary } from "@/types/claims";
 import { Loader2, Edit2 } from "lucide-react";
 import { useState, useMemo } from "react";
@@ -18,13 +18,24 @@ interface MergedAdjuster {
 export default function AdjustersPage() {
   const [selectedAdjusters, setSelectedAdjusters] = useState<string[]>([]);
   const [selectedOffices, setSelectedOffices] = useState<string[]>([]);
+  const [selectedYears, setSelectedYears] = useState<string[]>([]);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingAdjuster, setEditingAdjuster] = useState<Adjuster | null>(null);
 
   const { data: adjusters, isLoading: adjustersLoading, error: adjustersError } = useAdjusters();
-  const { data: commissionSummaries, isLoading: summariesLoading } = useAdjusterCommissionSummaries();
+  const { data: availableYears, isLoading: yearsLoading } = useCommissionYears();
+  
+  // Convert selected years to numbers for the hook
+  const selectedYearsNumbers = useMemo(() => 
+    selectedYears.map(y => parseInt(y, 10)).filter(y => !isNaN(y)),
+    [selectedYears]
+  );
+  
+  const { data: commissionSummaries, isLoading: summariesLoading } = useAdjusterCommissionSummaries(
+    selectedYearsNumbers.length > 0 ? selectedYearsNumbers : undefined
+  );
 
-  const isLoading = adjustersLoading || summariesLoading;
+  const isLoading = adjustersLoading || summariesLoading || yearsLoading;
 
   // Merge adjusters table with commission summaries
   const mergedAdjusters = useMemo((): MergedAdjuster[] => {
@@ -62,6 +73,11 @@ export default function AdjustersPage() {
     if (!adjusters) return [];
     return [...new Set(adjusters.map((a) => a.office).filter(Boolean))];
   }, [adjusters]);
+
+  // Get year options as strings for MultiSelectFilter
+  const yearOptions = useMemo(() => {
+    return (availableYears || []).map(y => String(y));
+  }, [availableYears]);
 
   const adjusterNames = useMemo(() => {
     if (!adjusters) return [];
@@ -126,12 +142,24 @@ export default function AdjustersPage() {
         </h1>
         <p className="text-muted-foreground">
           All adjusters and their performance metrics
+          {selectedYears.length > 0 && (
+            <span className="ml-2 text-primary">
+              ({selectedYears.join(", ")})
+            </span>
+          )}
         </p>
       </div>
 
       {/* Filters */}
       <div className="glass-card p-6 mb-8 animate-fade-in">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <MultiSelectFilter
+            label="Filter by Year"
+            options={yearOptions}
+            selected={selectedYears}
+            onChange={setSelectedYears}
+            placeholder="All years"
+          />
           <MultiSelectFilter
             label="Filter by Adjuster"
             options={adjusterNames}
@@ -201,4 +229,3 @@ function AdjusterCardWithEdit({ summary, adjuster, delay = 0, onEdit }: Adjuster
     </div>
   );
 }
-
