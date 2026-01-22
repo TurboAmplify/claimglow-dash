@@ -32,12 +32,8 @@ function getYearFromDate(dateVal: any): number | null {
   return null;
 }
 
-export async function parseCommissionExcel(url: string): Promise<SheetData[]> {
-  const response = await fetch(url);
-  const arrayBuffer = await response.arrayBuffer();
-  const data = new Uint8Array(arrayBuffer);
-  const workbook = XLSX.read(data, { type: 'array' });
-  
+// Parse workbook data (shared logic)
+function parseWorkbook(workbook: XLSX.WorkBook): SheetData[] {
   const allData: SheetData[] = [];
   const rowsByYear: Record<number, CommissionRow[]> = {};
   
@@ -181,4 +177,31 @@ export async function parseCommissionExcel(url: string): Promise<SheetData[]> {
   }
   
   return allData.sort((a, b) => a.year - b.year);
+}
+
+// Parse from URL (existing functionality)
+export async function parseCommissionExcel(url: string): Promise<SheetData[]> {
+  const response = await fetch(url);
+  const arrayBuffer = await response.arrayBuffer();
+  const data = new Uint8Array(arrayBuffer);
+  const workbook = XLSX.read(data, { type: 'array' });
+  return parseWorkbook(workbook);
+}
+
+// Parse from File object (for file uploads)
+export async function parseCommissionExcelFromFile(file: File): Promise<SheetData[]> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        resolve(parseWorkbook(workbook));
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsArrayBuffer(file);
+  });
 }
