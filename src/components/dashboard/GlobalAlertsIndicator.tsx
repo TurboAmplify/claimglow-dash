@@ -24,9 +24,9 @@ function getMilestoneConfig(milestone: ClaimMilestone) {
 }
 
 export function GlobalAlertsIndicator() {
-  const { salesperson, isDirector } = useCurrentSalesperson();
-  const { data: personalAlerts = [], refetch: refetchPersonal } = useClaimAlerts(salesperson?.id);
-  const { data: teamAlerts = [] } = useTeamClaimAlerts();
+  const { salesperson, isDirector, isLoading: isLoadingSalesperson } = useCurrentSalesperson();
+  const { data: personalAlerts = [], refetch: refetchPersonal, isLoading: isLoadingPersonal } = useClaimAlerts(salesperson?.id);
+  const { data: teamAlerts = [], isLoading: isLoadingTeam } = useTeamClaimAlerts();
   const { createRating, isCreating } = useAdjusterRatings(salesperson?.id);
   
   const [isExpanded, setIsExpanded] = useState(false);
@@ -38,6 +38,9 @@ export function GlobalAlertsIndicator() {
   } | null>(null);
   
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Show loading state while fetching data
+  const isLoading = isLoadingSalesperson || isLoadingPersonal || isLoadingTeam;
 
   // Group personal alerts by milestone
   const alertsByMilestone = personalAlerts.reduce((acc, alert) => {
@@ -90,6 +93,15 @@ export function GlobalAlertsIndicator() {
       },
     });
   };
+
+  // Show loading spinner while fetching
+  if (isLoading) {
+    return (
+      <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-xl">
+        <Bell className="h-5 w-5 text-muted-foreground animate-pulse" />
+      </Button>
+    );
+  }
 
   if (totalAlerts === 0) {
     return (
