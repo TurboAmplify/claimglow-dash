@@ -168,3 +168,59 @@ export function useAggregatedAdjusterRatings() {
     },
   });
 }
+
+// Hook to get all team members' claims needing rating (for directors)
+export function useTeamClaimsNeedingRating() {
+  return useQuery({
+    queryKey: ["team_claims_needing_rating"],
+    queryFn: async () => {
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      
+      // Fetch all claims older than 6 months with adjuster info
+      const { data: claims, error: claimsError } = await supabase
+        .from("sales_commissions")
+        .select("id, client_name, adjuster, date_signed, salesperson_id")
+        .lt("date_signed", sixMonthsAgo.toISOString().split('T')[0])
+        .not("adjuster", "is", null)
+        .order("date_signed", { ascending: false });
+      
+      if (claimsError) throw claimsError;
+      
+      // Fetch all existing ratings
+      const { data: existingRatings, error: ratingsError } = await supabase
+        .from("adjuster_ratings")
+        .select("sales_commission_id, salesperson_id");
+      
+      if (ratingsError) throw ratingsError;
+      
+      // Fetch all salespeople for name mapping
+      const { data: salespeople, error: spError } = await supabase
+        .from("salespeople")
+        .select("id, name");
+      
+      if (spError) throw spError;
+      
+      const salespersonMap = new Map(salespeople?.map(sp => [sp.id, sp.name]) || []);
+      const ratedClaimIds = new Set(existingRatings?.map(r => r.sales_commission_id) || []);
+      
+      // Filter to unrated claims and group by salesperson
+      const unratedClaims = (claims || []).filter(claim => !ratedClaimIds.has(claim.id));
+      
+      const groupedByPerson = unratedClaims.reduce((acc, claim) => {
+        const spId = claim.salesperson_id;
+        if (!acc[spId]) {
+          acc[spId] = {
+            salesperson_id: spId,
+            salesperson_name: salespersonMap.get(spId) || "Unknown",
+            claims: [],
+          };
+        }
+        acc[spId].claims.push(claim);
+        return acc;
+      }, {} as Record<string, { salesperson_id: string; salesperson_name: string; claims: typeof unratedClaims }>);
+      
+      return Object.values(groupedByPerson).sort((a, b) => b.claims.length - a.claims.length);
+    },
+  });
+}

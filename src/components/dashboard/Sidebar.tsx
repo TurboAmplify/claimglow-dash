@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
 import { SettingsPanel } from "@/components/settings/SettingsPanel";
+import { GlobalAlertsIndicator } from "./GlobalAlertsIndicator";
 
 const mainNavItems = [
   { title: "Home", url: "/", icon: Home },
@@ -92,13 +93,20 @@ export function Sidebar({ onNavigate }: SidebarProps) {
     >
       {/* Logo */}
       <div className="p-6 border-b border-sidebar-border/30">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center glow-primary">
-            <BarChart3 className="w-5 h-5 text-primary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center glow-primary">
+              <BarChart3 className="w-5 h-5 text-primary" />
+            </div>
+            {!collapsed && (
+              <div className="animate-fade-in">
+                <h1 className="text-lg font-bold text-foreground">DealMetrics</h1>
+              </div>
+            )}
           </div>
           {!collapsed && (
-            <div className="animate-fade-in">
-              <h1 className="text-lg font-bold text-foreground">DealMetrics</h1>
+            <div className="hidden lg:block">
+              <GlobalAlertsIndicator />
             </div>
           )}
         </div>
