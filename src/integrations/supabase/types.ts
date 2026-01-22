@@ -17,30 +17,42 @@ export type Database = {
       adjuster_ratings: {
         Row: {
           adjuster: string
+          claim_milestone: string | null
           created_at: string
           id: string
           notes: string | null
           rating: number
+          rating_communication: number | null
+          rating_overall: number | null
+          rating_settlement: number | null
           sales_commission_id: string
           salesperson_id: string
           updated_at: string
         }
         Insert: {
           adjuster: string
+          claim_milestone?: string | null
           created_at?: string
           id?: string
           notes?: string | null
           rating: number
+          rating_communication?: number | null
+          rating_overall?: number | null
+          rating_settlement?: number | null
           sales_commission_id: string
           salesperson_id: string
           updated_at?: string
         }
         Update: {
           adjuster?: string
+          claim_milestone?: string | null
           created_at?: string
           id?: string
           notes?: string | null
           rating?: number
+          rating_communication?: number | null
+          rating_overall?: number | null
+          rating_settlement?: number | null
           sales_commission_id?: string
           salesperson_id?: string
           updated_at?: string
@@ -314,6 +326,7 @@ export type Database = {
           client_name: string
           commission_percentage: number | null
           commissions_paid: number | null
+          completed_at: string | null
           created_at: string
           date_signed: string | null
           fee_percentage: number | null
@@ -336,6 +349,7 @@ export type Database = {
           client_name: string
           commission_percentage?: number | null
           commissions_paid?: number | null
+          completed_at?: string | null
           created_at?: string
           date_signed?: string | null
           fee_percentage?: number | null
@@ -358,6 +372,7 @@ export type Database = {
           client_name?: string
           commission_percentage?: number | null
           commissions_paid?: number | null
+          completed_at?: string | null
           created_at?: string
           date_signed?: string | null
           fee_percentage?: number | null
