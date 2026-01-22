@@ -42,20 +42,20 @@ export function SalespersonCard({ stats, onClick, delay = 0 }: SalespersonCardPr
     return `$${value.toLocaleString()}`;
   };
 
-  // Office-based styling
+  // Office-based styling - Dallas = Blue, Houston = Red
   const getOfficeStyles = () => {
-    if (isHouston) {
+    if (isDallas) {
       return {
         cardBg: "bg-blue-950/40",
         borderColor: "border-l-blue-500",
         officeBadge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
       };
     }
-    if (isDallas) {
+    if (isHouston) {
       return {
-        cardBg: "bg-cyan-950/30",
-        borderColor: "border-l-cyan-400",
-        officeBadge: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+        cardBg: "bg-red-950/30",
+        borderColor: "border-l-red-500",
+        officeBadge: "bg-red-500/20 text-red-300 border-red-500/30",
       };
     }
     return {
