@@ -3,10 +3,11 @@ import { Bell, Star, Users, X, Clock, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
-import { useClaimAlerts, useTeamClaimAlerts, useAdjusterRatings, type ClaimMilestone } from "@/hooks/useAdjusterRatings";
+import { useClaimAlerts, useTeamClaimAlerts, useAdjusterRatings, type ClaimMilestone, type ClaimAlert } from "@/hooks/useAdjusterRatings";
 import { AdjusterRatingDialog } from "@/components/salesperson/AdjusterRatingDialog";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { createPortal } from "react-dom";
 
 function getMilestoneConfig(milestone: ClaimMilestone) {
   switch (milestone) {
@@ -23,6 +24,153 @@ function getMilestoneConfig(milestone: ClaimMilestone) {
   }
 }
 
+interface AlertDropdownContentProps {
+  personalAlerts: ClaimAlert[];
+  alertsByMilestone: Record<ClaimMilestone, ClaimAlert[]>;
+  teamAlerts: Array<{ salesperson_id: string; salesperson_name: string; alerts: ClaimAlert[] }>;
+  teamAlertsCount: number;
+  isDirector: boolean;
+  salespersonId: string | undefined;
+  onClose: () => void;
+  onSelectClaim: (claim: { id: string; clientName: string; adjuster: string; milestone: ClaimMilestone }) => void;
+}
+
+function AlertDropdownContent({
+  personalAlerts,
+  alertsByMilestone,
+  teamAlerts,
+  teamAlertsCount,
+  isDirector,
+  salespersonId,
+  onClose,
+  onSelectClaim,
+}: AlertDropdownContentProps) {
+  const totalAlerts = personalAlerts.length + (isDirector ? teamAlertsCount : 0);
+
+  return (
+    <div className="fixed inset-x-4 top-16 sm:inset-auto sm:right-4 sm:top-16 sm:w-96 max-h-[80vh] bg-background border border-border rounded-xl shadow-2xl z-[9999] animate-fade-in overflow-hidden flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-3 border-b border-border bg-secondary/30 shrink-0">
+        <div className="flex items-center gap-2">
+          <Bell className="h-4 w-4 text-primary" />
+          <span className="font-medium text-sm">Alerts</span>
+          <Badge variant="secondary" className="text-xs">
+            {totalAlerts}
+          </Badge>
+        </div>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-6 w-6 rounded-lg"
+          onClick={onClose}
+        >
+          <X className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+
+      <div className="overflow-y-auto flex-1">
+        {/* Personal Rating Alerts by Milestone */}
+        {personalAlerts.length > 0 && (
+          <div className="p-3 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <Star className="h-3.5 w-3.5" />
+              Rating Needed
+            </div>
+            
+            {(['2_weeks', '3_months', '6_months', 'completed'] as ClaimMilestone[]).map(milestone => {
+              const alerts = alertsByMilestone[milestone];
+              if (!alerts?.length) return null;
+              
+              const config = getMilestoneConfig(milestone);
+              const MilestoneIcon = config.icon;
+              
+              return (
+                <div key={milestone} className="space-y-2">
+                  <div className={cn("flex items-center gap-1.5 text-xs font-medium", config.color)}>
+                    <MilestoneIcon className="h-3 w-3" />
+                    {config.label} Reviews ({alerts.length})
+                  </div>
+                  {alerts.slice(0, 3).map(alert => {
+                    // Skip if adjuster is missing
+                    if (!alert.adjuster) return null;
+                    
+                    return (
+                      <div 
+                        key={`${alert.id}-${milestone}`}
+                        className="flex items-center justify-between p-2 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors"
+                      >
+                        <div className="space-y-0.5 min-w-0 flex-1">
+                          <p className="text-sm font-medium truncate">{alert.client_name}</p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {alert.adjuster} · {alert.date_signed ? format(new Date(alert.date_signed), "MMM d, yyyy") : "N/A"}
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className={cn("h-7 rounded-lg ml-2 shrink-0", config.bg, config.color, "hover:opacity-80")}
+                          onClick={() => onSelectClaim({
+                            id: alert.id,
+                            clientName: alert.client_name,
+                            adjuster: alert.adjuster,
+                            milestone: alert.milestone,
+                          })}
+                        >
+                          <Star className="w-3 h-3 mr-1" />
+                          Rate
+                        </Button>
+                      </div>
+                    );
+                  })}
+                  {alerts.length > 3 && (
+                    <p className="text-xs text-muted-foreground text-center">
+                      +{alerts.length - 3} more {config.label.toLowerCase()} reviews
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Director Team Alerts */}
+        {isDirector && teamAlertsCount > 0 && (
+          <div className="p-3 border-t border-border">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
+              <Users className="h-3.5 w-3.5" />
+              Team Alerts
+            </div>
+            <div className="space-y-2">
+              {teamAlerts
+                .filter(t => t.salesperson_id !== salespersonId)
+                .slice(0, 5)
+                .map(team => (
+                  <div 
+                    key={team.salesperson_id}
+                    className="flex items-center justify-between p-2 rounded-lg bg-secondary/50"
+                  >
+                    <span className="text-sm font-medium">{team.salesperson_name}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {team.alerts.length} pending
+                    </Badge>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {personalAlerts.length === 0 && teamAlertsCount === 0 && (
+          <div className="p-6 text-center text-muted-foreground">
+            <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No alerts at this time</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function GlobalAlertsIndicator() {
   const { salesperson, isDirector, isLoading: isLoadingSalesperson } = useCurrentSalesperson();
   const { data: personalAlerts = [], refetch: refetchPersonal, isLoading: isLoadingPersonal } = useClaimAlerts(salesperson?.id);
@@ -37,7 +185,7 @@ export function GlobalAlertsIndicator() {
     milestone: ClaimMilestone;
   } | null>(null);
   
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Show loading state while fetching data
   const isLoading = isLoadingSalesperson || isLoadingPersonal || isLoadingTeam;
@@ -58,15 +206,26 @@ export function GlobalAlertsIndicator() {
 
   const totalAlerts = personalAlerts.length + (isDirector ? teamAlertsCount : 0);
 
+  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      // Check if click is outside both the button and the dropdown
+      if (buttonRef.current && !buttonRef.current.contains(target)) {
+        // Check if click is inside the portal dropdown
+        const dropdown = document.getElementById('alerts-dropdown-portal');
+        if (dropdown && dropdown.contains(target)) {
+          return; // Click was inside dropdown, don't close
+        }
         setIsExpanded(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    
+    if (isExpanded) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isExpanded]);
 
   const handleRatingSubmit = (data: { 
     rating_communication: number; 
@@ -113,139 +272,36 @@ export function GlobalAlertsIndicator() {
 
   return (
     <>
-      <div ref={dropdownRef} className="relative">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="relative h-9 w-9 rounded-xl hover:bg-primary/10"
-          onClick={() => setIsExpanded(!isExpanded)}
+      <Button 
+        ref={buttonRef}
+        variant="ghost" 
+        size="icon" 
+        className="relative h-9 w-9 rounded-xl hover:bg-primary/10"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <Bell className="h-5 w-5 text-foreground" />
+        <Badge 
+          className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center p-0 text-[10px] bg-destructive text-destructive-foreground border-0"
         >
-          <Bell className="h-5 w-5 text-foreground" />
-          <Badge 
-            className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center p-0 text-[10px] bg-destructive text-destructive-foreground border-0"
-          >
-            {totalAlerts}
-          </Badge>
-        </Button>
+          {totalAlerts > 99 ? '99+' : totalAlerts}
+        </Badge>
+      </Button>
 
-        {isExpanded && (
-          <div className="fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 max-h-[80vh] bg-background border border-glass-border/30 rounded-xl shadow-xl z-[100] animate-fade-in overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between p-3 border-b border-glass-border/20 bg-secondary/30">
-              <div className="flex items-center gap-2">
-                <Bell className="h-4 w-4 text-primary" />
-                <span className="font-medium text-sm">Alerts</span>
-                <Badge variant="secondary" className="text-xs">
-                  {totalAlerts}
-                </Badge>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-6 w-6 rounded-lg"
-                onClick={() => setIsExpanded(false)}
-              >
-                <X className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-
-            <div className="max-h-[60vh] overflow-y-auto">
-              {/* Personal Rating Alerts by Milestone */}
-              {personalAlerts.length > 0 && (
-                <div className="p-3 space-y-3">
-                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    <Star className="h-3.5 w-3.5" />
-                    Rating Needed
-                  </div>
-                  
-                  {(['2_weeks', '3_months', '6_months', 'completed'] as ClaimMilestone[]).map(milestone => {
-                    const alerts = alertsByMilestone[milestone];
-                    if (!alerts?.length) return null;
-                    
-                    const config = getMilestoneConfig(milestone);
-                    const MilestoneIcon = config.icon;
-                    
-                    return (
-                      <div key={milestone} className="space-y-2">
-                        <div className={cn("flex items-center gap-1.5 text-xs font-medium", config.color)}>
-                          <MilestoneIcon className="h-3 w-3" />
-                          {config.label} Reviews ({alerts.length})
-                        </div>
-                        {alerts.slice(0, 3).map(alert => (
-                          <div 
-                            key={`${alert.id}-${milestone}`}
-                            className="flex items-center justify-between p-2 rounded-lg bg-secondary/50 hover:bg-secondary/70 transition-colors"
-                          >
-                            <div className="space-y-0.5 min-w-0 flex-1">
-                              <p className="text-sm font-medium truncate">{alert.client_name}</p>
-                              <p className="text-xs text-muted-foreground truncate">
-                                {alert.adjuster} · {alert.date_signed ? format(new Date(alert.date_signed), "MMM d, yyyy") : "N/A"}
-                              </p>
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className={cn("h-7 rounded-lg ml-2 shrink-0", config.bg, config.color, "hover:opacity-80")}
-                              onClick={() => setSelectedClaim({
-                                id: alert.id,
-                                clientName: alert.client_name,
-                                adjuster: alert.adjuster!,
-                                milestone: alert.milestone,
-                              })}
-                            >
-                              <Star className="w-3 h-3 mr-1" />
-                              Rate
-                            </Button>
-                          </div>
-                        ))}
-                        {alerts.length > 3 && (
-                          <p className="text-xs text-muted-foreground text-center">
-                            +{alerts.length - 3} more {config.label.toLowerCase()} reviews
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Director Team Alerts */}
-              {isDirector && teamAlertsCount > 0 && (
-                <div className="p-3 border-t border-glass-border/20">
-                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
-                    <Users className="h-3.5 w-3.5" />
-                    Team Alerts
-                  </div>
-                  <div className="space-y-2">
-                    {teamAlerts
-                      .filter(t => t.salesperson_id !== salesperson?.id)
-                      .slice(0, 5)
-                      .map(team => (
-                        <div 
-                          key={team.salesperson_id}
-                          className="flex items-center justify-between p-2 rounded-lg bg-secondary/50"
-                        >
-                          <span className="text-sm font-medium">{team.salesperson_name}</span>
-                          <Badge variant="outline" className="text-xs">
-                            {team.alerts.length} pending
-                          </Badge>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Empty state */}
-              {personalAlerts.length === 0 && teamAlertsCount === 0 && (
-                <div className="p-6 text-center text-muted-foreground">
-                  <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No alerts at this time</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+      {isExpanded && createPortal(
+        <div id="alerts-dropdown-portal">
+          <AlertDropdownContent
+            personalAlerts={personalAlerts}
+            alertsByMilestone={alertsByMilestone}
+            teamAlerts={teamAlerts}
+            teamAlertsCount={teamAlertsCount}
+            isDirector={isDirector}
+            salespersonId={salesperson?.id}
+            onClose={() => setIsExpanded(false)}
+            onSelectClaim={setSelectedClaim}
+          />
+        </div>,
+        document.body
+      )}
 
       {selectedClaim && (
         <AdjusterRatingDialog
