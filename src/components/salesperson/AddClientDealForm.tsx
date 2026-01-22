@@ -93,6 +93,7 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
       const estimate = parseFloat(initialEstimate) || 0;
       const currentYear = new Date().getFullYear();
 
+      // Note: percent_change is a generated column, so we don't include it
       const { error } = await supabase.from("sales_commissions").insert({
         salesperson_id: salespersonId,
         client_name: clientName.trim(),
@@ -102,7 +103,6 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
         year: currentYear,
         initial_estimate: estimate,
         revised_estimate: estimate,
-        percent_change: 0,
         insurance_checks_ytd: 0,
         old_remainder: estimate,
         new_remainder: estimate,
