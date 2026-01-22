@@ -93,13 +93,13 @@ function namesMatch(commissionName: string, registryName: string, registryFullNa
   return false;
 }
 
-export function useAdjusterCommissionSummaries(selectedYears?: number[]) {
+export function useAdjusterCommissionSummaries(selectedYears?: number[], selectedSalespeople?: string[]) {
   return useQuery({
-    queryKey: ["adjuster-commission-summaries", selectedYears],
+    queryKey: ["adjuster-commission-summaries", selectedYears, selectedSalespeople],
     queryFn: async (): Promise<AdjusterSummary[]> => {
       let query = supabase
         .from("sales_commissions")
-        .select("adjuster, office, initial_estimate, revised_estimate, year")
+        .select("adjuster, office, initial_estimate, revised_estimate, year, salesperson_id, salespeople!inner(name)")
         .not("adjuster", "is", null);
       
       // Apply year filter if specified
@@ -108,6 +108,15 @@ export function useAdjusterCommissionSummaries(selectedYears?: number[]) {
       }
 
       const { data, error } = await query;
+      
+      // Filter by salesperson names if specified (done client-side after join)
+      let filteredData = data || [];
+      if (selectedSalespeople && selectedSalespeople.length > 0) {
+        filteredData = filteredData.filter(record => {
+          const salespersonName = (record.salespeople as any)?.name;
+          return salespersonName && selectedSalespeople.includes(salespersonName);
+        });
+      }
       if (error) throw error;
 
       // Also fetch the canonical adjuster names from adjusters table
@@ -124,7 +133,7 @@ export function useAdjusterCommissionSummaries(selectedYears?: number[]) {
       // Group by canonical adjuster name
       const adjusterMap = new Map<string, { canonicalName: string; office: string | null; records: CommissionRecord[] }>();
       
-      (data || []).forEach((record) => {
+      filteredData.forEach((record) => {
         if (!record.adjuster) return;
         
       // Find matching canonical adjuster
