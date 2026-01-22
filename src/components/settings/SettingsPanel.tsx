@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { DensitySwitcher } from './DensitySwitcher';
 import { PeopleManagement } from './PeopleManagement';
+import { ViewAsSelector } from './ViewAsSelector';
 import { useCurrentSalesperson } from '@/hooks/useCurrentSalesperson';
 import { Separator } from '@/components/ui/separator';
 
@@ -104,8 +105,9 @@ export function SettingsPanel({ collapsed }: SettingsPanelProps) {
             {isDirector && (
               <>
                 <Separator className="my-3" />
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Administration</p>
+                <div className="space-y-3">
+                  <p className="text-xs font-medium text-muted-foreground">Administration</p>
+                  <ViewAsSelector />
                   <PeopleManagement />
                 </div>
               </>
