@@ -8,6 +8,8 @@ import { AdjusterSummary } from "@/types/claims";
 import { Loader2, Edit2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 
 interface MergedAdjuster {
@@ -15,15 +17,35 @@ interface MergedAdjuster {
   summary: AdjusterSummary;
 }
 
+// Hook to get unique salespeople from commissions
+function useSalespeopleFromCommissions() {
+  return useQuery({
+    queryKey: ["salespeople-from-commissions"],
+    queryFn: async (): Promise<string[]> => {
+      const { data, error } = await supabase
+        .from("sales_commissions")
+        .select("salesperson_id, salespeople!inner(name)")
+        .not("salesperson_id", "is", null);
+      
+      if (error) throw error;
+      
+      const names = [...new Set((data || []).map(d => (d.salespeople as any)?.name).filter(Boolean))];
+      return names.sort();
+    },
+  });
+}
+
 export default function AdjustersPage() {
   const [selectedAdjusters, setSelectedAdjusters] = useState<string[]>([]);
   const [selectedOffices, setSelectedOffices] = useState<string[]>([]);
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
+  const [selectedSalespeople, setSelectedSalespeople] = useState<string[]>([]);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingAdjuster, setEditingAdjuster] = useState<Adjuster | null>(null);
 
   const { data: adjusters, isLoading: adjustersLoading, error: adjustersError } = useAdjusters();
   const { data: availableYears, isLoading: yearsLoading } = useCommissionYears();
+  const { data: salespeople, isLoading: salespeopleLoading } = useSalespeopleFromCommissions();
   
   // Convert selected years to numbers for the hook
   const selectedYearsNumbers = useMemo(() => 
@@ -32,10 +54,11 @@ export default function AdjustersPage() {
   );
   
   const { data: commissionSummaries, isLoading: summariesLoading } = useAdjusterCommissionSummaries(
-    selectedYearsNumbers.length > 0 ? selectedYearsNumbers : undefined
+    selectedYearsNumbers.length > 0 ? selectedYearsNumbers : undefined,
+    selectedSalespeople.length > 0 ? selectedSalespeople : undefined
   );
 
-  const isLoading = adjustersLoading || summariesLoading || yearsLoading;
+  const isLoading = adjustersLoading || summariesLoading || yearsLoading || salespeopleLoading;
 
   // Merge adjusters table with commission summaries
   const mergedAdjusters = useMemo((): MergedAdjuster[] => {
@@ -95,13 +118,18 @@ export default function AdjustersPage() {
       filtered = filtered.filter((m) => selectedAdjusters.includes(m.adjuster.name));
     }
 
+    // When salesperson filter is active, only show adjusters with claims
+    if (selectedSalespeople.length > 0) {
+      filtered = filtered.filter((m) => m.summary.totalClaims > 0);
+    }
+
     // Sort by total claims descending, those without claims go to end
     return filtered.sort((a, b) => {
       const aTotal = a.summary?.totalClaims ?? -1;
       const bTotal = b.summary?.totalClaims ?? -1;
       return bTotal - aTotal;
     });
-  }, [mergedAdjusters, selectedOffices, selectedAdjusters]);
+  }, [mergedAdjusters, selectedOffices, selectedAdjusters, selectedSalespeople]);
 
   const handleEditAdjuster = (adjuster: Adjuster) => {
     setEditingAdjuster(adjuster);
@@ -135,50 +163,62 @@ export default function AdjustersPage() {
 
   return (
     <DashboardLayout>
-      {/* Header */}
-      <div className="mb-8 animate-fade-in">
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          View by Adjuster
-        </h1>
-        <p className="text-muted-foreground">
-          All adjusters and their performance metrics
-          {selectedYears.length > 0 && (
-            <span className="ml-2 text-primary">
-              ({selectedYears.join(", ")})
-            </span>
-          )}
-        </p>
-      </div>
+      {/* Sticky Header + Filters */}
+      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm pb-4 -mx-4 px-4 md:-mx-6 md:px-6">
+        {/* Header */}
+        <div className="pt-4 animate-fade-in">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h1 className="text-2xl font-bold text-foreground">
+              View by Adjuster
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              All adjusters and their performance metrics
+              {selectedYears.length > 0 && (
+                <span className="ml-1 text-primary">
+                  ({selectedYears.join(", ")})
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
 
-      {/* Filters */}
-      <div className="glass-card p-6 mb-8 animate-fade-in">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <MultiSelectFilter
-            label="Filter by Year"
-            options={yearOptions}
-            selected={selectedYears}
-            onChange={setSelectedYears}
-            placeholder="All years"
-          />
-          <MultiSelectFilter
-            label="Filter by Adjuster"
-            options={adjusterNames}
-            selected={selectedAdjusters}
-            onChange={setSelectedAdjusters}
-            placeholder="Select adjusters..."
-          />
-          <MultiSelectFilter
-            label="Filter by Office"
-            options={offices}
-            selected={selectedOffices}
-            onChange={setSelectedOffices}
-            placeholder="Select offices..."
-          />
+        {/* Filters - Compact */}
+        <div className="glass-card p-3 mt-3 animate-fade-in">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <MultiSelectFilter
+              label="Year"
+              options={yearOptions}
+              selected={selectedYears}
+              onChange={setSelectedYears}
+              placeholder="All years"
+            />
+            <MultiSelectFilter
+              label="Salesperson"
+              options={salespeople || []}
+              selected={selectedSalespeople}
+              onChange={setSelectedSalespeople}
+              placeholder="All salespeople"
+            />
+            <MultiSelectFilter
+              label="Adjuster"
+              options={adjusterNames}
+              selected={selectedAdjusters}
+              onChange={setSelectedAdjusters}
+              placeholder="All adjusters"
+            />
+            <MultiSelectFilter
+              label="Office"
+              options={offices}
+              selected={selectedOffices}
+              onChange={setSelectedOffices}
+              placeholder="All offices"
+            />
+          </div>
         </div>
       </div>
 
       {/* Adjuster Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 pt-2">
         {filteredAdjusters.map((merged, index) => (
           <AdjusterCardWithEdit
             key={merged.adjuster.id}
