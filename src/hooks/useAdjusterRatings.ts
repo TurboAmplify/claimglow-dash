@@ -172,6 +172,13 @@ export function useClaimAlerts(salespersonId: string | undefined) {
       
       const { twoWeeksAgo, threeMonthsAgo, sixMonthsAgo } = getMilestoneDates();
       
+      console.log('[ClaimAlerts] Milestone dates:', {
+        twoWeeksAgo: twoWeeksAgo.toISOString(),
+        threeMonthsAgo: threeMonthsAgo.toISOString(),
+        sixMonthsAgo: sixMonthsAgo.toISOString(),
+        salespersonId
+      });
+      
       // Fetch all claims for this salesperson with adjuster info
       const { data: claims, error: claimsError } = await supabase
         .from("sales_commissions")
@@ -189,6 +196,8 @@ export function useClaimAlerts(salespersonId: string | undefined) {
         .eq("salesperson_id", salespersonId);
       
       if (ratingsError) throw ratingsError;
+      
+      console.log('[ClaimAlerts] Fetched claims:', claims?.length, 'Ratings:', existingRatings?.length);
       
       // Create a map of claim_id -> set of milestones already rated
       const ratedMilestones = new Map<string, Set<string>>();
@@ -230,6 +239,8 @@ export function useClaimAlerts(salespersonId: string | undefined) {
           alerts.push({ ...claim, milestone: '2_weeks' });
         }
       }
+      
+      console.log('[ClaimAlerts] Final alerts:', alerts.length, alerts.slice(0, 3).map(a => ({ client: a.client_name, milestone: a.milestone })));
       
       return alerts;
     },
