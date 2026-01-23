@@ -40,8 +40,8 @@ const adjustingNavItems = [
   { title: "All Claims", url: "/claims", icon: FileText },
 ];
 
-// Base sales nav items (Import Data shown only for directors)
-const baseSalesNavItems = [
+// Director-only sales nav items
+const directorSalesNavItems = [
   { title: "Sales Dashboard", url: "/sales", icon: DollarSign },
   { title: "By Sales Person", url: "/sales/by-person", icon: Users },
   { title: "By Office", url: "/sales/by-office", icon: Building2 },
@@ -67,22 +67,31 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   
   const effectivePerson = isViewingAsOther ? effectiveSalesperson : salesperson;
 
-  // Sales nav items - show Import Data only for actual directors (not when viewing as someone)
-  const salesNavItems = [
-    ...baseSalesNavItems,
-    ...(actuallyDirector && !isViewingAsOther ? [{ title: "Import Data", url: "/import-commissions", icon: Upload }] : []),
-  ];
+  // Sales nav items - only show for directors (or when viewing as director)
+  const salesNavItems = actuallyDirector 
+    ? [
+        ...directorSalesNavItems,
+        ...(!isViewingAsOther ? [{ title: "Import Data", url: "/import-commissions", icon: Upload }] : []),
+      ]
+    : []; // Sales reps don't see the sales section at all
 
   // Dynamic planning nav items based on effective role
   const planningNavItems = [
-    // Show Sales Planning only if actually director OR if viewing as director
-    ...(actuallyDirector || effectiveIsDirector ? [{ title: "Sales Planning", url: "/planning", icon: Map }] : []),
-    // Show My Plan for the effective person if they're not a director
-    ...(effectivePerson && !effectiveIsDirector 
-      ? [{ title: "My Plan", url: `/planning/${effectivePerson.id}`, icon: Target }]
+    // Show Sales Planning only if actually director
+    ...(actuallyDirector ? [{ title: "Sales Planning", url: "/planning", icon: Map }] : []),
+    // Show My Dashboard/Plan for the effective person
+    ...(effectivePerson 
+      ? [
+          { title: "My Dashboard", url: `/sales/person/${effectivePerson.id}`, icon: DollarSign },
+          ...(!effectiveIsDirector ? [{ title: "My Plan", url: `/planning/${effectivePerson.id}`, icon: Target }] : []),
+        ]
       : []
     ),
   ];
+
+  // For sales reps, hide adjusting and claims sections
+  const showAdjustingSection = actuallyDirector;
+  const showClaimsSection = actuallyDirector;
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -152,54 +161,62 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           </NavLink>
         ))}
 
-        {/* Claims Section */}
-        {!collapsed && (
-          <p className="px-4 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Claims</p>
-        )}
-        {collapsed && <div className="h-4" />}
-        {claimsNavItems.map((item, index) => (
-          <NavLink
-            key={item.url}
-            to={item.url}
-            onClick={onNavigate}
-            className={cn(
-              "flex items-center gap-3 px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200",
-              collapsed && "justify-center px-3"
-            )}
-            activeClassName="bg-primary/10 text-primary border border-primary/20 glow-primary"
-            style={{ animationDelay: `${(mainNavItems.length + index) * 50}ms` }}
-          >
-            <item.icon className="w-5 h-5 flex-shrink-0" />
+        {/* Claims Section - Directors only */}
+        {showClaimsSection && (
+          <>
             {!collapsed && (
-              <span className="font-medium animate-fade-in">{item.title}</span>
+              <p className="px-4 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Claims</p>
             )}
-          </NavLink>
-        ))}
+            {collapsed && <div className="h-4" />}
+            {claimsNavItems.map((item, index) => (
+              <NavLink
+                key={item.url}
+                to={item.url}
+                onClick={onNavigate}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200",
+                  collapsed && "justify-center px-3"
+                )}
+                activeClassName="bg-primary/10 text-primary border border-primary/20 glow-primary"
+                style={{ animationDelay: `${(mainNavItems.length + index) * 50}ms` }}
+              >
+                <item.icon className="w-5 h-5 flex-shrink-0" />
+                {!collapsed && (
+                  <span className="font-medium animate-fade-in">{item.title}</span>
+                )}
+              </NavLink>
+            ))}
+          </>
+        )}
 
-        {/* Sales Section */}
-        {!collapsed && (
-          <p className="px-4 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sales</p>
-        )}
-        {collapsed && <div className="h-4" />}
-        {salesNavItems.map((item, index) => (
-          <NavLink
-            key={item.url}
-            to={item.url}
-            end={item.url === "/sales"}
-            onClick={onNavigate}
-            className={cn(
-              "flex items-center gap-3 px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200",
-              collapsed && "justify-center px-3"
-            )}
-            activeClassName="bg-primary/10 text-primary border border-primary/20 glow-primary"
-            style={{ animationDelay: `${(mainNavItems.length + claimsNavItems.length + index) * 50}ms` }}
-          >
-            <item.icon className="w-5 h-5 flex-shrink-0" />
+        {/* Sales Section - Directors only */}
+        {salesNavItems.length > 0 && (
+          <>
             {!collapsed && (
-              <span className="font-medium animate-fade-in">{item.title}</span>
+              <p className="px-4 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sales</p>
             )}
-          </NavLink>
-        ))}
+            {collapsed && <div className="h-4" />}
+            {salesNavItems.map((item, index) => (
+              <NavLink
+                key={item.url}
+                to={item.url}
+                end={item.url === "/sales"}
+                onClick={onNavigate}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200",
+                  collapsed && "justify-center px-3"
+                )}
+                activeClassName="bg-primary/10 text-primary border border-primary/20 glow-primary"
+                style={{ animationDelay: `${(mainNavItems.length + claimsNavItems.length + index) * 50}ms` }}
+              >
+                <item.icon className="w-5 h-5 flex-shrink-0" />
+                {!collapsed && (
+                  <span className="font-medium animate-fade-in">{item.title}</span>
+                )}
+              </NavLink>
+            ))}
+          </>
+        )}
 
         {/* Planning Section */}
         {!collapsed && (
@@ -225,30 +242,34 @@ export function Sidebar({ onNavigate }: SidebarProps) {
           </NavLink>
         ))}
 
-        {/* Adjusting Section */}
-        {!collapsed && (
-          <p className="px-4 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Adjusting</p>
-        )}
-        {collapsed && <div className="h-4" />}
-        {adjustingNavItems.map((item, index) => (
-          <NavLink
-            key={item.url}
-            to={item.url}
-            end={item.url === "/dashboard"}
-            onClick={onNavigate}
-            className={cn(
-              "flex items-center gap-3 px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200",
-              collapsed && "justify-center px-3"
-            )}
-            activeClassName="bg-primary/10 text-primary border border-primary/20 glow-primary"
-            style={{ animationDelay: `${(mainNavItems.length + claimsNavItems.length + salesNavItems.length + planningNavItems.length + index) * 50}ms` }}
-          >
-            <item.icon className="w-5 h-5 flex-shrink-0" />
+        {/* Adjusting Section - Directors only */}
+        {showAdjustingSection && (
+          <>
             {!collapsed && (
-              <span className="font-medium animate-fade-in">{item.title}</span>
+              <p className="px-4 py-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Adjusting</p>
             )}
-          </NavLink>
-        ))}
+            {collapsed && <div className="h-4" />}
+            {adjustingNavItems.map((item, index) => (
+              <NavLink
+                key={item.url}
+                to={item.url}
+                end={item.url === "/dashboard"}
+                onClick={onNavigate}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200",
+                  collapsed && "justify-center px-3"
+                )}
+                activeClassName="bg-primary/10 text-primary border border-primary/20 glow-primary"
+                style={{ animationDelay: `${(mainNavItems.length + claimsNavItems.length + salesNavItems.length + planningNavItems.length + index) * 50}ms` }}
+              >
+                <item.icon className="w-5 h-5 flex-shrink-0" />
+                {!collapsed && (
+                  <span className="font-medium animate-fade-in">{item.title}</span>
+                )}
+              </NavLink>
+            ))}
+          </>
+        )}
       </nav>
 
       {/* User section and Collapse Toggle */}

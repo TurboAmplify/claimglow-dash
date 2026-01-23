@@ -6,12 +6,14 @@ interface RoleBasedRouteProps {
   children: React.ReactNode;
   allowedRoles?: ("sales_director" | "sales_rep")[];
   requireOwnPage?: boolean; // For sales reps, only allow access to their own page
+  redirectToOwnDashboard?: boolean; // Redirect sales reps to their own dashboard
 }
 
 export function RoleBasedRoute({ 
   children, 
   allowedRoles,
   requireOwnPage = false,
+  redirectToOwnDashboard = false,
 }: RoleBasedRouteProps) {
   const { id } = useParams<{ id: string }>();
   const { salesperson, isLoading, isAuthenticated } = useCurrentSalesperson();
@@ -39,6 +41,11 @@ export function RoleBasedRoute({
         </div>
       </div>
     );
+  }
+
+  // Sales reps should be redirected to their own dashboard for certain pages
+  if (redirectToOwnDashboard && salesperson.role === "sales_rep") {
+    return <Navigate to={`/sales/person/${salesperson.id}`} replace />;
   }
 
   // Check role restrictions
