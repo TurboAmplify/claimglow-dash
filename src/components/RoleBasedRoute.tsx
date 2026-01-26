@@ -16,8 +16,9 @@ export function RoleBasedRoute({
   redirectToOwnDashboard = false,
 }: RoleBasedRouteProps) {
   const { id } = useParams<{ id: string }>();
-  const { salesperson, isLoading, isAuthenticated } = useCurrentSalesperson();
+  const { salesperson, isLoading } = useCurrentSalesperson();
 
+  // Show loading while fetching salesperson data
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -26,12 +27,8 @@ export function RoleBasedRoute({
     );
   }
 
-  // Not authenticated - let ProtectedRoute handle this
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  // No salesperson record found for this user
+  // No salesperson record found for this user - show access denied
+  // (ProtectedRoute already handles unauthenticated users)
   if (!salesperson) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
