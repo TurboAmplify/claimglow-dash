@@ -36,7 +36,13 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<HomePage />} />
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <RoleBasedRoute redirectToOwnDashboard>
+                    <HomePage />
+                  </RoleBasedRoute>
+                </ProtectedRoute>
+              } />
               <Route path="/login" element={<AuthPage />} />
               {/* Director-only pages */}
               <Route path="/dashboard" element={
