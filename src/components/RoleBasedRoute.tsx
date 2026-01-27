@@ -1,4 +1,4 @@
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams, useLocation } from "react-router-dom";
 import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
 import { Loader2 } from "lucide-react";
 
@@ -16,6 +16,7 @@ export function RoleBasedRoute({
   redirectToOwnDashboard = false,
 }: RoleBasedRouteProps) {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const { salesperson, isLoading } = useCurrentSalesperson();
 
   // Show loading while fetching salesperson data
@@ -40,21 +41,28 @@ export function RoleBasedRoute({
     );
   }
 
+  const targetPath = `/sales/person/${salesperson.id}`;
+
   // Sales reps should be redirected to their own dashboard for certain pages
+  // But don't redirect if we're already at or heading to the target
   if (redirectToOwnDashboard && salesperson.role === "sales_rep") {
-    return <Navigate to={`/sales/person/${salesperson.id}`} replace />;
+    if (location.pathname !== targetPath) {
+      return <Navigate to={targetPath} replace />;
+    }
   }
 
   // Check role restrictions
   if (allowedRoles && !allowedRoles.includes(salesperson.role as "sales_director" | "sales_rep")) {
     // Sales reps trying to access director-only pages
-    return <Navigate to={`/sales/person/${salesperson.id}`} replace />;
+    if (location.pathname !== targetPath) {
+      return <Navigate to={targetPath} replace />;
+    }
   }
 
   // For sales reps, check if they're trying to access their own page
   if (requireOwnPage && salesperson.role === "sales_rep" && id && id !== salesperson.id) {
     // Redirect to their own page
-    return <Navigate to={`/sales/person/${salesperson.id}`} replace />;
+    return <Navigate to={targetPath} replace />;
   }
 
   return <>{children}</>;

@@ -32,13 +32,14 @@ export default function AuthPage() {
     if (user && !loadingSalesperson) {
       if (salesperson) {
         if (isDirector) {
-          navigate('/planning');
+          navigate('/planning', { replace: true });
         } else {
-          navigate(`/sales/person/${salesperson.id}`);
+          // Use replace to prevent back-button issues
+          navigate(`/sales/person/${salesperson.id}`, { replace: true });
         }
       } else {
         // User authenticated but no matching salesperson record - redirect to home
-        navigate('/');
+        navigate('/', { replace: true });
       }
     }
   }, [user, salesperson, loadingSalesperson, isDirector, navigate]);
