@@ -217,6 +217,7 @@ export default function SalespersonDashboardPage() {
             stats={stats} 
             goal={currentGoal}
             salespersonName={salesperson.name}
+            salespersonId={salesperson.id}
             statsYear={statsYear}
           />
         </TabsContent>

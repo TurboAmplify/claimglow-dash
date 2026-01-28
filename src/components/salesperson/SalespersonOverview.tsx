@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { KPICard } from "@/components/dashboard/KPICard";
-import { DollarSign, FileText, TrendingUp, Percent, Target, Banknote } from "lucide-react";
+import { DollarSign, FileText, TrendingUp, Percent, Target, Banknote, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { SalesGoal } from "@/types/sales";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { AddClientDealForm } from "./AddClientDealForm";
 
 interface SalespersonOverviewProps {
   stats: {
@@ -16,10 +20,12 @@ interface SalespersonOverviewProps {
   } | null;
   goal?: SalesGoal;
   salespersonName: string;
+  salespersonId: string;
   statsYear?: number;
 }
 
-export function SalespersonOverview({ stats, goal, salespersonName, statsYear = 2025 }: SalespersonOverviewProps) {
+export function SalespersonOverview({ stats, goal, salespersonName, salespersonId, statsYear = 2025 }: SalespersonOverviewProps) {
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const goalYear = goal?.year || statsYear;
   
   if (!stats) {
@@ -49,6 +55,32 @@ export function SalespersonOverview({ stats, goal, salespersonName, statsYear = 
 
   return (
     <div className="space-y-6">
+      {/* Add New Deal Collapsible */}
+      <Collapsible open={isAddFormOpen} onOpenChange={setIsAddFormOpen}>
+        <CollapsibleTrigger asChild>
+          <Button 
+            variant="outline" 
+            className="w-full justify-between glass-card border-dashed border-2 h-12 hover:bg-primary/5"
+          >
+            <span className="flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Add New Client Deal
+            </span>
+            {isAddFormOpen ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-2">
+          <AddClientDealForm 
+            salespersonId={salespersonId} 
+            onSuccess={() => setIsAddFormOpen(false)} 
+          />
+        </CollapsibleContent>
+      </Collapsible>
+
       {/* Year Context Header */}
       <div className="text-sm text-muted-foreground">
         Showing {statsYear} performance data
