@@ -63,7 +63,12 @@ export function CommissionEstimator({ commissions, salespersonId }: CommissionEs
   }, [filteredCommissions]);
 
   const formatCurrency = (value: number) => {
-    return `$${value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(value);
   };
 
   return (
@@ -77,7 +82,7 @@ export function CommissionEstimator({ commissions, salespersonId }: CommissionEs
           >
             <span className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
-              Add New Client Deal
+              Add New Client / Deal
             </span>
             {isAddFormOpen ? (
               <ChevronUp className="w-4 h-4" />
@@ -135,35 +140,35 @@ export function CommissionEstimator({ commissions, salespersonId }: CommissionEs
         </div>
       </div>
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-        <div className="glass-card p-3 text-center animate-fade-in min-w-0" style={{ animationDelay: "50ms" }}>
-          <p className="text-xs text-muted-foreground truncate">Deals</p>
-          <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums whitespace-nowrap">{summaryStats.dealCount}</p>
+      {/* Summary Stats - Responsive grid with proper overflow handling */}
+      <div className="grid grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3">
+        <div className="glass-card p-2 sm:p-3 text-center animate-fade-in" style={{ animationDelay: "50ms" }}>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">Claims</p>
+          <p className="text-base sm:text-lg lg:text-xl font-bold text-foreground tabular-nums">{summaryStats.dealCount}</p>
         </div>
-        <div className="glass-card p-3 text-center animate-fade-in min-w-0" style={{ animationDelay: "75ms" }}>
-          <p className="text-xs text-muted-foreground truncate">Total Volume</p>
-          <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalVolume)}</p>
+        <div className="glass-card p-2 sm:p-3 text-center animate-fade-in" style={{ animationDelay: "75ms" }}>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">Total Volume</p>
+          <p className="text-base sm:text-lg lg:text-xl font-bold text-foreground tabular-nums">{formatCurrency(summaryStats.totalVolume)}</p>
         </div>
-        <div className="glass-card p-3 text-center animate-fade-in min-w-0" style={{ animationDelay: "100ms" }}>
-          <p className="text-xs text-muted-foreground truncate">Collected</p>
-          <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCollected)}</p>
+        <div className="glass-card p-2 sm:p-3 text-center animate-fade-in" style={{ animationDelay: "100ms" }}>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">Collected</p>
+          <p className="text-base sm:text-lg lg:text-xl font-bold text-foreground tabular-nums">{formatCurrency(summaryStats.totalCollected)}</p>
         </div>
-        <div className="glass-card p-3 text-center animate-fade-in min-w-0" style={{ animationDelay: "125ms" }}>
-          <p className="text-xs text-muted-foreground truncate">Collection %</p>
-          <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums whitespace-nowrap">{summaryStats.collectionRate.toFixed(1)}%</p>
+        <div className="glass-card p-2 sm:p-3 text-center animate-fade-in" style={{ animationDelay: "125ms" }}>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">Collection %</p>
+          <p className="text-base sm:text-lg lg:text-xl font-bold text-foreground tabular-nums">{summaryStats.collectionRate.toFixed(1)}%</p>
         </div>
-        <div className="glass-card p-3 text-center animate-fade-in min-w-0" style={{ animationDelay: "150ms" }}>
-          <p className="text-xs text-muted-foreground truncate">Commission Earned</p>
-          <p className="text-lg sm:text-xl font-bold text-primary tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCommissionEarned)}</p>
+        <div className="glass-card p-2 sm:p-3 text-center animate-fade-in" style={{ animationDelay: "150ms" }}>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">Comm. Earned</p>
+          <p className="text-base sm:text-lg lg:text-xl font-bold text-primary tabular-nums">{formatCurrency(summaryStats.totalCommissionEarned)}</p>
         </div>
-        <div className="glass-card p-3 text-center animate-fade-in min-w-0" style={{ animationDelay: "175ms" }}>
-          <p className="text-xs text-muted-foreground truncate">Paid Out</p>
-          <p className="text-lg sm:text-xl font-bold text-success tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCommissionPaid)}</p>
+        <div className="glass-card p-2 sm:p-3 text-center animate-fade-in" style={{ animationDelay: "175ms" }}>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">Paid Out</p>
+          <p className="text-base sm:text-lg lg:text-xl font-bold text-success tabular-nums">{formatCurrency(summaryStats.totalCommissionPaid)}</p>
         </div>
-        <div className="glass-card p-3 text-center animate-fade-in min-w-0" style={{ animationDelay: "200ms" }}>
-          <p className="text-xs text-muted-foreground truncate">Pending</p>
-          <p className="text-lg sm:text-xl font-bold text-warning tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.pendingCommission)}</p>
+        <div className="glass-card p-2 sm:p-3 text-center animate-fade-in" style={{ animationDelay: "200ms" }}>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">Pending</p>
+          <p className="text-base sm:text-lg lg:text-xl font-bold text-warning tabular-nums">{formatCurrency(summaryStats.pendingCommission)}</p>
         </div>
       </div>
 
