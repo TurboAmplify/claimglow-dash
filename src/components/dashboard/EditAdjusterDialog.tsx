@@ -64,12 +64,12 @@ export const EditAdjusterDialog = forwardRef<HTMLDivElement, EditAdjusterDialogP
       }
 
       updateMutation.mutate(
-        { id: adjuster.id, name, office },
+        { id: adjuster.id, name, office, oldName: adjuster.name },
         {
           onSuccess: () => {
             toast({
               title: "Adjuster updated",
-              description: "The adjuster information has been saved.",
+              description: "The adjuster information has been saved and synced to commission records.",
             });
             onOpenChange(false);
           },
