@@ -31,17 +31,46 @@ export function useUpdateAdjuster() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, name, office }: { id: string; name: string; office: string }) => {
-      const { error } = await supabase
+    mutationFn: async ({ id, name, office, oldName }: { id: string; name: string; office: string; oldName?: string }) => {
+      // Update the adjusters table
+      const { error: adjusterError } = await supabase
         .from("adjusters")
         .update({ name, full_name: name, office })
         .eq("id", id);
 
-      if (error) throw error;
+      if (adjusterError) throw adjusterError;
+
+      // If the name changed, also update all matching sales_commissions records
+      if (oldName && oldName !== name) {
+        const { error: commissionsError } = await supabase
+          .from("sales_commissions")
+          .update({ adjuster: name })
+          .eq("adjuster", oldName);
+
+        if (commissionsError) {
+          console.error("Failed to update commissions:", commissionsError);
+          // Don't throw - the adjuster was updated, just log the commission sync issue
+        }
+      }
+
+      // Also update office in commissions if it changed
+      const officeCode = office.toLowerCase() === 'houston' ? 'H' : 
+                         office.toLowerCase() === 'dallas' ? 'D' : office;
+      const { error: officeError } = await supabase
+        .from("sales_commissions")
+        .update({ office: officeCode })
+        .eq("adjuster", name);
+      
+      if (officeError) {
+        console.error("Failed to update commission offices:", officeError);
+      }
+
       return { id, name, office };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["adjusters"] });
+      queryClient.invalidateQueries({ queryKey: ["adjuster-commission-summaries"] });
+      queryClient.invalidateQueries({ queryKey: ["sales-commissions"] });
     },
   });
 }
