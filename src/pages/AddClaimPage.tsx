@@ -129,6 +129,16 @@ const AddClaimPage = () => {
     return `$${value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   };
 
+  // Compact format for summary stats to prevent overflow
+  const formatCurrencyCompact = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(value);
+  };
+
   // Summary stats
   const summaryStats = useMemo(() => {
     const totalVolume = filteredClaims.reduce((sum, c) => sum + (c.revised_estimate || c.initial_estimate || 0), 0);
@@ -564,11 +574,11 @@ const AddClaimPage = () => {
               </div>
               <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "75ms" }}>
                 <p className="text-[10px] text-muted-foreground leading-tight">Total Volume</p>
-                <p className="text-base font-bold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalVolume)}</p>
+                <p className="text-base font-bold text-foreground tabular-nums">{formatCurrencyCompact(summaryStats.totalVolume)}</p>
               </div>
               <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "100ms" }}>
                 <p className="text-[10px] text-muted-foreground leading-tight">Collected</p>
-                <p className="text-base font-bold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCollected)}</p>
+                <p className="text-base font-bold text-foreground tabular-nums">{formatCurrencyCompact(summaryStats.totalCollected)}</p>
               </div>
               <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "125ms" }}>
                 <p className="text-[10px] text-muted-foreground leading-tight">Collection %</p>
@@ -576,15 +586,15 @@ const AddClaimPage = () => {
               </div>
               <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "150ms" }}>
                 <p className="text-[10px] text-muted-foreground leading-tight">Comm. Earned</p>
-                <p className="text-base font-bold text-primary tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCommissionEarned)}</p>
+                <p className="text-base font-bold text-primary tabular-nums">{formatCurrencyCompact(summaryStats.totalCommissionEarned)}</p>
               </div>
               <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "175ms" }}>
                 <p className="text-[10px] text-muted-foreground leading-tight">Paid Out</p>
-                <p className="text-base font-bold text-green-600 tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.totalCommissionPaid)}</p>
+                <p className="text-base font-bold text-success tabular-nums">{formatCurrencyCompact(summaryStats.totalCommissionPaid)}</p>
               </div>
               <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "200ms" }}>
                 <p className="text-[10px] text-muted-foreground leading-tight">Pending</p>
-                <p className="text-base font-bold text-amber-600 tabular-nums whitespace-nowrap">{formatCurrency(summaryStats.pendingCommission)}</p>
+                <p className="text-base font-bold text-warning tabular-nums">{formatCurrencyCompact(summaryStats.pendingCommission)}</p>
               </div>
             </div>
           </div>
