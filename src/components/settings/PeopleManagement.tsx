@@ -270,6 +270,10 @@ export function PeopleManagement() {
                   <SelectContent>
                     <SelectItem value="Houston">Houston</SelectItem>
                     <SelectItem value="Dallas">Dallas</SelectItem>
+                    <SelectItem value="Louisiana">Louisiana</SelectItem>
+                    <SelectItem value="Austin">Austin</SelectItem>
+                    <SelectItem value="San Antonio">San Antonio</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button size="sm" onClick={handleAddAdjuster} disabled={addAdjusterMutation.isPending}>
