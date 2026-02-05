@@ -3,7 +3,7 @@ import { SalesCommission } from "@/types/sales";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, Edit2, TrendingUp, TrendingDown, Calendar, Pencil, Trash2 } from "lucide-react";
+import { DollarSign, Edit2, TrendingUp, TrendingDown, Calendar, Pencil, Trash2, Users } from "lucide-react";
 import { EditSalesRecordDialog } from "@/components/dashboard/EditSalesRecordDialog";
 import { CheckReceivedDialog } from "./CheckReceivedDialog";
 import { UpdateEstimateDialog } from "./UpdateEstimateDialog";
@@ -11,7 +11,7 @@ import { EditCheckDialog } from "./EditCheckDialog";
 import { format } from "date-fns";
 import { useCommissionChecks, CommissionCheck } from "@/hooks/useCommissionChecks";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -58,6 +58,48 @@ export function DealCard({ commission, animationDelay = 0, isHighlighted = false
 
   // Fetch checks for this commission
   const { data: checks = [] } = useCommissionChecks(commission.id);
+
+  // Fetch all salespeople for name lookup
+  const { data: allSalespeople = [] } = useQuery({
+    queryKey: ["salespeople"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("salespeople")
+        .select("id, name")
+        .eq("is_active", true);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Fetch related split records for the same client (to show split partners)
+  const { data: allSplits = [] } = useQuery({
+    queryKey: ["all-splits-for-client", commission.client_name],
+    queryFn: async () => {
+      if (!commission.client_name) return [];
+      const { data, error } = await supabase
+        .from("sales_commissions")
+        .select("id, salesperson_id, split_percentage")
+        .eq("client_name", commission.client_name);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!commission.client_name,
+  });
+
+  // Build split display info
+  const splitDisplay = useMemo(() => {
+    if (allSplits.length <= 1) return null; // No split partners
+    
+    return allSplits.map((split) => {
+      const sp = allSalespeople.find((s) => s.id === split.salesperson_id);
+      return {
+        name: sp?.name || "Unknown",
+        percentage: split.split_percentage || 0,
+        isCurrent: split.id === commission.id,
+      };
+    }).sort((a, b) => b.percentage - a.percentage); // Sort by percentage descending
+  }, [allSplits, allSalespeople, commission.id]);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -374,14 +416,31 @@ export function DealCard({ commission, animationDelay = 0, isHighlighted = false
           </div>
         </div>
 
-        {/* Footer - Percentages */}
-        <div className="mt-3 pt-3 border-t border-border/50 flex flex-wrap gap-4 text-xs text-muted-foreground">
-          <span>Fee: {calculations.feePercent}%</span>
-          <span>Commission: {calculations.commissionPercent}%</span>
-          <span>Split: {calculations.splitPercent}%</span>
-          <span className="ml-auto">
-            Effective Rate: {(calculations.feePercent * calculations.commissionPercent * calculations.splitPercent / 10000).toFixed(3)}%
-          </span>
+        {/* Footer - Percentages and Split Info */}
+        <div className="mt-3 pt-3 border-t border-border/50 space-y-2">
+          {/* Split Partners Display */}
+          {splitDisplay && splitDisplay.length > 1 && (
+            <div className="flex items-center gap-2 flex-wrap text-xs">
+              <Users className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-muted-foreground">Split:</span>
+              {splitDisplay.map((partner, idx) => (
+                <span key={idx} className={`${partner.isCurrent ? "font-medium text-primary" : "text-muted-foreground"}`}>
+                  {partner.percentage}% {partner.name}
+                  {idx < splitDisplay.length - 1 && <span className="text-muted-foreground ml-1">•</span>}
+                </span>
+              ))}
+            </div>
+          )}
+          
+          {/* Rate Details */}
+          <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+            <span>Fee: {calculations.feePercent}%</span>
+            <span>Commission: {calculations.commissionPercent}%</span>
+            {!splitDisplay && <span>Split: {calculations.splitPercent}%</span>}
+            <span className="ml-auto">
+              Effective Rate: {(calculations.feePercent * calculations.commissionPercent * calculations.splitPercent / 10000).toFixed(3)}%
+            </span>
+          </div>
         </div>
       </div>
 
