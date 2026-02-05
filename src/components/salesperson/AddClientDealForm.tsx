@@ -4,13 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { CalendarIcon, Save, Calculator } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { AutocompleteInput, AutocompleteOption } from "@/components/ui/autocomplete-input";
+import { AddPersonDialog } from "@/components/ui/add-person-dialog";
 
 interface AddClientDealFormProps {
   salespersonId: string;
@@ -33,9 +34,11 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
   const [commissionPercentage, setCommissionPercentage] = useState("8");
   const [splitPercentage, setSplitPercentage] = useState("100");
   const [isSaving, setIsSaving] = useState(false);
+  const [addPersonDialogOpen, setAddPersonDialogOpen] = useState(false);
+  const [pendingNewPerson, setPendingNewPerson] = useState("");
   const queryClient = useQueryClient();
 
-  // Fetch adjusters for the dropdown
+  // Fetch adjusters for the autocomplete
   const { data: adjusters = [] } = useQuery<Adjuster[]>({
     queryKey: ["adjusters"],
     queryFn: async () => {
@@ -49,12 +52,36 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
     },
   });
 
-  // Auto-fill office when adjuster is selected
+  // Convert adjusters to autocomplete options
+  const adjusterOptions: AutocompleteOption[] = useMemo(() => {
+    return adjusters.map((adj) => ({
+      value: adj.name,
+      label: adj.name,
+      description: adj.office,
+    }));
+  }, [adjusters]);
+
+  // Handle adjuster selection - auto-fill office
   const handleAdjusterChange = (value: string) => {
     setAdjuster(value);
-    const selectedAdjuster = adjusters.find(a => a.name === value);
+    const selectedAdjuster = adjusters.find(
+      (a) => a.name.toLowerCase() === value.toLowerCase()
+    );
     if (selectedAdjuster) {
       setOffice(selectedAdjuster.office);
+    }
+  };
+
+  // Handle adding a new person
+  const handleNewPerson = (name: string) => {
+    setPendingNewPerson(name);
+    setAddPersonDialogOpen(true);
+  };
+
+  const handleAddPersonComplete = (result: { type: string; name: string; office?: string }) => {
+    setAdjuster(result.name);
+    if (result.office) {
+      setOffice(result.office);
     }
   };
 
@@ -93,7 +120,6 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
       const estimate = parseFloat(initialEstimate) || 0;
       const currentYear = new Date().getFullYear();
 
-      // Note: percent_change is a generated column, so we don't include it
       const { error } = await supabase.from("sales_commissions").insert({
         salesperson_id: salespersonId,
         client_name: clientName.trim(),
@@ -145,166 +171,172 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
   };
 
   return (
-    <form onSubmit={handleSubmit} className="glass-card p-6 space-y-6 animate-fade-in">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Client Name */}
-        <div className="space-y-2">
-          <Label htmlFor="clientName">Client Name *</Label>
-          <Input
-            id="clientName"
-            placeholder="Enter client name"
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
-            required
-          />
-        </div>
-
-        {/* Adjuster */}
-        <div className="space-y-2">
-          <Label htmlFor="adjuster">Adjuster</Label>
-          <Select value={adjuster} onValueChange={handleAdjusterChange}>
-            <SelectTrigger className="bg-secondary/50 border-glass-border/30">
-              <SelectValue placeholder="Select adjuster" />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-glass-border/30">
-              {adjusters.map((adj) => (
-                <SelectItem key={adj.id} value={adj.name}>
-                  {adj.name} ({adj.office})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Office */}
-        <div className="space-y-2">
-          <Label htmlFor="office">Office</Label>
-          <Input
-            id="office"
-            placeholder="Enter office"
-            value={office}
-            onChange={(e) => setOffice(e.target.value)}
-          />
-        </div>
-
-        {/* Date Signed */}
-        <div className="space-y-2">
-          <Label>Date Signed</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !dateSigned && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {dateSigned ? format(dateSigned, "PPP") : "Select date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={dateSigned}
-                onSelect={setDateSigned}
-                initialFocus
-                className="p-3 pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Initial Estimate */}
-        <div className="space-y-2">
-          <Label htmlFor="initialEstimate">Initial Estimate ($)</Label>
-          <Input
-            id="initialEstimate"
-            type="number"
-            placeholder="0"
-            value={initialEstimate}
-            onChange={(e) => setInitialEstimate(e.target.value)}
-          />
-        </div>
-
-        {/* Fee Percentage */}
-        <div className="space-y-2">
-          <Label htmlFor="feePercentage">Fee %</Label>
-          <Input
-            id="feePercentage"
-            type="number"
-            step="0.1"
-            placeholder="7"
-            value={feePercentage}
-            onChange={(e) => setFeePercentage(e.target.value)}
-          />
-        </div>
-
-        {/* Commission Percentage */}
-        <div className="space-y-2">
-          <Label htmlFor="commissionPercentage">Commission %</Label>
-          <Input
-            id="commissionPercentage"
-            type="number"
-            step="0.1"
-            placeholder="8"
-            value={commissionPercentage}
-            onChange={(e) => setCommissionPercentage(e.target.value)}
-          />
-        </div>
-
-        {/* Split Percentage */}
-        <div className="space-y-2">
-          <Label htmlFor="splitPercentage">Split %</Label>
-          <Input
-            id="splitPercentage"
-            type="number"
-            step="1"
-            placeholder="100"
-            value={splitPercentage}
-            onChange={(e) => setSplitPercentage(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {/* Commission Preview */}
-      {parseFloat(initialEstimate) > 0 && (
-        <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-          <div className="flex items-center gap-2 mb-3">
-            <Calculator className="w-4 h-4 text-primary" />
-            <span className="font-medium text-foreground">Projected Commission</span>
+    <>
+      <form onSubmit={handleSubmit} className="glass-card p-6 space-y-6 animate-fade-in">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Client Name */}
+          <div className="space-y-2">
+            <Label htmlFor="clientName">Client Name *</Label>
+            <Input
+              id="clientName"
+              placeholder="Enter client name"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              required
+            />
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <span className="text-muted-foreground">Estimated Value: </span>
-              <span className="font-medium">{formatCurrency(parseFloat(initialEstimate) || 0)}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Fee Earned: </span>
-              <span className="font-medium">{formatCurrency(projectedCommission.feeEarned)}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Your Commission: </span>
-              <span className="font-bold text-primary">{formatCurrency(projectedCommission.commissionEarned)}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Effective Rate: </span>
-              <span className="font-medium">
-                {((parseFloat(feePercentage) / 100) * (parseFloat(commissionPercentage) / 100) * (parseFloat(splitPercentage) / 100) * 100).toFixed(3)}%
-              </span>
-            </div>
+
+          {/* Adjuster - Autocomplete */}
+          <div className="space-y-2">
+            <Label htmlFor="adjuster">Adjuster</Label>
+            <AutocompleteInput
+              value={adjuster}
+              onValueChange={handleAdjusterChange}
+              options={adjusterOptions}
+              placeholder="Select or type adjuster"
+              emptyMessage="No adjusters found"
+              allowCustom={true}
+              onNewValue={handleNewPerson}
+            />
+          </div>
+
+          {/* Office */}
+          <div className="space-y-2">
+            <Label htmlFor="office">Office</Label>
+            <Input
+              id="office"
+              placeholder="Enter office"
+              value={office}
+              onChange={(e) => setOffice(e.target.value)}
+            />
+          </div>
+
+          {/* Date Signed */}
+          <div className="space-y-2">
+            <Label>Date Signed</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !dateSigned && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateSigned ? format(dateSigned, "PPP") : "Select date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateSigned}
+                  onSelect={setDateSigned}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
-      )}
 
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isSaving}>
-          <Save className="w-4 h-4 mr-2" />
-          {isSaving ? "Adding..." : "Add Deal"}
-        </Button>
-      </div>
-    </form>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Initial Estimate */}
+          <div className="space-y-2">
+            <Label htmlFor="initialEstimate">Initial Estimate ($)</Label>
+            <Input
+              id="initialEstimate"
+              type="number"
+              placeholder="0"
+              value={initialEstimate}
+              onChange={(e) => setInitialEstimate(e.target.value)}
+            />
+          </div>
+
+          {/* Fee Percentage */}
+          <div className="space-y-2">
+            <Label htmlFor="feePercentage">Fee %</Label>
+            <Input
+              id="feePercentage"
+              type="number"
+              step="0.1"
+              placeholder="7"
+              value={feePercentage}
+              onChange={(e) => setFeePercentage(e.target.value)}
+            />
+          </div>
+
+          {/* Commission Percentage */}
+          <div className="space-y-2">
+            <Label htmlFor="commissionPercentage">Commission %</Label>
+            <Input
+              id="commissionPercentage"
+              type="number"
+              step="0.1"
+              placeholder="8"
+              value={commissionPercentage}
+              onChange={(e) => setCommissionPercentage(e.target.value)}
+            />
+          </div>
+
+          {/* Split Percentage */}
+          <div className="space-y-2">
+            <Label htmlFor="splitPercentage">Split %</Label>
+            <Input
+              id="splitPercentage"
+              type="number"
+              step="1"
+              placeholder="100"
+              value={splitPercentage}
+              onChange={(e) => setSplitPercentage(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Commission Preview */}
+        {parseFloat(initialEstimate) > 0 && (
+          <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
+            <div className="flex items-center gap-2 mb-3">
+              <Calculator className="w-4 h-4 text-primary" />
+              <span className="font-medium text-foreground">Projected Commission</span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>
+                <span className="text-muted-foreground">Estimated Value: </span>
+                <span className="font-medium">{formatCurrency(parseFloat(initialEstimate) || 0)}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Fee Earned: </span>
+                <span className="font-medium">{formatCurrency(projectedCommission.feeEarned)}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Your Commission: </span>
+                <span className="font-bold text-primary">{formatCurrency(projectedCommission.commissionEarned)}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Effective Rate: </span>
+                <span className="font-medium">
+                  {((parseFloat(feePercentage) / 100) * (parseFloat(commissionPercentage) / 100) * (parseFloat(splitPercentage) / 100) * 100).toFixed(3)}%
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-end">
+          <Button type="submit" disabled={isSaving}>
+            <Save className="w-4 h-4 mr-2" />
+            {isSaving ? "Adding..." : "Add Deal"}
+          </Button>
+        </div>
+      </form>
+
+      <AddPersonDialog
+        open={addPersonDialogOpen}
+        onOpenChange={setAddPersonDialogOpen}
+        personName={pendingNewPerson}
+        onComplete={handleAddPersonComplete}
+      />
+    </>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { SalesCommission } from "@/types/sales";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,13 +11,24 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 interface CommissionEstimatorProps {
   commissions: SalesCommission[];
   salespersonId: string;
+  highlightDealId?: string;
 }
 
-export function CommissionEstimator({ commissions, salespersonId }: CommissionEstimatorProps) {
+export function CommissionEstimator({ commissions, salespersonId, highlightDealId }: CommissionEstimatorProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const highlightRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to highlighted deal
+  useEffect(() => {
+    if (highlightDealId && highlightRef.current) {
+      setTimeout(() => {
+        highlightRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
+    }
+  }, [highlightDealId]);
 
   const years = useMemo(() => {
     const uniqueYears = [...new Set(commissions.map((c) => c.year).filter(Boolean))];
@@ -185,11 +196,16 @@ export function CommissionEstimator({ commissions, salespersonId }: CommissionEs
           </div>
         ) : (
           filteredCommissions.map((commission, index) => (
-            <DealCard 
-              key={commission.id} 
-              commission={commission} 
-              animationDelay={index * 50}
-            />
+            <div 
+              key={commission.id}
+              ref={commission.id === highlightDealId ? highlightRef : undefined}
+            >
+              <DealCard 
+                commission={commission} 
+                animationDelay={index * 50}
+                isHighlighted={commission.id === highlightDealId}
+              />
+            </div>
           ))
         )}
       </div>
