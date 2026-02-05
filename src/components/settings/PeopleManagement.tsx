@@ -150,7 +150,7 @@ export function PeopleManagement() {
           <span>Manage People</span>
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Manage People</DialogTitle>
           <DialogDescription>Add or remove salespeople and adjusters.</DialogDescription>
