@@ -8,6 +8,7 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { SalesCommission } from "@/types/sales";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { formatCurrencyCompact } from "@/lib/formatCurrency";
 
 export default function SalesByOfficePage() {
   const [selectedOffices, setSelectedOffices] = useState<string[]>([]);
@@ -256,8 +257,8 @@ export default function SalesByOfficePage() {
                     <DollarSign className="w-4 h-4" />
                     <span className="text-sm">Commissions</span>
                   </div>
-                  <span className="text-2xl font-bold text-primary">
-                    ${stat.commissions.toLocaleString()}
+                  <span className="text-2xl font-bold text-primary tabular-nums">
+                    {formatCurrencyCompact(stat.commissions)}
                   </span>
                 </div>
               </div>
