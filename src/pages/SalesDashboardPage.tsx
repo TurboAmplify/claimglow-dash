@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import { useSalesCommissions, useSalespeople, useAvailableYears, useYearSummaries } from "@/hooks/useSalesCommissions";
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Loader2, TrendingUp, TrendingDown, DollarSign, FileText, Percent, Target, Upload, Users, Check } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', '#22c55e', '#f59e0b', '#ef4444'];
 
 export default function SalesDashboardPage() {
+  const navigate = useNavigate();
   const { data: salespeople } = useSalespeople();
   const { data: availableYears } = useAvailableYears();
   const [selectedYear, setSelectedYear] = useState<number | null>(2020);
@@ -365,18 +366,28 @@ export default function SalesDashboardPage() {
                 <tbody>
                   {commissions.slice(0, 50).map((c) => {
                     const salesperson = salespeople?.find(sp => sp.id === c.salesperson_id);
+                    const handleRowClick = () => {
+                      if (c.salesperson_id) {
+                        navigate(`/sales/person/${c.salesperson_id}?deal=${c.id}`);
+                      }
+                    };
                     return (
-                      <tr key={c.id} className="border-b border-glass-border/20 hover:bg-secondary/20">
+                      <tr 
+                        key={c.id} 
+                        className="border-b border-glass-border/20 hover:bg-secondary/30 cursor-pointer transition-colors"
+                        onClick={handleRowClick}
+                        title={c.salesperson_id ? "Click to view deal details" : "No salesperson assigned"}
+                      >
                         <td className="px-4 py-3 font-medium text-foreground">{c.client_name}</td>
                         <td className="px-4 py-3 text-muted-foreground">{salesperson?.name || '—'}</td>
                         <td className="px-4 py-3 text-muted-foreground">{c.date_signed || '—'}</td>
                         <td className="px-4 py-3 text-right font-mono">{formatCurrency(c.initial_estimate || 0)}</td>
                         <td className="px-4 py-3 text-right font-mono">{formatCurrency(c.revised_estimate || 0)}</td>
                         <td className={`px-4 py-3 text-right font-mono ${(c.percent_change || 0) >= 0 ? 'text-emerald-500' : 'text-destructive'}`}>
-                          {(c.percent_change || 0) >= 0 ? '+' : ''}{(c.percent_change || 0).toFixed(1)}%
+                          {(c.percent_change || 0) >= 0 ? '+' : ''}{Number(c.percent_change || 0).toFixed(1)}%
                         </td>
-                        <td className="px-4 py-3 text-right font-mono">{c.split_percentage || 100}%</td>
-                        <td className="px-4 py-3 text-right font-mono">{c.fee_percentage || 0}%</td>
+                        <td className="px-4 py-3 text-right font-mono">{Number(c.split_percentage || 100).toFixed(1)}%</td>
+                        <td className="px-4 py-3 text-right font-mono">{Number(c.fee_percentage || 0).toFixed(1)}%</td>
                         <td className="px-4 py-3 text-right font-mono text-primary">{formatCurrency(c.commissions_paid || 0)}</td>
                       </tr>
                     );

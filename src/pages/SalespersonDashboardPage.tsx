@@ -11,15 +11,22 @@ import { useSalespeople, useSalesCommissions } from "@/hooks/useSalesCommissions
 import { useSalesGoals } from "@/hooks/useSalesGoals";
 import { useSalesPlan } from "@/hooks/useSalesPlan";
 import { usePlanScenarios } from "@/hooks/usePlanScenarios";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Loader2, ArrowLeft, User, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 
 export default function SalespersonDashboardPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const highlightDealId = searchParams.get("deal");
+  
+  // Determine default tab based on URL params
+  const [activeTab, setActiveTab] = useState(() => {
+    return highlightDealId ? "commissions" : "overview";
+  });
   
   // Use 2025 for current performance/stats, 2026 for planning
   const statsYear = 2025;
@@ -198,7 +205,7 @@ export default function SalespersonDashboardPage() {
       </div>
 
       {/* Dashboard Tabs */}
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="plan">
@@ -269,6 +276,7 @@ export default function SalespersonDashboardPage() {
           <CommissionRecordsSection 
             commissions={commissions || []}
             salespersonId={id!}
+            highlightDealId={highlightDealId || undefined}
           />
         </TabsContent>
       </Tabs>

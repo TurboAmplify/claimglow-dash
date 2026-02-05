@@ -27,9 +27,26 @@ import {
 interface DealCardProps {
   commission: SalesCommission;
   animationDelay?: number;
+  isHighlighted?: boolean;
 }
 
-export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
+// Map office codes to full names
+const getOfficeName = (code: string | null | undefined): string => {
+  if (!code) return "";
+  const officeMap: Record<string, string> = {
+    "H": "Houston",
+    "D": "Dallas",
+    "Houston": "Houston",
+    "Dallas": "Dallas",
+    "Louisiana": "Louisiana",
+    "Austin": "Austin",
+    "San Antonio": "San Antonio",
+    "Other": "Other",
+  };
+  return officeMap[code] || code;
+};
+
+export function DealCard({ commission, animationDelay = 0, isHighlighted = false }: DealCardProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [checkDialogOpen, setCheckDialogOpen] = useState(false);
   const [estimateDialogOpen, setEstimateDialogOpen] = useState(false);
@@ -170,13 +187,15 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
   return (
     <>
       <div 
-        className="glass-card p-4 animate-fade-in hover:shadow-lg transition-shadow"
+        className={`glass-card p-4 animate-fade-in hover:shadow-lg transition-all ${
+          isHighlighted ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""
+        }`}
         style={{ animationDelay: `${animationDelay}ms` }}
       >
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1 min-w-0 flex-wrap">
               <h3 className="font-semibold text-lg text-foreground truncate">{commission.client_name}</h3>
               <Badge variant={commission.status === "closed" ? "secondary" : "default"}>
                 {commission.status || "open"}
@@ -184,14 +203,17 @@ export function DealCard({ commission, animationDelay = 0 }: DealCardProps) {
               {commission.year && (
                 <Badge variant="outline">{commission.year}</Badge>
               )}
+              {commission.office && (
+                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
+                  {getOfficeName(commission.office)}
+                </Badge>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               {commission.adjuster && <span className="truncate max-w-[150px]">{commission.adjuster}</span>}
-              {commission.adjuster && commission.office && <span>•</span>}
-              {commission.office && <span className="whitespace-nowrap">{commission.office}</span>}
               {commission.date_signed && (
                 <>
-                  <span>•</span>
+                  {commission.adjuster && <span>•</span>}
                   <span className="flex items-center gap-1 whitespace-nowrap">
                     <Calendar className="w-3 h-3 flex-shrink-0" />
                     {formatDate(commission.date_signed)}

@@ -5,9 +5,10 @@ import { AdjusterCard } from "@/components/dashboard/AdjusterCard";
 import { useAdjusters, Adjuster } from "@/hooks/useAdjusters";
 import { useAdjusterCommissionSummaries, useCommissionYears } from "@/hooks/useAdjusterCommissionSummaries";
 import { AdjusterSummary } from "@/types/claims";
-import { Loader2, Edit2 } from "lucide-react";
+import { Loader2, Edit2, Search, X } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -36,6 +37,7 @@ function useSalespeopleFromCommissions() {
 }
 
 export default function AdjustersPage() {
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedAdjusters, setSelectedAdjusters] = useState<string[]>([]);
   const [selectedOffices, setSelectedOffices] = useState<string[]>([]);
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
@@ -110,6 +112,14 @@ export default function AdjustersPage() {
   const filteredAdjusters = useMemo(() => {
     let filtered = mergedAdjusters;
 
+    // Search filter - case-insensitive partial match on name
+    if (searchQuery.trim()) {
+      const searchLower = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((m) =>
+        m.adjuster.name.toLowerCase().includes(searchLower)
+      );
+    }
+
     if (selectedOffices.length > 0) {
       filtered = filtered.filter((m) => selectedOffices.includes(m.adjuster.office));
     }
@@ -129,7 +139,7 @@ export default function AdjustersPage() {
       const bTotal = b.summary?.totalClaims ?? -1;
       return bTotal - aTotal;
     });
-  }, [mergedAdjusters, selectedOffices, selectedAdjusters, selectedSalespeople]);
+  }, [mergedAdjusters, searchQuery, selectedOffices, selectedAdjusters, selectedSalespeople]);
 
   const handleEditAdjuster = (adjuster: Adjuster) => {
     setEditingAdjuster(adjuster);
@@ -179,6 +189,29 @@ export default function AdjustersPage() {
                 </span>
               )}
             </p>
+          </div>
+        </div>
+
+        {/* Search Box */}
+        <div className="mt-3 animate-fade-in">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search adjusters..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10 bg-secondary/50 border-glass-border/30"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </div>
 
