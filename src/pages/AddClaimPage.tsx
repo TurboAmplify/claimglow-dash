@@ -566,35 +566,41 @@ const AddClaimPage = () => {
         {/* Monthly Commission Summary + Summary Stats */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2">
-            {/* Summary Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
-              <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "50ms" }}>
-                <p className="text-[10px] text-muted-foreground leading-tight">Claims</p>
-                <p className="text-base font-bold text-foreground tabular-nums">{summaryStats.dealCount}</p>
+            {/* Summary Stats - Split into 2 rows */}
+            <div className="space-y-2">
+              {/* Row 1: Claims, Volume, Collected, Collection % */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "50ms" }}>
+                  <p className="text-[10px] text-muted-foreground leading-tight">Claims</p>
+                  <p className="text-base font-bold text-foreground tabular-nums">{summaryStats.dealCount}</p>
+                </div>
+                <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "75ms" }}>
+                  <p className="text-[10px] text-muted-foreground leading-tight">Total Volume</p>
+                  <p className="text-base font-bold text-foreground tabular-nums">{formatCurrencyCompact(summaryStats.totalVolume)}</p>
+                </div>
+                <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "100ms" }}>
+                  <p className="text-[10px] text-muted-foreground leading-tight">Collected</p>
+                  <p className="text-base font-bold text-foreground tabular-nums">{formatCurrencyCompact(summaryStats.totalCollected)}</p>
+                </div>
+                <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "125ms" }}>
+                  <p className="text-[10px] text-muted-foreground leading-tight">Collection %</p>
+                  <p className="text-base font-bold text-foreground tabular-nums">{summaryStats.collectionRate.toFixed(1)}%</p>
+                </div>
               </div>
-              <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "75ms" }}>
-                <p className="text-[10px] text-muted-foreground leading-tight">Total Volume</p>
-                <p className="text-base font-bold text-foreground tabular-nums">{formatCurrencyCompact(summaryStats.totalVolume)}</p>
-              </div>
-              <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "100ms" }}>
-                <p className="text-[10px] text-muted-foreground leading-tight">Collected</p>
-                <p className="text-base font-bold text-foreground tabular-nums">{formatCurrencyCompact(summaryStats.totalCollected)}</p>
-              </div>
-              <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "125ms" }}>
-                <p className="text-[10px] text-muted-foreground leading-tight">Collection %</p>
-                <p className="text-base font-bold text-foreground tabular-nums">{summaryStats.collectionRate.toFixed(1)}%</p>
-              </div>
-              <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "150ms" }}>
-                <p className="text-[10px] text-muted-foreground leading-tight">Comm. Earned</p>
-                <p className="text-base font-bold text-primary tabular-nums">{formatCurrencyCompact(summaryStats.totalCommissionEarned)}</p>
-              </div>
-              <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "175ms" }}>
-                <p className="text-[10px] text-muted-foreground leading-tight">Paid Out</p>
-                <p className="text-base font-bold text-success tabular-nums">{formatCurrencyCompact(summaryStats.totalCommissionPaid)}</p>
-              </div>
-              <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "200ms" }}>
-                <p className="text-[10px] text-muted-foreground leading-tight">Pending</p>
-                <p className="text-base font-bold text-warning tabular-nums">{formatCurrencyCompact(summaryStats.pendingCommission)}</p>
+              {/* Row 2: Comm. Earned, Paid Out, Pending */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "150ms" }}>
+                  <p className="text-[10px] text-muted-foreground leading-tight">Comm. Earned</p>
+                  <p className="text-base font-bold text-primary tabular-nums">{formatCurrencyCompact(summaryStats.totalCommissionEarned)}</p>
+                </div>
+                <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "175ms" }}>
+                  <p className="text-[10px] text-muted-foreground leading-tight">Paid Out</p>
+                  <p className="text-base font-bold text-success tabular-nums">{formatCurrencyCompact(summaryStats.totalCommissionPaid)}</p>
+                </div>
+                <div className="glass-card p-2.5 text-center animate-fade-in" style={{ animationDelay: "200ms" }}>
+                  <p className="text-[10px] text-muted-foreground leading-tight">Pending</p>
+                  <p className="text-base font-bold text-warning tabular-nums">{formatCurrencyCompact(summaryStats.pendingCommission)}</p>
+                </div>
               </div>
             </div>
           </div>
