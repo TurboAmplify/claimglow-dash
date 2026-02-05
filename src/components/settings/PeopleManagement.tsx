@@ -164,7 +164,14 @@ export function PeopleManagement() {
 
           <TabsContent value="salespeople" className="space-y-4 mt-4">
             {/* Add Salesperson Form */}
-            <div className="space-y-3 p-3 rounded-lg bg-muted/30 border border-border/50">
+            <form 
+              className="space-y-3 p-3 rounded-lg bg-muted/30 border border-border/50"
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleAddSalesperson();
+              }}
+            >
               <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
                 <UserPlus className="w-3.5 h-3.5" />
                 Add New Salesperson
@@ -195,11 +202,11 @@ export function PeopleManagement() {
                     <SelectItem value="sales_director">Sales Director</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button size="sm" onClick={handleAddSalesperson} disabled={addSalespersonMutation.isPending}>
+                <Button type="submit" size="sm" disabled={addSalespersonMutation.isPending}>
                   Add Salesperson
                 </Button>
               </div>
-            </div>
+            </form>
 
             {/* Current Salespeople List */}
             <div className="space-y-2">
@@ -242,7 +249,14 @@ export function PeopleManagement() {
 
           <TabsContent value="adjusters" className="space-y-4 mt-4">
             {/* Add Adjuster Form */}
-            <div className="space-y-3 p-3 rounded-lg bg-muted/30 border border-border/50">
+            <form 
+              className="space-y-3 p-3 rounded-lg bg-muted/30 border border-border/50"
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleAddAdjuster();
+              }}
+            >
               <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
                 <UserPlus className="w-3.5 h-3.5" />
                 Add New Adjuster
@@ -276,11 +290,11 @@ export function PeopleManagement() {
                     <SelectItem value="Other">Other</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button size="sm" onClick={handleAddAdjuster} disabled={addAdjusterMutation.isPending}>
+                <Button type="submit" size="sm" disabled={addAdjusterMutation.isPending}>
                   Add Adjuster
                 </Button>
               </div>
-            </div>
+            </form>
 
             {/* Current Adjusters List */}
             <div className="space-y-2">
