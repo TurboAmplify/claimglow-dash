@@ -7,6 +7,7 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SalesCommission } from "@/types/sales";
+import { formatCurrencyCompact } from "@/lib/formatCurrency";
 
 export default function AllSalesPage() {
   const [selectedPeople, setSelectedPeople] = useState<string[]>([]);
@@ -165,7 +166,7 @@ export default function AllSalesPage() {
         </div>
         <div className="glass-card p-6 animate-fade-in" style={{ animationDelay: "100ms" }}>
           <p className="text-sm text-muted-foreground mb-1">Total Commissions</p>
-          <p className="text-3xl font-bold text-primary">${totalCommissions.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-primary tabular-nums">{formatCurrencyCompact(totalCommissions)}</p>
         </div>
       </div>
 

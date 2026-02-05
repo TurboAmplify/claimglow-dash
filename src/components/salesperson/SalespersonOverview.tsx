@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AddClientDealForm } from "./AddClientDealForm";
+import { formatCurrencyCompact } from "@/lib/formatCurrency";
 
 interface SalespersonOverviewProps {
   stats: {
@@ -36,15 +37,6 @@ export function SalespersonOverview({ stats, goal, salespersonName, salespersonI
     );
   }
 
-  const formatCurrency = (value: number) => {
-    if (value >= 1000000) {
-      return `$${(value / 1000000).toFixed(2)}M`;
-    }
-    if (value >= 1000) {
-      return `$${(value / 1000).toFixed(0)}K`;
-    }
-    return `$${value.toLocaleString()}`;
-  };
 
   const revenueProgress = goal?.target_revenue 
     ? Math.min((stats.totalRevisedVolume / goal.target_revenue) * 100, 100) 
@@ -98,15 +90,15 @@ export function SalespersonOverview({ stats, goal, salespersonName, salespersonI
         />
         <KPICard
           title="Total Volume"
-          value={formatCurrency(stats.totalRevisedVolume)}
-          subtitle={`Initial: ${formatCurrency(stats.totalVolume)}`}
+          value={formatCurrencyCompact(stats.totalRevisedVolume)}
+          subtitle={`Initial: ${formatCurrencyCompact(stats.totalVolume)}`}
           icon={TrendingUp}
           glowColor="success"
           delay={100}
         />
         <KPICard
           title="Commissions Earned"
-          value={formatCurrency(stats.totalCommissions)}
+          value={formatCurrencyCompact(stats.totalCommissions)}
           subtitle="Paid to date"
           icon={DollarSign}
           glowColor="accent"
@@ -114,7 +106,7 @@ export function SalespersonOverview({ stats, goal, salespersonName, salespersonI
         />
         <KPICard
           title="Insurance Checks"
-          value={formatCurrency(stats.totalInsuranceChecks)}
+          value={formatCurrencyCompact(stats.totalInsuranceChecks)}
           subtitle="YTD received"
           icon={Banknote}
           glowColor="primary"
@@ -122,7 +114,7 @@ export function SalespersonOverview({ stats, goal, salespersonName, salespersonI
         />
         <KPICard
           title="Pending Balance"
-          value={formatCurrency(stats.totalNewRemainder)}
+          value={formatCurrencyCompact(stats.totalNewRemainder)}
           subtitle="Remaining to collect"
           icon={Target}
           glowColor="destructive"
@@ -138,7 +130,7 @@ export function SalespersonOverview({ stats, goal, salespersonName, salespersonI
         />
         <KPICard
           title="Avg Deal Size"
-          value={formatCurrency(stats.avgDealSize)}
+          value={formatCurrencyCompact(stats.avgDealSize)}
           subtitle="Per deal"
           icon={FileText}
           glowColor="success"
@@ -159,8 +151,8 @@ export function SalespersonOverview({ stats, goal, salespersonName, salespersonI
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm text-muted-foreground">Revenue Target</span>
-                  <span className="text-sm font-medium text-foreground">
-                    {formatCurrency(stats.totalRevisedVolume)} / {formatCurrency(goal.target_revenue)}
+                  <span className="text-sm font-medium text-foreground tabular-nums">
+                    {formatCurrencyCompact(stats.totalRevisedVolume)} / {formatCurrencyCompact(goal.target_revenue)}
                   </span>
                 </div>
                 <Progress value={revenueProgress} className="h-3" />

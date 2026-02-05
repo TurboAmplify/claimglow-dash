@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { formatCurrencyCompact } from "@/lib/formatCurrency";
 import { User, DollarSign, FileText, Building2, Percent, TrendingUp, TrendingDown } from "lucide-react";
 import { useState } from "react";
 
@@ -31,16 +32,6 @@ export function SalespersonCard({ stats, onClick, delay = 0 }: SalespersonCardPr
 
   const isHouston = stats.office?.toLowerCase() === "houston";
   const isDallas = stats.office?.toLowerCase() === "dallas";
-
-  const formatCurrency = (value: number) => {
-    if (value >= 1000000) {
-      return `$${(value / 1000000).toFixed(2)}M`;
-    }
-    if (value >= 1000) {
-      return `$${(value / 1000).toFixed(0)}K`;
-    }
-    return `$${value.toLocaleString()}`;
-  };
 
   // Office-based styling - Dallas = Blue, Houston = Red
   const getOfficeStyles = () => {
@@ -115,14 +106,14 @@ export function SalespersonCard({ stats, onClick, delay = 0 }: SalespersonCardPr
             <TrendingUp className="w-3.5 h-3.5" />
             <span className="text-xs uppercase tracking-wide">Volume</span>
           </div>
-          <p className="text-xl font-bold text-foreground whitespace-nowrap">{formatCurrency(stats.volume)}</p>
+          <p className="text-xl font-bold text-foreground tabular-nums">{formatCurrencyCompact(stats.volume)}</p>
         </div>
         <div className="p-3 rounded-xl bg-primary/10">
           <div className="flex items-center gap-2 text-muted-foreground mb-1">
             <DollarSign className="w-3.5 h-3.5" />
             <span className="text-xs uppercase tracking-wide">Earned</span>
           </div>
-          <p className="text-xl font-bold text-primary whitespace-nowrap">{formatCurrency(stats.commissions)}</p>
+          <p className="text-xl font-bold text-primary tabular-nums">{formatCurrencyCompact(stats.commissions)}</p>
         </div>
       </div>
 
@@ -132,13 +123,13 @@ export function SalespersonCard({ stats, onClick, delay = 0 }: SalespersonCardPr
           <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
             Avg Fee %
           </div>
-          <p className="text-lg font-bold text-foreground whitespace-nowrap tabular-nums">{stats.avgFeePercentage.toFixed(1)}%</p>
+          <p className="text-lg font-bold text-foreground tabular-nums">{stats.avgFeePercentage.toFixed(1)}%</p>
         </div>
         <div className="p-3 rounded-xl bg-secondary/30">
           <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
             Avg Deal Size
           </div>
-          <p className="text-lg font-bold text-foreground whitespace-nowrap">{formatCurrency(avgDealSize)}</p>
+          <p className="text-lg font-bold text-foreground tabular-nums">{formatCurrencyCompact(avgDealSize)}</p>
         </div>
       </div>
 
@@ -186,11 +177,11 @@ export function SalespersonCard({ stats, onClick, delay = 0 }: SalespersonCardPr
         <div className="flex justify-between text-sm">
           <div>
             <span className="text-muted-foreground">Initial: </span>
-            <span className="font-medium text-foreground">{formatCurrency(stats.volume)}</span>
+            <span className="font-medium text-foreground tabular-nums">{formatCurrencyCompact(stats.volume)}</span>
           </div>
           <div>
             <span className="text-muted-foreground">Revised: </span>
-            <span className="font-medium text-foreground">{formatCurrency(stats.revisedVolume)}</span>
+            <span className="font-medium text-foreground tabular-nums">{formatCurrencyCompact(stats.revisedVolume)}</span>
           </div>
         </div>
       </div>
