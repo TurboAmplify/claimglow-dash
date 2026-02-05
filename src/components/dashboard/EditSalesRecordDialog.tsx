@@ -128,10 +128,29 @@ export function EditSalesRecordDialog({
     }));
   }, [allSalespeople]);
 
+  // Combined options for salesperson field (salespeople + adjusters)
+  const combinedPersonOptions: AutocompleteOption[] = useMemo(() => {
+    const spOptions = allSalespeople.map((sp) => ({
+      value: sp.id,
+      label: sp.name,
+      description: "Salesperson",
+    }));
+    const adjOptions = adjusters.map((adj) => ({
+      value: `adj_${adj.id}`,
+      label: adj.name,
+      description: `Adjuster - ${adj.office}`,
+    }));
+    return [...spOptions, ...adjOptions];
+  }, [allSalespeople, adjusters]);
+
   // Get selected salesperson name for display
   const selectedSalespersonName = useMemo(() => {
-    return allSalespeople.find((sp) => sp.id === salespersonId)?.name || "";
-  }, [allSalespeople, salespersonId]);
+    const sp = allSalespeople.find((sp) => sp.id === salespersonId);
+    if (sp) return sp.name;
+    // Check if it's an adjuster
+    const adj = adjusters.find((a) => `adj_${a.id}` === salespersonId || a.name.toLowerCase() === salespersonId?.toLowerCase());
+    return adj?.name || "";
+  }, [allSalespeople, adjusters, salespersonId]);
 
   useEffect(() => {
     if (record) {
@@ -179,11 +198,20 @@ export function EditSalesRecordDialog({
   };
 
   const handleSalespersonChange = (name: string) => {
+    // Check salespeople first
     const sp = allSalespeople.find(
       (s) => s.name.toLowerCase() === name.toLowerCase()
     );
     if (sp) {
       setSalespersonId(sp.id);
+      return;
+    }
+    // Check adjusters
+    const adj = adjusters.find(
+      (a) => a.name.toLowerCase() === name.toLowerCase()
+    );
+    if (adj) {
+      setSalespersonId(`adj_${adj.id}`);
     }
   };
 
@@ -232,9 +260,35 @@ export function EditSalesRecordDialog({
     setSplitParticipants(splitParticipants.filter((_, i) => i !== index));
   };
 
-  const updateSplitParticipant = (index: number, field: "salespersonId" | "splitPercentage", value: string) => {
+  const updateSplitParticipant = (index: number, field: "salespersonId" | "salespersonName" | "splitPercentage", value: string) => {
     const updated = [...splitParticipants];
-    if (field === "salespersonId") {
+    if (field === "salespersonName") {
+      // Look up by name in salespeople first, then adjusters
+      const sp = allSalespeople.find((s) => s.name.toLowerCase() === value.toLowerCase());
+      if (sp) {
+        updated[index] = {
+          ...updated[index],
+          salespersonId: sp.id,
+          salespersonName: sp.name,
+        };
+      } else {
+        const adj = adjusters.find((a) => a.name.toLowerCase() === value.toLowerCase());
+        if (adj) {
+          updated[index] = {
+            ...updated[index],
+            salespersonId: `adj_${adj.id}`,
+            salespersonName: adj.name,
+          };
+        } else {
+          // Custom name entry
+          updated[index] = {
+            ...updated[index],
+            salespersonId: "",
+            salespersonName: value,
+          };
+        }
+      }
+    } else if (field === "salespersonId") {
       const sp = allSalespeople.find((s) => s.id === value);
       updated[index] = {
         ...updated[index],
@@ -256,9 +310,27 @@ export function EditSalesRecordDialog({
     return mainSplit + participantsTotal;
   }, [splitPercentage, splitParticipants]);
 
-  const getAvailableSalespeople = (currentId: string) => {
-    const usedIds = [salespersonId, ...splitParticipants.map((p) => p.salespersonId)];
-    return allSalespeople.filter((sp) => sp.id === currentId || !usedIds.includes(sp.id));
+  // Get available people for split (both salespeople and adjusters)
+  const getAvailableSplitOptions = (currentName: string): AutocompleteOption[] => {
+    const usedNames = [selectedSalespersonName, ...splitParticipants.map((p) => p.salespersonName)].map(n => n.toLowerCase());
+    
+    const spOptions = allSalespeople
+      .filter((sp) => sp.name.toLowerCase() === currentName.toLowerCase() || !usedNames.includes(sp.name.toLowerCase()))
+      .map((sp) => ({
+        value: sp.id,
+        label: sp.name,
+        description: "Salesperson",
+      }));
+    
+    const adjOptions = adjusters
+      .filter((adj) => adj.name.toLowerCase() === currentName.toLowerCase() || !usedNames.includes(adj.name.toLowerCase()))
+      .map((adj) => ({
+        value: `adj_${adj.id}`,
+        label: adj.name,
+        description: `Adjuster - ${adj.office}`,
+      }));
+    
+    return [...spOptions, ...adjOptions];
   };
 
   const updateMutation = useMutation({
@@ -411,9 +483,9 @@ export function EditSalesRecordDialog({
                 <AutocompleteInput
                   value={selectedSalespersonName}
                   onValueChange={handleSalespersonChange}
-                  options={salespersonOptions}
-                  placeholder="Select salesperson"
-                  emptyMessage="No salespeople found"
+                  options={combinedPersonOptions}
+                  placeholder="Select salesperson or adjuster"
+                  emptyMessage="No people found"
                   allowCustom={true}
                   onNewValue={handleNewSalesperson}
                 />
@@ -492,21 +564,18 @@ export function EditSalesRecordDialog({
                 {/* Additional split participants */}
                 {splitParticipants.map((participant, index) => (
                   <div key={index} className="flex items-center gap-2">
-                    <Select
-                      value={participant.salespersonId}
-                      onValueChange={(value) => updateSplitParticipant(index, "salespersonId", value)}
-                    >
-                      <SelectTrigger className="flex-1 h-8 text-sm">
-                        <SelectValue placeholder="Select salesperson" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getAvailableSalespeople(participant.salespersonId).map((sp) => (
-                          <SelectItem key={sp.id} value={sp.id} className="text-sm">
-                            {sp.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex-1">
+                      <AutocompleteInput
+                        value={participant.salespersonName}
+                        onValueChange={(name) => updateSplitParticipant(index, "salespersonName", name)}
+                        options={getAvailableSplitOptions(participant.salespersonName)}
+                        placeholder="Select person"
+                        emptyMessage="No people found"
+                        allowCustom={true}
+                        onNewValue={handleNewSalesperson}
+                        className="h-8 text-sm"
+                      />
+                    </div>
                     <Input
                       type="number"
                       min="0"
