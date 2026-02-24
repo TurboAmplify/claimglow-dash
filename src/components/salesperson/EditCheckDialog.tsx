@@ -120,6 +120,9 @@ export function EditCheckDialog({ open, onOpenChange, check, commission }: EditC
                   selected={receivedDate}
                   onSelect={setReceivedDate}
                   initialFocus
+                  captionLayout="dropdown-buttons"
+                  fromYear={2020}
+                  toYear={2030}
                   className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
@@ -148,6 +151,9 @@ export function EditCheckDialog({ open, onOpenChange, check, commission }: EditC
                   selected={depositedDate}
                   onSelect={setDepositedDate}
                   initialFocus
+                  captionLayout="dropdown-buttons"
+                  fromYear={2020}
+                  toYear={2030}
                   className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
