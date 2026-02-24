@@ -182,6 +182,9 @@ export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceive
                   selected={receivedDate}
                   onSelect={setReceivedDate}
                   initialFocus
+                  captionLayout="dropdown-buttons"
+                  fromYear={2020}
+                  toYear={2030}
                   className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
@@ -210,6 +213,9 @@ export function CheckReceivedDialog({ open, onOpenChange, record }: CheckReceive
                   selected={depositedDate}
                   onSelect={setDepositedDate}
                   initialFocus
+                  captionLayout="dropdown-buttons"
+                  fromYear={2020}
+                  toYear={2030}
                   className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
