@@ -9,7 +9,7 @@ import {
   useOfficeSummaries, 
   useDashboardStats 
 } from "@/hooks/useClaims";
-import { useSalesCommissions } from "@/hooks/useSalesCommissions";
+import { useSalesCommissions, useSalespeople } from "@/hooks/useSalesCommissions";
 import { useAdjusters } from "@/hooks/useAdjusters";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,9 +22,11 @@ const Index = () => {
   const navigate = useNavigate();
   const { data: claims, isLoading: claimsLoading, error } = useClaims();
   const { data: adjustersData, isLoading: adjustersLoading } = useAdjusters();
+  const { data: allCommissions, isLoading: commissionsLoading } = useSalesCommissions();
   
-  const isLoading = claimsLoading || adjustersLoading;
+  const isLoading = claimsLoading || adjustersLoading || commissionsLoading;
   const totalAdjustersCount = adjustersData?.length || 0;
+  const totalClaimsCount = allCommissions?.length || 0;
   
   // Fetch salespeople for filter
   const { data: salespeople } = useQuery({
@@ -172,8 +174,8 @@ const Index = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <KPICard
           title="Total Claims"
-          value={stats.totalClaims}
-          subtitle="Active claims"
+          value={totalClaimsCount}
+          subtitle="All claims"
           icon={FileText}
           glowColor="primary"
           delay={0}
