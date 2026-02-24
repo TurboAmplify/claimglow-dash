@@ -15,7 +15,7 @@ export default function SalesDashboardPage() {
   const navigate = useNavigate();
   const { data: salespeople } = useSalespeople();
   const { data: availableYears } = useAvailableYears();
-  const [selectedYear, setSelectedYear] = useState<number | null>(2020);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedSalespersonIds, setSelectedSalespersonIds] = useState<string[]>([]);
   
   // Fetch ALL commissions then filter client-side for multi-select
