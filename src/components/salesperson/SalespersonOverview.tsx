@@ -83,7 +83,7 @@ export function SalespersonOverview({ stats, goal, salespersonName, salespersonI
         <KPICard
           title="Total Deals"
           value={stats.totalDeals.toString()}
-          subtitle="Closed deals"
+          subtitle="Total deals"
           icon={FileText}
           glowColor="primary"
           delay={0}
