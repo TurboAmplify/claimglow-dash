@@ -15,10 +15,10 @@ import {
   LogOut,
   PlusCircle
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentSalesperson } from "@/hooks/useCurrentSalesperson";
 import { useViewAs } from "@/contexts/ViewAsContext";
@@ -54,8 +54,10 @@ interface SidebarProps {
 
 export function Sidebar({ onNavigate }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { salesperson, isDirector: actuallyDirector } = useCurrentSalesperson();
   const { effectiveSalesperson, isViewingAsOther, isDirector: viewAsDirectorCheck } = useViewAs();
@@ -90,6 +92,18 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   ];
 
   // For sales reps, hide adjusting and claims sections
+  // Scroll active nav item into view when route changes
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      if (!navRef.current) return;
+      // Find the active link by looking for the glow-primary class applied by activeClassName
+      const activeLink = navRef.current.querySelector('.glow-primary') as HTMLElement | null;
+      if (activeLink) {
+        activeLink.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+    });
+  }, [location.pathname]);
+
   const showAdjustingSection = actuallyDirector;
   const showClaimsSection = actuallyDirector;
 
@@ -139,7 +153,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+      <nav ref={navRef} className="flex-1 p-4 space-y-1 overflow-y-auto">
         {/* Home */}
         {mainNavItems.map((item, index) => (
           <NavLink
