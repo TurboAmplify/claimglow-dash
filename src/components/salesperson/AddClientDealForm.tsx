@@ -13,6 +13,19 @@ import { cn } from "@/lib/utils";
 import { AutocompleteInput, AutocompleteOption } from "@/components/ui/autocomplete-input";
 import { AddPersonDialog } from "@/components/ui/add-person-dialog";
 
+// Commission % defaults by salesperson name (first name match, case-insensitive)
+const DEFAULT_COMMISSION_BY_NAME: Record<string, string> = {
+  jason: "25",
+  richard: "15",
+};
+const STANDARD_COMMISSION = "20";
+
+function getDefaultCommissionForName(name?: string | null): string {
+  if (!name) return STANDARD_COMMISSION;
+  const first = name.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
+  return DEFAULT_COMMISSION_BY_NAME[first] ?? STANDARD_COMMISSION;
+}
+
 interface AddClientDealFormProps {
   salespersonId: string;
   onSuccess?: () => void;
