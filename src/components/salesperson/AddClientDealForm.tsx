@@ -310,9 +310,12 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
               id="commissionPercentage"
               type="number"
               step="0.1"
-              placeholder="8"
+              placeholder={STANDARD_COMMISSION}
               value={commissionPercentage}
-              onChange={(e) => setCommissionPercentage(e.target.value)}
+              onChange={(e) => {
+                setUserEditedCommission(true);
+                setCommissionPercentage(e.target.value);
+              }}
             />
           </div>
 
