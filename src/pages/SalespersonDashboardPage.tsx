@@ -226,6 +226,7 @@ export default function SalespersonDashboardPage() {
             salespersonName={salesperson.name}
             salespersonId={salesperson.id}
             statsYear={statsYear}
+            onStatsYearChange={setStatsYear}
           />
         </TabsContent>
 
