@@ -77,8 +77,22 @@ export function SalespersonOverview({ stats, goal, salespersonName, salespersonI
       </Collapsible>
 
       {/* Year Context Header */}
-      <div className="text-sm text-muted-foreground">
-        Showing {statsYear} performance data
+      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+        <span>Showing performance data for</span>
+        {onStatsYearChange ? (
+          <Select value={String(statsYear)} onValueChange={(v) => onStatsYearChange(Number(v))}>
+            <SelectTrigger className="h-8 w-[100px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {yearOptions.map((y) => (
+                <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <span className="font-medium text-foreground">{statsYear}</span>
+        )}
       </div>
       
       {/* KPI Cards */}
