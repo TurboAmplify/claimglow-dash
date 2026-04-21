@@ -5,6 +5,7 @@ import { SalesGoal } from "@/types/sales";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AddClientDealForm } from "./AddClientDealForm";
 import { formatCurrencyCompact } from "@/lib/formatCurrency";
 
