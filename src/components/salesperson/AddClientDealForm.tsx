@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,12 +44,35 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
   const [dateSigned, setDateSigned] = useState<Date | undefined>(new Date());
   const [initialEstimate, setInitialEstimate] = useState("");
   const [feePercentage, setFeePercentage] = useState("7");
-  const [commissionPercentage, setCommissionPercentage] = useState("8");
+  const [commissionPercentage, setCommissionPercentage] = useState(STANDARD_COMMISSION);
   const [splitPercentage, setSplitPercentage] = useState("100");
   const [isSaving, setIsSaving] = useState(false);
   const [addPersonDialogOpen, setAddPersonDialogOpen] = useState(false);
   const [pendingNewPerson, setPendingNewPerson] = useState("");
+  const [userEditedCommission, setUserEditedCommission] = useState(false);
   const queryClient = useQueryClient();
+
+  // Fetch the current salesperson to determine default commission %
+  const { data: currentSalesperson } = useQuery({
+    queryKey: ["salesperson", salespersonId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("salespeople")
+        .select("id, name")
+        .eq("id", salespersonId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!salespersonId,
+  });
+
+  // Apply default commission % when salesperson loads (unless user has edited)
+  useEffect(() => {
+    if (!userEditedCommission) {
+      setCommissionPercentage(getDefaultCommissionForName(currentSalesperson?.name));
+    }
+  }, [currentSalesperson?.name, userEditedCommission]);
 
   // Fetch adjusters for the autocomplete
   const { data: adjusters = [] } = useQuery<Adjuster[]>({
