@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,19 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { AutocompleteInput, AutocompleteOption } from "@/components/ui/autocomplete-input";
 import { AddPersonDialog } from "@/components/ui/add-person-dialog";
+
+// Commission % defaults by salesperson name (first name match, case-insensitive)
+const DEFAULT_COMMISSION_BY_NAME: Record<string, string> = {
+  jason: "25",
+  richard: "15",
+};
+const STANDARD_COMMISSION = "20";
+
+function getDefaultCommissionForName(name?: string | null): string {
+  if (!name) return STANDARD_COMMISSION;
+  const first = name.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
+  return DEFAULT_COMMISSION_BY_NAME[first] ?? STANDARD_COMMISSION;
+}
 
 interface AddClientDealFormProps {
   salespersonId: string;
@@ -31,12 +44,35 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
   const [dateSigned, setDateSigned] = useState<Date | undefined>(new Date());
   const [initialEstimate, setInitialEstimate] = useState("");
   const [feePercentage, setFeePercentage] = useState("7");
-  const [commissionPercentage, setCommissionPercentage] = useState("8");
+  const [commissionPercentage, setCommissionPercentage] = useState(STANDARD_COMMISSION);
   const [splitPercentage, setSplitPercentage] = useState("100");
   const [isSaving, setIsSaving] = useState(false);
   const [addPersonDialogOpen, setAddPersonDialogOpen] = useState(false);
   const [pendingNewPerson, setPendingNewPerson] = useState("");
+  const [userEditedCommission, setUserEditedCommission] = useState(false);
   const queryClient = useQueryClient();
+
+  // Fetch the current salesperson to determine default commission %
+  const { data: currentSalesperson } = useQuery({
+    queryKey: ["salesperson", salespersonId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("salespeople")
+        .select("id, name")
+        .eq("id", salespersonId)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!salespersonId,
+  });
+
+  // Apply default commission % when salesperson loads (unless user has edited)
+  useEffect(() => {
+    if (!userEditedCommission) {
+      setCommissionPercentage(getDefaultCommissionForName(currentSalesperson?.name));
+    }
+  }, [currentSalesperson?.name, userEditedCommission]);
 
   // Fetch adjusters for the autocomplete
   const { data: adjusters = [] } = useQuery<Adjuster[]>({
@@ -133,7 +169,7 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
         old_remainder: estimate,
         new_remainder: estimate,
         fee_percentage: parseFloat(feePercentage) || 7,
-        commission_percentage: parseFloat(commissionPercentage) || 8,
+        commission_percentage: parseFloat(commissionPercentage) || parseFloat(STANDARD_COMMISSION),
         split_percentage: parseFloat(splitPercentage) || 100,
         commissions_paid: 0,
         status: "open",
@@ -153,8 +189,9 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
       setDateSigned(new Date());
       setInitialEstimate("");
       setFeePercentage("7");
-      setCommissionPercentage("8");
+      setCommissionPercentage(getDefaultCommissionForName(currentSalesperson?.name));
       setSplitPercentage("100");
+      setUserEditedCommission(false);
 
       queryClient.invalidateQueries({ queryKey: ["sales_commissions"] });
       onSuccess?.();
@@ -273,9 +310,12 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
               id="commissionPercentage"
               type="number"
               step="0.1"
-              placeholder="8"
+              placeholder={STANDARD_COMMISSION}
               value={commissionPercentage}
-              onChange={(e) => setCommissionPercentage(e.target.value)}
+              onChange={(e) => {
+                setUserEditedCommission(true);
+                setCommissionPercentage(e.target.value);
+              }}
             />
           </div>
 
