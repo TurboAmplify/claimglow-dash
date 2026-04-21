@@ -169,7 +169,7 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
         old_remainder: estimate,
         new_remainder: estimate,
         fee_percentage: parseFloat(feePercentage) || 7,
-        commission_percentage: parseFloat(commissionPercentage) || 8,
+        commission_percentage: parseFloat(commissionPercentage) || parseFloat(STANDARD_COMMISSION),
         split_percentage: parseFloat(splitPercentage) || 100,
         commissions_paid: 0,
         status: "open",
@@ -189,8 +189,9 @@ export function AddClientDealForm({ salespersonId, onSuccess }: AddClientDealFor
       setDateSigned(new Date());
       setInitialEstimate("");
       setFeePercentage("7");
-      setCommissionPercentage("8");
+      setCommissionPercentage(getDefaultCommissionForName(currentSalesperson?.name));
       setSplitPercentage("100");
+      setUserEditedCommission(false);
 
       queryClient.invalidateQueries({ queryKey: ["sales_commissions"] });
       onSuccess?.();
