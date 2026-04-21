@@ -28,8 +28,8 @@ export default function SalespersonDashboardPage() {
     return highlightDealId ? "commissions" : "overview";
   });
   
-  // Use 2025 for current performance/stats, 2026 for planning
-  const statsYear = 2025;
+  // Use selectable stats year (default 2025), 2026 for planning
+  const [statsYear, setStatsYear] = useState<number>(2025);
   const planningYear = 2026;
 
   const { data: salespeople, isLoading: loadingSalespeople } = useSalespeople();
