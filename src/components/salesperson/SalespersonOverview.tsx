@@ -5,6 +5,7 @@ import { SalesGoal } from "@/types/sales";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AddClientDealForm } from "./AddClientDealForm";
 import { formatCurrencyCompact } from "@/lib/formatCurrency";
 
@@ -23,11 +24,13 @@ interface SalespersonOverviewProps {
   salespersonName: string;
   salespersonId: string;
   statsYear?: number;
+  onStatsYearChange?: (year: number) => void;
 }
 
-export function SalespersonOverview({ stats, goal, salespersonName, salespersonId, statsYear = 2025 }: SalespersonOverviewProps) {
+export function SalespersonOverview({ stats, goal, salespersonName, salespersonId, statsYear = 2025, onStatsYearChange }: SalespersonOverviewProps) {
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const goalYear = goal?.year || statsYear;
+  const yearOptions = [2026, 2025, 2024, 2023, 2022, 2021, 2020];
   
   if (!stats) {
     return (
@@ -74,8 +77,22 @@ export function SalespersonOverview({ stats, goal, salespersonName, salespersonI
       </Collapsible>
 
       {/* Year Context Header */}
-      <div className="text-sm text-muted-foreground">
-        Showing {statsYear} performance data
+      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+        <span>Showing performance data for</span>
+        {onStatsYearChange ? (
+          <Select value={String(statsYear)} onValueChange={(v) => onStatsYearChange(Number(v))}>
+            <SelectTrigger className="h-8 w-[100px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {yearOptions.map((y) => (
+                <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <span className="font-medium text-foreground">{statsYear}</span>
+        )}
       </div>
       
       {/* KPI Cards */}
